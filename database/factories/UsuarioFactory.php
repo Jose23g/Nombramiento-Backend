@@ -18,10 +18,12 @@ class UsuarioFactory extends Factory
     {
         return [
             'usuario' => $this->faker->userName,
-            'contrasena' => bcrypt('password123'),
-            // Puedes personalizar la contraseña aquí.
+            'contrasena' => bcrypt('password'),
             'id_rol' => \App\Models\Rol::factory()->create()->id,
             'id_persona' => \App\Models\Persona::factory()->create()->id,
+            'correo' => $this->faker->unique()->safeEmail,
+            'email_verified_at' => now(),
+            'remember_token' => Str::random(10),
         ];
     }
 }
