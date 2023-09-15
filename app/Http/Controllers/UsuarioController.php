@@ -17,13 +17,14 @@ class UsuarioController extends Controller
     public function login(Request $request){
 
         return response()->json("Implementar metodo de login");
+        
     }
 
     public function register (Request $request){
        
         $validator = Validator::make($request->all(), [
             'cedula' => 'required|unique:personas',
-            'nombre' => 'required unique:usuarios',
+            'nombre' => 'required',
             'correo' => 'required',
             'contraseña' => 'required',
             'numerocuenta' => 'required',
@@ -75,7 +76,7 @@ class UsuarioController extends Controller
                 'id_persona' => $nuevapersona->id
              ]);
            }
-
+           dd($nuevapersona, $nuevousuario);
            return response()->json(['persona'=> $nuevapersona, 'usuario' =>$nuevousuario, ],200);
 
         } catch(Exception $e){
