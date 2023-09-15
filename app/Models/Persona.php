@@ -8,8 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 class Persona extends Model
 {
     use HasFactory;
+    
     protected $guarded = [];
 
+     public $timespams = false;
+
+    protected $table = 'personas';
+
+    protected $fillable = [
+        'cedula',
+        'nombre',
+        'id_provincia',
+        'id_canton',
+        'id_distrito',
+        'id_barrio',
+        'otrassenas'
+    ];
+
+    
     public function correos()
     {
         return $this->hasMany(Correo::class, 'id_persona');

@@ -9,6 +9,17 @@ class Archivos extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    public $timespams = false;
+
+    protected $table = 'archivos';
+
+    protected $fillable = [
+        'nombre',
+        'tipo',
+        'file',
+        'id_persona',
+    ];
+
 
     public function persona()
     {

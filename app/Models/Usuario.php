@@ -17,12 +17,20 @@ class Usuario extends Authenticatable
      */
     protected $guarded = [];
 
+    public $timespams = false;
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'usuarios';
+
+    protected $fillable = [
+        'usuario',
+        'contraseña',
+        'id_persona',
+        'id_rol',
+        'correo',
+        'imagen',
+    ];
+
+
     protected $hidden = [
         'contrasena',
         'remember_token',
