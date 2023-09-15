@@ -23,23 +23,11 @@ Route::group(['prefix' => 'auth'], function (){
     Route::post('login', [UsuarioController::class, 'login'])->name('login');
 });
 
-Route::group(['prefix' => 'dta'], function () {
-    Route::group(['prefix' => 'provincia'], function () {
-        Route::get('List', [ProvinciaController::class, 'obtengaLaLista']);
-        Route::get('ById', [ProvinciaController::class, 'obtengaPorId']);
-    });
-    Route::group(['prefix' => 'canton'], function () {
-        Route::get('ListByP', [CantonController::class, 'obtengaLaListaPorProvincia']);
-        Route::get('ById', [CantonController::class, 'obtengaPorId']);
-    });
-    Route::group(['prefix' => 'distrito'], function () {
-        Route::get('ById', [DistritoController::class, 'obtengaPorId']);
-        Route::get('ListByPC', [DistritoController::class, 'obtengaLaListaPorProvinciaYCanton']);
-    });
-    Route::group(['prefix' => 'barrio'], function () {
-        Route::get('ById', [BarrioController::class, 'obtengaPorId']);
-        Route::get('ListByPCD', [BarrioController::class, 'obtengaLaListaPorProvinciaCantonYDistrito']);
-    });
+Route::group(['prefix' => 'direccion'], function () {
+    Route::get('provincia', [ProvinciaController::class, 'obtenga']);
+    Route::get('canton', [CantonController::class, 'obtenga']);
+    Route::get('distrito', [DistritoController::class, 'obtenga']);
+    Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
