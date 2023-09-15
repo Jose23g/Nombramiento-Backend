@@ -9,7 +9,7 @@ class Archivos extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    public $timespams = false;
+    public $timestamps = false;
 
     protected $table = 'archivos';
 
