@@ -15,6 +15,11 @@ class Distrito extends Model
         return $this->belongsTo(Canton::class, 'id_canton');
     }
 
+    public function provincia()
+    {
+        return $this->belongsTo(Provincia::class, 'id_provincia');
+    }
+
     public function barrios()
     {
         return $this->hasMany(Barrio::class, 'id_distrito');

@@ -25,9 +25,24 @@ class Persona extends Model
         return $this->hasMany(Archivo::class, 'id_persona');
     }
 
-    public function direcciones()
+    public function barrio()
     {
-        return $this->hasMany(Direccion::class, 'id_persona');
+        return $this->belongsTo(Barrio::class, 'id_barrio');
+    }
+
+    public function distrito()
+    {
+        return $this->belongsTo(Distrito::class, 'id_distrito');
+    }
+
+    public function canton()
+    {
+        return $this->belongsTo(Canton::class, 'id_canton');
+    }
+
+    public function provincia()
+    {
+        return $this->belongsTo(Provincia::class, 'id_provincia');
     }
 
     public function usuario()

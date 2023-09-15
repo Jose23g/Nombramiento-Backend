@@ -15,9 +15,19 @@ class Barrio extends Model
         return $this->belongsTo(Distrito::class, 'id_distrito');
     }
 
-    public function direcciones()
+    public function canton()
     {
-        return $this->hasMany(Direccion::class, 'id_barrio');
+        return $this->belongsTo(Canton::class, 'id_canton');
+    }
+
+    public function provincia()
+    {
+        return $this->belongsTo(Provincia::class, 'id_provincia');
+    }
+
+    public function personas()
+    {
+        return $this->hasMany(Persona::class, 'id_barrio');
     }
 
 }

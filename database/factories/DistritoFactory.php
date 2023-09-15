@@ -19,6 +19,7 @@ class DistritoFactory extends Factory
         return [
             'nombre' => $this->faker->city,
             'id_canton' => \App\Models\Canton::factory()->create()->id,
+            'id_provincia' => \App\Models\Provincia::factory()->create()->id,
         ];
     }
 }

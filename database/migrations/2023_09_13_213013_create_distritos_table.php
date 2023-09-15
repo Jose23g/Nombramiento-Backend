@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('direcciones', function (Blueprint $table) {
+        Schema::create('distritos', function (Blueprint $table) {
             $table->id();
-            $table->string('otrassenas');
-            $table->unsignedBigInteger('id_barrio');
-            $table->foreign('id_barrio')->references('id')->on('barrios');
-            $table->unsignedBigInteger('id_persona');
-            $table->foreign('id_persona')->references('id')->on('personas');
+            $table->string('nombre');
+            $table->unsignedBigInteger('id_canton');
+            $table->foreign('id_canton')->references('id')->on('cantones');
+            $table->unsignedBigInteger('id_provincia');
+            $table->foreign('id_provincia')->references('id')->on('provincias');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('direccions');
+        Schema::dropIfExists('distritos');
     }
 };
