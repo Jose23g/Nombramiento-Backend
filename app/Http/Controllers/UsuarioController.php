@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\DB;
 use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Usuario;
@@ -26,7 +26,7 @@ class UsuarioController extends Controller
             'cedula' => 'required|unique:personas',
             'nombre' => 'required',
             'correo' => 'required',
-            'contraseña' => 'required',
+            'contrasena' => 'required',
             'numerocuenta' => 'required',
             'id_provincia'   => 'required',
             'id_canton' => 'required',
@@ -39,7 +39,7 @@ class UsuarioController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()],422);
         } 
-        
+        DB::beginTransaction();
         try{
           // Creamos la nueava persons
             $nuevapersona =  Persona::create([
@@ -58,12 +58,12 @@ class UsuarioController extends Controller
            // creamos el usuario apartir de los datos de persona metidos
            $nuevousuario = new Usuario();
            $nuevousuario-> usuario = $request->correo;
-           $nuevousuario-> contraseña = Hash::make($request->contraseña);
+           $nuevousuario-> contrasena = Hash::make($request->contrasena);
            $nuevousuario->id_persona = $nuevapersona->id;
-           $nuevousuario->rol = 1; 
+           $nuevousuario->id_rol = 1; 
            $nuevousuario->correo = $request->correo; 
 
-           if($imagenperfil->getClientOriginalExtension() =='jpg'){
+           if( $imagenperfil && $imagenperfil->getClientOriginalExtension() =='jpg'){
             $nuevousuario->imagen = file_get_contents($imagenperfil->getRealPath());
            } 
            $nuevousuario->save();
@@ -76,10 +76,11 @@ class UsuarioController extends Controller
                 'id_persona' => $nuevapersona->id
              ]);
            }
-           dd($nuevapersona, $nuevousuario);
+           DB::commit();
            return response()->json(['persona'=> $nuevapersona, 'usuario' =>$nuevousuario, ],200);
-
+          
         } catch(Exception $e){
+            DB::rollback();
             return response()->json(['message' => $e->getMessage()],500);
         }
  

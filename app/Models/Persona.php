@@ -11,7 +11,7 @@ class Persona extends Model
     
     protected $guarded = [];
 
-     public $timespams = false;
+    public $timestamps = false;
 
     protected $table = 'personas';
 
