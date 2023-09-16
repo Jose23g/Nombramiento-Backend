@@ -6,36 +6,62 @@ use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Usuario;
 use Exception;
-use GuzzleHttp\Psr7\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use PhpParser\Node\Stmt\TryCatch;
+use Laravel\Passport\Passport;
 
 class UsuarioController extends Controller
 {
-    public function login(Request $request){
+    public function login(Request $request)
+    {
+        try {
+            $request->validate([
+                'correo' => 'required',
+                'contrasena' => 'required'
+            ]);
 
-        return response()->json("Implementar metodo de login");
-        
+            $usuario = Usuario::where('correo', $request->input('correo'))->first();
+
+            if (!$usuario) {
+                return response()->json(['Error' => 'Credenciales incorrectas'], 401);
+            }
+
+            if (Hash::check($request->input('contrasena'), $usuario->contrasena)) {
+                
+                Passport::actingAs($usuario);
+                $token = $usuario->createToken('MyAppToken')->accessToken;
+                $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
+                return response()->json(['Persona'=>$persona ,'token' => $token], 200);
+
+            } else {
+                return response()->json(['error' => 'Credenciales incorrectas'], 401);
+            }
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
     }
 
-    public function register (Request $request){
-       
+    public function register(Request $request)
+    {
+
         $validator = Validator::make($request->all(), [
             'cedula' => 'required|unique:personas',
             'nombre' => 'required',
             'correo' => 'required',
             'contrasena' => 'required',
             'numerocuenta' => 'required',
-            'id_provincia'   => 'required',
+            'id_provincia' => 'required',
             'id_canton' => 'required',
             'id_distrito' => 'required',
             'id_barrio' => 'required',
             'otrassenas' => 'required'
 
         ]);
- 
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()],422);
         } 
@@ -83,6 +109,8 @@ class UsuarioController extends Controller
             DB::rollback();
             return response()->json(['message' => $e->getMessage()],500);
         }
- 
+
     }
+
+    
 }

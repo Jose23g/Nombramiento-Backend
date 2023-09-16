@@ -18,6 +18,8 @@ use App\Http\Controllers\BarrioController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+// Ruta de prueba protegida por autenticación Passport
+
 Route::group(['prefix' => 'auth'], function (){
     Route::post('registrar', [UsuarioController::class, 'register'])->name('registrar');
     Route::post('login', [UsuarioController::class, 'login'])->name('login');
@@ -30,6 +32,3 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
