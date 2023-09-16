@@ -16,13 +16,14 @@ class Usuario extends Authenticatable
      * @var array<int, string>
      */
 
-    public $timespams = false;
+    public $timestamps = false;
 
     protected $table = 'usuarios';
     protected $password = 'contrasena';
 
     protected $fillable = [
         'usuario',
+        'contrasena',
         'id_persona',
         'id_rol',
         'correo',
