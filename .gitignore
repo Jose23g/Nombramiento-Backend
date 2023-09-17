@@ -5,6 +5,10 @@
 /public/storage
 /storage/*.key
 /vendor
+bootstrap/app.php
+config/app.php
+composer.json
+composer.lock
 .env
 .laravel.env
 .replit
