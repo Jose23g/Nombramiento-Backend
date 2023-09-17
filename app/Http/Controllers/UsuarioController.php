@@ -59,7 +59,6 @@ class UsuarioController extends Controller
             'id_distrito' => 'required',
             'id_barrio' => 'required',
             'otrassenas' => 'required'
-
         ]);
 
         if ($validator->fails()) {
