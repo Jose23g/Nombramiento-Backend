@@ -19,6 +19,7 @@ class UsuarioFactory extends Factory
         return [
             'usuario' => $this->faker->userName,
             'contrasena' => bcrypt('password'),
+            'imagen' => base64_encode(file_get_contents('archivo.pdf')),
             'id_rol' => \App\Models\Rol::factory()->create()->id,
             'id_persona' => \App\Models\Persona::factory()->create()->id,
             'correo' => $this->faker->unique()->safeEmail,

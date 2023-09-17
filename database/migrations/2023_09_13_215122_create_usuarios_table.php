@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string('usuario');
             $table->string('contrasena');
+            $table->binary('imagen');
             $table->unsignedBigInteger('id_rol');
             $table->foreign('id_rol')->references('id')->on('roles');
             $table->unsignedBigInteger('id_persona');

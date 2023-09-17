@@ -40,6 +40,11 @@ class Persona extends Model
     {
         return $this->hasMany(Archivo::class, 'id_persona');
     }
+    
+    public function banco()
+    {
+        return $this->belongsTo(Banco::class, 'id_banco');
+    }
 
     public function barrio()
     {

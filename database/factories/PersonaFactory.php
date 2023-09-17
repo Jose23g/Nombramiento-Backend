@@ -19,7 +19,9 @@ class PersonaFactory extends Factory
         return [
             'nombre' => $this->faker->name,
             'cedula' => $this->faker->unique()->randomNumber(8),
+            'cuenta' => $this->faker->randomNumber(8),
             'otrassenas' => $this->faker->address,
+            'id_banco' => App\Models\Banco::factory()->create()->id,
             'id_barrio' => App\Models\Barrio::factory()->create()->id,
             'id_distrito' => \App\Models\Distrito::factory()->create()->id,
             'id_canton' => \App\Models\Canton::factory()->create()->id,
