@@ -8,7 +8,6 @@ use App\Models\Usuario;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Passport\Passport;
@@ -28,7 +27,6 @@ class UsuarioController extends Controller
             if (!$usuario) {
                 return response()->json(['Error' => 'Credenciales incorrectas'], 401);
             }
-
             if (Hash::check($request->input('contrasena'), $usuario->contrasena)) {
                 
                 Passport::actingAs($usuario);
