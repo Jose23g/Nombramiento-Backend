@@ -1,17 +1,21 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\DB;
+
+use App\Models\Barrio;
+use App\Models\Canton;
+use App\Models\Distrito;
+use App\Models\Provincia;
+use App\Models\Telefono;
+use Exception;
 use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Usuario;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Passport\Passport;
 
 class UsuarioController extends Controller
 {
@@ -30,11 +34,11 @@ class UsuarioController extends Controller
             }
 
             if (Hash::check($request->input('contrasena'), $usuario->contrasena)) {
-                
+
                 Passport::actingAs($usuario);
                 $token = $usuario->createToken('MyAppToken')->accessToken;
                 $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
-                return response()->json(['Persona'=>$persona ,'token' => $token], 200);
+                return response()->json(['Persona' => $persona, 'token' => $token], 200);
 
             } else {
                 return response()->json(['error' => 'Credenciales incorrectas'], 401);
@@ -63,54 +67,90 @@ class UsuarioController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()],422);
-        } 
+            return response()->json(['message' => $validator->errors()], 422);
+        }
         DB::beginTransaction();
-        try{
-          // Creamos la nueava persons
-            $nuevapersona =  Persona::create([
-            'cedula' => $request->cedula,
-            'nombre' => $request->nombre,
-            'id_provincia' => $request->id_provincia,
-            'id_canton' => $request->id_canton,
-            'id_distrito' => $request->id_distrito,
-            'id_barrio' => $request->id_barrio,
-            'otrassenas' => $request->otrassenas
-           ]);
+        try {
+            // Creamos la nueava persons
+            $nuevapersona = Persona::create([
+                'cedula' => $request->cedula,
+                'nombre' => $request->nombre,
+                'id_provincia' => $request->id_provincia,
+                'id_canton' => $request->id_canton,
+                'id_distrito' => $request->id_distrito,
+                'id_barrio' => $request->id_barrio,
+                'otrassenas' => $request->otrassenas
+            ]);
 
-           $imagenperfil = $request->file('imagenperfil'); //imagen de perfil
-           $archivopdf = $request->file('archivo'); //archivopdf 
+            $imagenperfil = $request->file('imagenperfil'); //imagen de perfil
+            $archivopdf = $request->file('archivo'); //archivopdf 
 
-           // creamos el usuario apartir de los datos de persona metidos
-           $nuevousuario = new Usuario();
-           $nuevousuario-> usuario = $request->correo;
-           $nuevousuario-> contrasena = Hash::make($request->contrasena);
-           $nuevousuario->id_persona = $nuevapersona->id;
-           $nuevousuario->id_rol = 1; 
-           $nuevousuario->correo = $request->correo; 
+            // creamos el usuario apartir de los datos de persona metidos
+            $nuevousuario = new Usuario();
+            $nuevousuario->usuario = $request->correo;
+            $nuevousuario->contrasena = Hash::make($request->contrasena);
+            $nuevousuario->id_persona = $nuevapersona->id;
+            $nuevousuario->id_rol = 1;
+            $nuevousuario->correo = $request->correo;
 
-           if( $imagenperfil && $imagenperfil->getClientOriginalExtension() =='jpg'){
-            $nuevousuario->imagen = file_get_contents($imagenperfil->getRealPath());
-           } 
-           $nuevousuario->save();
+            if ($imagenperfil && $imagenperfil->getClientOriginalExtension() == 'jpg') {
+                $nuevousuario->imagen = file_get_contents($imagenperfil->getRealPath());
+            }
+            $nuevousuario->save();
 
-           if($archivopdf && $archivopdf->getClientOriginalExtension() =='pdf'){
-             $archivo  = Archivos::create([
-                'nombre' => $request->cedula, 
-                'tipo' =>$archivopdf->getClientOriginalExtension(),
-                'file' => file_get_contents($archivopdf->getRealPath()),
-                'id_persona' => $nuevapersona->id
-             ]);
-           }
-           DB::commit();
-           return response()->json(['persona'=> $nuevapersona, 'usuario' =>$nuevousuario, ],200);
-          
-        } catch(Exception $e){
+            if ($archivopdf && $archivopdf->getClientOriginalExtension() == 'pdf') {
+                $archivo = Archivos::create([
+                    'nombre' => $request->cedula,
+                    'tipo' => $archivopdf->getClientOriginalExtension(),
+                    'file' => file_get_contents($archivopdf->getRealPath()),
+                    'id_persona' => $nuevapersona->id
+                ]);
+            }
+            DB::commit();
+            return response()->json(['persona' => $nuevapersona, 'usuario' => $nuevousuario,], 200);
+
+        } catch (Exception $e) {
             DB::rollback();
-            return response()->json(['message' => $e->getMessage()],500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
 
     }
 
-    
+    public function obtenerUsuario(Request $request)
+    {
+        $usuario = $request->user();
+
+        if ($usuario) {
+            $persona = Persona::find($usuario->id_persona);
+            $archivo = Archivos::where('id_persona', $persona->id_persona);
+            $telefonos = Telefono::where('id_persona', $persona->id_persona);
+            $barrio = Barrio::select('id', 'nombre')->find($persona->id_barrio);
+            $distrito = Distrito::select('id', 'nombre')->find($persona->id_distrito);
+            $canton = Canton::select('id', 'nombre')->find($persona->id_canton);
+            $provincia = Provincia::select('id', 'nombre')->find($persona->id_provincia);
+
+            
+            return response()->json([
+                'Usuario' =>[
+                    'correo' => $usuario->correo,
+                    'nombre' => $persona->nombre,
+                    'cedula' => $persona->cedula,
+                    'Telefono' => $telefonos,
+                    'cuentabancaria'=>'No implementado aun',
+                    'foto_perfil' => 'no implementado',
+                    'archivo' => $archivo,
+                    'direccion' => [
+                       'provincia'=> $provincia,
+                        'canton'=>$canton,
+                        'distrito'=>$distrito,
+                        'barrio'=>$barrio,
+                        'otrassenas'=>$persona->otrassenas,
+                    ]
+                ]
+            ], 200);
+        } else {
+            return response()->json(['Error' => 'Usuario no autenticado'], 401);
+        }
+    }
+
 }

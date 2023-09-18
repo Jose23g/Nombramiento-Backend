@@ -20,10 +20,6 @@ use App\Http\Controllers\BarrioController;
 */
 // Ruta de prueba protegida por autenticación Passport
 
-Route::group(['prefix' => 'auth'], function (){
-    Route::post('registrar', [UsuarioController::class, 'register'])->name('registrar');
-    Route::post('login', [UsuarioController::class, 'login'])->name('login');
-});
 
 Route::group(['prefix' => 'direccion'], function () {
     Route::get('provincia', [ProvinciaController::class, 'obtenga']);
@@ -31,4 +27,14 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('distrito', [DistritoController::class, 'obtenga']);
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
+
+Route::middleware('auth:api')->prefix('usuario')->group(function(){
+    Route::get('perfil', [UsuarioController::class, 'obtenerUsuario']);
+});
+
+Route::group(['prefix' => 'auth'], function (){
+    Route::post('registrar', [UsuarioController::class, 'register']);
+    Route::post('login', [UsuarioController::class, 'login']);
+});
+
 
