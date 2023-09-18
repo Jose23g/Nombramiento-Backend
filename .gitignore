@@ -5,16 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
-bootstrap/app.php
-config/app.php
-composer.json
-composer.lock
 .env
-.laravel.env
-.replit
-.styleci.yml
-replit.nix
-webpack.mix.js
 .env.backup
 .env.production
 .phpunit.result.cache
