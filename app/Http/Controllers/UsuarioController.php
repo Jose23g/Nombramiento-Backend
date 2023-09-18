@@ -32,7 +32,6 @@ class UsuarioController extends Controller
             if (!$usuario) {
                 return response()->json(['Error' => 'Credenciales incorrectas'], 401);
             }
-
             if (Hash::check($request->input('contrasena'), $usuario->contrasena)) {
 
                 Passport::actingAs($usuario);
@@ -63,7 +62,6 @@ class UsuarioController extends Controller
             'id_distrito' => 'required',
             'id_barrio' => 'required',
             'otrassenas' => 'required'
-
         ]);
 
         if ($validator->fails()) {
