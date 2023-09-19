@@ -37,7 +37,7 @@ class UsuarioController extends Controller
                 Passport::actingAs($usuario);
                 $rolScope = $usuario->rol()->first()->nombre;
                 $token = $usuario->createToken('MyAppToken', [$rolScope])->accessToken;
-                
+
                 $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
                 return response()->json(['Persona' => $persona, 'token' => $token], 200);
 
@@ -64,13 +64,13 @@ class UsuarioController extends Controller
             'id_barrio' => 'required',
             'otrassenas' => 'required',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-    
+
         DB::beginTransaction();
-    
+
         try {
             // Crear la nueva persona
             $nuevaPersona = Persona::create([
@@ -84,16 +84,16 @@ class UsuarioController extends Controller
                 'id_barrio' => $request->id_barrio,
                 'otrassenas' => $request->otrassenas,
             ]);
-    
+
             $imagenPerfil = $request->file('imagenperfil'); // Imagen de perfil
-    
+
             if ($imagenPerfil->isValid() && in_array($imagenPerfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
                 // Obtener el contenido de la imagen
                 $contenidoImagen = file_get_contents($imagenPerfil->getPathname());
-    
+
                 // Convertir el contenido de la imagen a Base64
                 $imagenBase64 = base64_encode($contenidoImagen);
-    
+
                 // Crear el usuario a partir de los datos de persona
                 $nuevoUsuario = new Usuario();
                 $nuevoUsuario->usuario = $request->correo;
@@ -103,9 +103,9 @@ class UsuarioController extends Controller
                 $nuevoUsuario->correo = $request->correo;
                 $nuevoUsuario->imagen = $imagenBase64; // Almacenar la imagen en formato Base64
                 $nuevoUsuario->save();
-    
+
                 DB::commit();
-    
+
                 return response()->json(['persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
             } else {
                 DB::rollback();
@@ -130,6 +130,13 @@ class UsuarioController extends Controller
             $canton = Canton::select('id', 'nombre')->find($persona->id_canton);
             $provincia = Provincia::select('id', 'nombre')->find($persona->id_provincia);
 
+            $imagenCodificada = $usuario->imagen;
+            $imagenDecodificada = base64_decode($imagenCodificada);
+
+
+            $response = response($imagenDecodificada, 200);
+
+            $response->header('Content-Type', 'image/jpg');
 
             return response()->json([
                 'Usuario' => [
@@ -138,7 +145,7 @@ class UsuarioController extends Controller
                     'cedula' => $persona->cedula,
                     'Telefono' => $telefonos,
                     'cuentabancaria' => 'No implementado aun',
-                    'foto_perfil' => 'no implementado',
+                    'foto_perfil' => $usuario->imagen,
                     'archivo' => $archivo,
                     'direccion' => [
                         'provincia' => $provincia,
@@ -153,5 +160,4 @@ class UsuarioController extends Controller
             return response()->json(['Error' => 'Usuario no autenticado'], 401);
         }
     }
-
 }
