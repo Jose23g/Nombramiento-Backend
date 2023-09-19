@@ -35,7 +35,9 @@ class UsuarioController extends Controller
             if (Hash::check($request->input('contrasena'), $usuario->contrasena)) {
 
                 Passport::actingAs($usuario);
-                $token = $usuario->createToken('MyAppToken')->accessToken;
+                $rolScope = $usuario->rol()->first()->nombre;
+                $token = $usuario->createToken('MyAppToken', [$rolScope])->accessToken;
+                
                 $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
                 return response()->json(['Persona' => $persona, 'token' => $token], 200);
 
@@ -127,22 +129,22 @@ class UsuarioController extends Controller
             $canton = Canton::select('id', 'nombre')->find($persona->id_canton);
             $provincia = Provincia::select('id', 'nombre')->find($persona->id_provincia);
 
-            
+
             return response()->json([
-                'Usuario' =>[
+                'Usuario' => [
                     'correo' => $usuario->correo,
                     'nombre' => $persona->nombre,
                     'cedula' => $persona->cedula,
                     'Telefono' => $telefonos,
-                    'cuentabancaria'=>'No implementado aun',
+                    'cuentabancaria' => 'No implementado aun',
                     'foto_perfil' => 'no implementado',
                     'archivo' => $archivo,
                     'direccion' => [
-                       'provincia'=> $provincia,
-                        'canton'=>$canton,
-                        'distrito'=>$distrito,
-                        'barrio'=>$barrio,
-                        'otrassenas'=>$persona->otrassenas,
+                        'provincia' => $provincia,
+                        'canton' => $canton,
+                        'distrito' => $distrito,
+                        'barrio' => $barrio,
+                        'otrassenas' => $persona->otrassenas,
                     ]
                 ]
             ], 200);

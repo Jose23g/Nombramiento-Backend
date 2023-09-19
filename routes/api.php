@@ -29,12 +29,13 @@ Route::group(['prefix' => 'direccion'], function () {
 });
 
 Route::middleware('auth:api')->prefix('usuario')->group(function(){
-    Route::get('perfil', [UsuarioController::class, 'obtenerUsuario']);
+    Route::get('perfil', [UsuarioController::class, 'obtenerUsuario'])->middleware('scope:Coordinador');
 });
 
 Route::group(['prefix' => 'auth'], function (){
     Route::post('registrar', [UsuarioController::class, 'register']);
     Route::post('login', [UsuarioController::class, 'login']);
 });
+
 
 
