@@ -19,6 +19,8 @@ class Persona extends Model
         'cedula',
         'nombre',
         'id_provincia',
+        'cuenta',
+        'id_banco',
         'id_canton',
         'id_distrito',
         'id_barrio',

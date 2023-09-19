@@ -52,68 +52,69 @@ class UsuarioController extends Controller
 
     public function register(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'cedula' => 'required|unique:personas',
             'nombre' => 'required',
             'correo' => 'required',
             'contrasena' => 'required',
-            'numerocuenta' => 'required',
+            'cuenta' => 'required',
             'id_provincia' => 'required',
             'id_canton' => 'required',
             'id_distrito' => 'required',
             'id_barrio' => 'required',
-            'otrassenas' => 'required'
+            'otrassenas' => 'required',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
+    
         DB::beginTransaction();
+    
         try {
-            // Creamos la nueava persons
-            $nuevapersona = Persona::create([
+            // Crear la nueva persona
+            $nuevaPersona = Persona::create([
                 'cedula' => $request->cedula,
                 'nombre' => $request->nombre,
+                'cuenta' => $request->cuenta,
+                'id_banco' => $request->id_banco,
                 'id_provincia' => $request->id_provincia,
                 'id_canton' => $request->id_canton,
                 'id_distrito' => $request->id_distrito,
                 'id_barrio' => $request->id_barrio,
-                'otrassenas' => $request->otrassenas
+                'otrassenas' => $request->otrassenas,
             ]);
-
-            $imagenperfil = $request->file('imagenperfil'); //imagen de perfil
-            $archivopdf = $request->file('archivo'); //archivopdf 
-
-            // creamos el usuario apartir de los datos de persona metidos
-            $nuevousuario = new Usuario();
-            $nuevousuario->usuario = $request->correo;
-            $nuevousuario->contrasena = Hash::make($request->contrasena);
-            $nuevousuario->id_persona = $nuevapersona->id;
-            $nuevousuario->id_rol = 1;
-            $nuevousuario->correo = $request->correo;
-
-            if ($imagenperfil && $imagenperfil->getClientOriginalExtension() == 'jpg') {
-                $nuevousuario->imagen = file_get_contents($imagenperfil->getRealPath());
+    
+            $imagenPerfil = $request->file('imagenperfil'); // Imagen de perfil
+    
+            if ($imagenPerfil->isValid() && in_array($imagenPerfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
+                // Obtener el contenido de la imagen
+                $contenidoImagen = file_get_contents($imagenPerfil->getPathname());
+    
+                // Convertir el contenido de la imagen a Base64
+                $imagenBase64 = base64_encode($contenidoImagen);
+    
+                // Crear el usuario a partir de los datos de persona
+                $nuevoUsuario = new Usuario();
+                $nuevoUsuario->usuario = $request->correo;
+                $nuevoUsuario->contrasena = Hash::make($request->contrasena);
+                $nuevoUsuario->id_persona = $nuevaPersona->id;
+                $nuevoUsuario->id_rol = 1;
+                $nuevoUsuario->correo = $request->correo;
+                $nuevoUsuario->imagen = $imagenBase64; // Almacenar la imagen en formato Base64
+                $nuevoUsuario->save();
+    
+                DB::commit();
+    
+                return response()->json(['persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
+            } else {
+                DB::rollback();
+                return response()->json(['error' => 'La imagen de perfil no es válida o no es un formato admitido (jpg, jpeg, png)'], 400);
             }
-            $nuevousuario->save();
-
-            if ($archivopdf && $archivopdf->getClientOriginalExtension() == 'pdf') {
-                $archivo = Archivos::create([
-                    'nombre' => $request->cedula,
-                    'tipo' => $archivopdf->getClientOriginalExtension(),
-                    'file' => file_get_contents($archivopdf->getRealPath()),
-                    'id_persona' => $nuevapersona->id
-                ]);
-            }
-            DB::commit();
-            return response()->json(['persona' => $nuevapersona, 'usuario' => $nuevousuario,], 200);
-
         } catch (Exception $e) {
             DB::rollback();
             return response()->json(['message' => $e->getMessage()], 500);
         }
-
     }
 
     public function obtenerUsuario(Request $request)
