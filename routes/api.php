@@ -29,7 +29,7 @@ Route::group(['prefix' => 'direccion'], function () {
 });
 
 Route::middleware('auth:api')->prefix('usuario')->group(function(){
-    Route::get('perfil', [UsuarioController::class, 'obtenerUsuario'])->middleware('scope:Coordinador');
+    Route::get('perfil', [UsuarioController::class, 'obtenerUsuario'])->middleware('scope:Profesor');
 });
 
 Route::group(['prefix' => 'auth'], function (){
