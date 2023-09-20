@@ -86,13 +86,8 @@ class UsuarioController extends Controller
             ]);
 
             $imagenPerfil = $request->file('imagenperfil'); // Imagen de perfil
+            $documento = $request->file('documento'); // Imagen de perfil
 
-            if ($imagenPerfil->isValid() && in_array($imagenPerfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
-                // Obtener el contenido de la imagen
-                $contenidoImagen = file_get_contents($imagenPerfil->getPathname());
-
-                // Convertir el contenido de la imagen a Base64
-                $imagenBase64 = base64_encode($contenidoImagen);
 
                 // Crear el usuario a partir de los datos de persona
                 $nuevoUsuario = new Usuario();
@@ -103,14 +98,19 @@ class UsuarioController extends Controller
                 $nuevoUsuario->correo = $request->correo;
                 $nuevoUsuario->imagen = $imagenBase64; // Almacenar la imagen en formato Base64
                 $nuevoUsuario->save();
-
                 DB::commit();
 
+                // una vez se crea el usuario y si venia imagen se procede a guardarla 
+                if ($imagenPerfil->isValid() && in_array($imagenPerfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
+                    // LLamamos al metodo guardar imagen
+                }
+
+                if ($documento ->isValid() && in_array($documento ->getClientOriginalExtension(), ['pdf'])) {
+                    // LLamamos al metodo guardar documento
+                }
+
                 return response()->json(['persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
-            } else {
-                DB::rollback();
-                return response()->json(['error' => 'La imagen de perfil no es válida o no es un formato admitido (jpg, jpeg, png)'], 400);
-            }
+            
         } catch (Exception $e) {
             DB::rollback();
             return response()->json(['message' => $e->getMessage()], 500);
