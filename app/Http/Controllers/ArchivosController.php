@@ -1,68 +1,77 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Persona;
 use App\Models\Usuario;
 use App\Models\Archivos;
+use Exception;
 use Illuminate\Http\Request;
 
 class ArchivosController extends Controller
 {
-    public function guardarimagen($id_usuario,$imagenperfil){
-        
+    public function guardarimagen($id_usuario, $imagenperfil)
+    {
+
         $usuario = Usuario::find($id_usuario);
 
         if (!$usuario) {
             return response()->json(['Error' => 'Usuario no encontrado'], 400);
         }
-       try{
+        try {
 
-         if ($imagenPerfil->isValid() && in_array($imagenPerfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
-           
-           $contenidoImagen = file_get_contents($imagenPerfil->getPathname());
-           $imagenBase64 = base64_encode($contenidoImagen);
-           $usuario->imagen = $imagenBase64;
-           $usuario->save();
-       
-        }else{
-           return response()->json(['Error' => 'Revise el contenido o el formato de la imagen'], 400);
-        } 
+            if ($imagenperfil->isValid() && in_array($imagenperfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
 
-       }catch(Exception $e){
-           return response()->json(['message' => $e->getMessage()], 500);
-       }
-       
-   }
+                $contenidoImagen = file_get_contents($imagenperfil->getPathname());
+                $imagenBase64 = base64_encode($contenidoImagen);
+                $usuario->imagen = $imagenBase64;
+                $usuario->save();
 
-   public function guardardocumento($id_persona, $documento){
-   
-    $persona = Persona::find($id_persona);
+            } else {
+                return response()->json(['Error' => 'Revise el contenido o el formato de la imagen'], 400);
+            }
 
-    if (!$persona) {
-        return response()->json(['Error' => 'Persona no encontrado'], 400);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+
     }
-   try{
 
-     if ($documento->isValid() && in_array($documento->getClientOriginalExtension(), ['pdf'])) {
-       
-        $contenidoPDF = file_get_contents($documento->getPathname());
-        $pdfBase64 = base64_encode($contenidoPDF);
-       
-        $nuevoarchivo = Archivos::create([
-            'nombre' => $documento->getClientOriginalName(),
-            'tipo' => $documento->getClientOriginalExtension(),
-            'file' => $pdfBase64,
-            'id_persona' => $persona->$id_persona
-        ]);
-         
-   
-    }else{
-       return response()->json(['Error' => 'Revise el contenido o el formato del pdf'], 400);
-    } 
+    public function guardardocumento($id_persona, $documento)
+    {
 
-   }catch(Exception $e){
-       return response()->json(['message' => $e->getMessage()], 500);
-   }
-   }
+        $persona = Persona::find($id_persona);
+
+        if (!$persona) {
+            return response()->json(['Error' => 'Persona no encontrado'], 400);
+        }
+        try {
+            
+            if ($documento->isValid() && in_array($documento->getClientOriginalExtension(), ['pdf'])) {
+                try {
+                    $contenidoPDF = file_get_contents($documento->getPathname());
+                    $pdfBase64 = base64_encode($contenidoPDF);
+                    
+                    $nuevoarchivo = Archivos::create([
+                        'nombre' => $documento->getClientOriginalName(),
+                        'tipo' => $documento->getClientOriginalExtension(),
+                        'file' => $pdfBase64,
+                        'id_persona' => $persona->id,
+                    ]);
+                    //dd($pdfBase64);
+                    
+                } catch (Exception $e) {
+                    throw new Exception($e->getMessage());
+                }
+
+
+            } else {
+                return response()->json(['Error' => 'Revise el contenido o el formato del pdf'], 400);
+            }
+
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 
 }

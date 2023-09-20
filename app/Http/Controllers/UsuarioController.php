@@ -88,29 +88,38 @@ class UsuarioController extends Controller
             $imagenPerfil = $request->file('imagenperfil'); // Imagen de perfil
             $documento = $request->file('documento'); // Imagen de perfil
 
+            // Crear el usuario a partir de los datos de persona
+            $nuevoUsuario = new Usuario();
+            $nuevoUsuario->usuario = $request->correo;
+            $nuevoUsuario->contrasena = Hash::make($request->contrasena);
+            $nuevoUsuario->id_persona = $nuevaPersona->id;
+            $nuevoUsuario->id_rol = 1;
+            $nuevoUsuario->correo = $request->correo;
+            $nuevoUsuario->save();
+            DB::commit();
 
-                // Crear el usuario a partir de los datos de persona
-                $nuevoUsuario = new Usuario();
-                $nuevoUsuario->usuario = $request->correo;
-                $nuevoUsuario->contrasena = Hash::make($request->contrasena);
-                $nuevoUsuario->id_persona = $nuevaPersona->id;
-                $nuevoUsuario->id_rol = 1;
-                $nuevoUsuario->correo = $request->correo;
-                $nuevoUsuario->imagen = $imagenBase64; // Almacenar la imagen en formato Base64
-                $nuevoUsuario->save();
-                DB::commit();
 
-                // una vez se crea el usuario y si venia imagen se procede a guardarla 
-                if ($imagenPerfil->isValid() && in_array($imagenPerfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
-                    // LLamamos al metodo guardar imagen
+            if ($imagenPerfil->isValid()) {
+                $imagen = app()->make(ArchivosController::class);
+                try {
+                    $resultado = $imagen->guardarimagen($nuevoUsuario->id, $imagenPerfil);
+                } catch (Exception $e) {
+                    return response(['mensaje' => $e->getMessage()]);
                 }
+            }
 
-                if ($documento ->isValid() && in_array($documento ->getClientOriginalExtension(), ['pdf'])) {
-                    // LLamamos al metodo guardar documento
+            if ($documento->isValid()) {
+                try {
+                    $pdf = app()->make(ArchivosController::class);
+                    //dd($nuevaPersona->id);
+                    $resultado = $pdf->guardardocumento($nuevaPersona->id, $documento);
+                } catch (Exception $e) {
+                    return response(['mensaje' => $e->getMessage()]);
                 }
+            }
 
-                return response()->json(['persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
-            
+            return response()->json(['persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
+
         } catch (Exception $e) {
             DB::rollback();
             return response()->json(['message' => $e->getMessage()], 500);
