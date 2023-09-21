@@ -21,6 +21,8 @@ class UsuarioController extends Controller
 {
     public function login(Request $request)
     {
+
+      //  dd($request);
         try {
             $request->validate([
                 'correo' => 'required',
@@ -99,7 +101,7 @@ class UsuarioController extends Controller
             DB::commit();
 
 
-            if ($imagenPerfil->isValid()) {
+            if ($imagenPerfil !== null) {
                 $imagen = app()->make(ArchivosController::class);
                 try {
                     $resultado = $imagen->guardarimagen($nuevoUsuario->id, $imagenPerfil);
@@ -108,7 +110,7 @@ class UsuarioController extends Controller
                 }
             }
 
-            if ($documento->isValid()) {
+            if ($documento !== null) {
                 try {
                     $pdf = app()->make(ArchivosController::class);
                     //dd($nuevaPersona->id);
