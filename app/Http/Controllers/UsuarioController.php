@@ -16,6 +16,8 @@ use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
 {
@@ -100,7 +102,6 @@ class UsuarioController extends Controller
             $nuevoUsuario->save();
             DB::commit();
 
-
             if ($imagenPerfil !== null) {
                 $imagen = app()->make(ArchivosController::class);
                 try {
@@ -170,5 +171,28 @@ class UsuarioController extends Controller
         } else {
             return response()->json(['Error' => 'Usuario no autenticado'], 401);
         }
+    }
+
+    public function editeUsuario(Request $request)
+    {
+        $usuario = Usuario::find($request->id);
+        $usuario->imagen = base64_encode($request->file('imagen'));
+        $usuario->save();
+        $request->id = $usuario->id_persona;
+        editePersona($request);
+    }
+
+    public function editePersona(Request $request)
+    {
+        $persona = Persona::find($request->id);
+        $persona->cuenta = $request->cuenta;
+        $persona->nombre = $request->nombre;
+        $persona->otrassenas = $request->otrassenas;
+        $persona->id_banco = $request->id_banco;
+        $persona->id_distrito = $request->id_distrito;
+        $persona->id_barrio = $request->id_barrio;
+        $persona->id_provincia = $request->id_provincia;
+        $persona->id_canton = $request->id_canton;
+        $persona->save();
     }
 }
