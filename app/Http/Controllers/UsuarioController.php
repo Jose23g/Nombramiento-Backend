@@ -120,7 +120,7 @@ class UsuarioController extends Controller
                 }
             }
 
-            return response()->json(['persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
+            return response()->json(['Message' => 'Se ha registrado con éxito','persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
 
         } catch (Exception $e) {
             DB::rollback();
