@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('archivos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
-            $table->string('tipo');
-            $table->binary('file');
             $table->unsignedBigInteger('id_persona');
             $table->foreign('id_persona')->references('id')->on('personas');
             $table->timestamps();
         });
+        DB::statement("ALTER TABLE archivos ADD file MEDIUMBLOB");
     }
 
     /**

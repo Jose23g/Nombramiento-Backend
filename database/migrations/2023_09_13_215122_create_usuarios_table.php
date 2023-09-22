@@ -13,8 +13,8 @@ return new class extends Migration {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->string('correo')->unique();
+            $table->string('otrocorreo');
             $table->string('contrasena');
-            $table->binary('imagen');
             $table->unsignedBigInteger('id_rol');
             $table->foreign('id_rol')->references('id')->on('roles');
             $table->unsignedBigInteger('id_persona');
@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->rememberToken();
             $table->timestamps();
         });
+        DB::statement("ALTER TABLE usuarios ADD imagen MEDIUMBLOB");
     }
 
     /**
