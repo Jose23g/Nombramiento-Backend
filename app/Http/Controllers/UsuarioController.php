@@ -45,7 +45,8 @@ class UsuarioController extends Controller
                 $token = $usuario->createToken('MyAppToken', [$rolScope])->accessToken;
 
                 $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
-                return response()->json(['Persona' => $persona, 'token' => $token], 200);
+                $scope = Rol::find($usuario->id_rol);
+                return response()->json(['Persona' => $persona, 'token' => $token , 'scope' => $scope->nombre], 200);
 
             } else {
                 return response()->json(['error' => 'Credenciales incorrectas'], 401);
