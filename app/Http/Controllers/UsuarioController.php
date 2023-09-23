@@ -100,7 +100,7 @@ class UsuarioController extends Controller
             //$nuevoUsuario->usuario = $request->correo;
             $nuevoUsuario->contrasena = Hash::make($request->contrasena);
             $nuevoUsuario->id_persona = $nuevaPersona->id;
-            $nuevoUsuario->id_rol = 1;
+            $nuevoUsuario->id_rol = 2;
             $nuevoUsuario->correo = $request->correo;
             $nuevoUsuario->save();
             DB::commit();
