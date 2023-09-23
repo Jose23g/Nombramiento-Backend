@@ -11,10 +11,12 @@ use Exception;
 use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Usuario;
+use App\Models\Rol;
 use Illuminate\Http\Request;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
@@ -43,7 +45,8 @@ class UsuarioController extends Controller
                 $token = $usuario->createToken('MyAppToken', [$rolScope])->accessToken;
 
                 $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
-                return response()->json(['Persona' => $persona, 'token' => $token], 200);
+                $scope = Rol::find($usuario->id_rol);
+                return response()->json(['Persona' => $persona, 'token' => $token , 'scope' => $scope->nombre], 200);
 
             } else {
                 return response()->json(['error' => 'Credenciales incorrectas'], 401);
@@ -195,4 +198,18 @@ class UsuarioController extends Controller
         $persona->id_canton = $request->id_canton;
         $persona->save();
     }
+
+    public function validartoken(Request $request){
+     /*    $usuario = $request->user();
+      if($usuario!== null){
+        return response()->json(['status' => 'true', 'scope' => $usuario->getScopes() ],200);
+      } */
+
+      $user = Auth::user(); // Obtiene el usuario autenticado
+      $scopes = $request->user()->token()->scopes; // Obtiene los scopes del token del usuario
+       
+      if ($user !== null) {
+          return response()->json(['status' => 'true', 'scopes' => $scopes], 200);
+      }
+    } 
 }
