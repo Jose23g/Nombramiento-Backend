@@ -17,6 +17,7 @@ return new class extends Migration
             $table->boolean('revoked');
             $table->dateTime('expires_at')->nullable();
         });
+        DB::statement('ALTER TABLE oauth_refresh_tokens MODIFY COLUMN id VARCHAR(100);');
     }
 
     /**

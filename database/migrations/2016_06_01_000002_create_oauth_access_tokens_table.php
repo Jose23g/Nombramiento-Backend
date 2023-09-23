@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamps();
             $table->dateTime('expires_at')->nullable();
         });
+        DB::statement('ALTER TABLE oauth_access_tokens MODIFY COLUMN id VARCHAR(100);');
     }
 
     /**

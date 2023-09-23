@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('revoked');
             $table->dateTime('expires_at')->nullable();
         });
+        DB::statement('ALTER TABLE oauth_auth_codes MODIFY COLUMN id VARCHAR(100);');
     }
 
     /**
