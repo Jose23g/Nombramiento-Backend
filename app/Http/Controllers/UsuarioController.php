@@ -65,6 +65,7 @@ class UsuarioController extends Controller
             'correo' => 'required',
             'contrasena' => 'required',
             'cuenta' => 'required',
+            'id_banco' => 'required',
             'id_provincia' => 'required',
             'id_canton' => 'required',
             'id_distrito' => 'required',

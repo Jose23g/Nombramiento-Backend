@@ -54,7 +54,6 @@ class ArchivosController extends Controller
                     
                     $nuevoarchivo = Archivos::create([
                         'nombre' => $documento->getClientOriginalName(),
-                        'tipo' => $documento->getClientOriginalExtension(),
                         'file' => $pdfBase64,
                         'id_persona' => $persona->id,
                     ]);
