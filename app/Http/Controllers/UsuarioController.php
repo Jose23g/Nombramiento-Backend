@@ -69,7 +69,6 @@ class UsuarioController extends Controller
             'id_provincia' => 'required',
             'id_canton' => 'required',
             'id_distrito' => 'required',
-            'id_barrio' => 'required',
             'otrassenas' => 'required',
         ]);
 
@@ -92,6 +91,15 @@ class UsuarioController extends Controller
                 'id_barrio' => $request->id_barrio,
                 'otrassenas' => $request->otrassenas,
             ]);
+            
+            $numerotelefono = $request->numero;
+            
+            if($numerotelefono !== null && strlen($numerotelefono) === 8 && ctype_digit($numerotelefono)){
+                $nuevotelefono = Telefono::create([
+                   'id_persona' => $nuevaPersona->id,
+                   'personal' => $request->numero
+                ]);
+              }
 
             $imagenPerfil = $request->file('imagenperfil'); // Imagen de perfil
             $documento = $request->file('documento'); // Imagen de perfil
