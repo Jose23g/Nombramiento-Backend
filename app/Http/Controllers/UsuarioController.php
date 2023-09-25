@@ -145,6 +145,7 @@ class UsuarioController extends Controller
             $distrito = Distrito::select('id', 'nombre')->find($persona->id_distrito);
             $canton = Canton::select('id', 'nombre')->find($persona->id_canton);
             $provincia = Provincia::select('id', 'nombre')->find($persona->id_provincia);
+            $banco = $persona->banco()->get();
 
             $imagenCodificada = $usuario->imagen;
             $imagenDecodificada = base64_decode($imagenCodificada);
@@ -163,6 +164,7 @@ class UsuarioController extends Controller
                     'cuentabancaria' => 'No implementado aun',
                     'foto_perfil' => $usuario->imagen,
                     'archivo' => $archivo,
+                    'banco'=>$banco,
                     'direccion' => [
                         'provincia' => $provincia,
                         'canton' => $canton,
