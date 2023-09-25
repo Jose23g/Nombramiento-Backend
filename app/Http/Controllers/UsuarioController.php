@@ -139,8 +139,8 @@ class UsuarioController extends Controller
 
         if ($usuario) {
             $persona = Persona::find($usuario->id_persona);
-            $archivo = Archivos::where('id_persona', $persona->id_persona);
-            $telefonos = Telefono::where('id_persona', $persona->id_persona);
+            $archivo = $persona->archivos()->get();
+            $telefonos = $persona->telefonos()->get();
             $barrio = Barrio::select('id', 'nombre')->find($persona->id_barrio);
             $distrito = Distrito::select('id', 'nombre')->find($persona->id_distrito);
             $canton = Canton::select('id', 'nombre')->find($persona->id_canton);
@@ -158,6 +158,7 @@ class UsuarioController extends Controller
             return response()->json([
                 'Usuario' => [
                     'correo' => $usuario->correo,
+                    'otrocorreo'=>$usuario->otrocorreo,
                     'nombre' => $persona->nombre,
                     'cedula' => $persona->cedula,
                     'Telefono' => $telefonos,

@@ -40,7 +40,7 @@ class Persona extends Model
 
     public function archivos()
     {
-        return $this->hasMany(Archivo::class, 'id_persona');
+        return $this->hasMany(Archivos::class, 'id_persona');
     }
     
     public function banco()
