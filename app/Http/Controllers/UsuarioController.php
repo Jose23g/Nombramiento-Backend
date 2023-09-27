@@ -162,7 +162,7 @@ class UsuarioController extends Controller
                     'nombre' => $persona->nombre,
                     'cedula' => $persona->cedula,
                     'Telefono' => $telefonos,
-                    'cuentabancaria' => 'No implementado aun',
+                    'cuentabancaria' => $persona->cuenta,
                     'foto_perfil' => $usuario->imagen,
                     'archivo' => $archivo,
                     'banco'=>$banco,
