@@ -54,5 +54,8 @@ class Usuario extends Authenticatable
     {
         return $this->belongsTo(Persona::class, 'id_persona');
     }
-
+    public function carreras()
+    {
+        return $this->hasMany(UsuarioCarrera::class, 'id_coordinador');
+    }
 }

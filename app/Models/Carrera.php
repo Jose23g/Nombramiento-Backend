@@ -13,11 +13,15 @@ class Carrera extends Model
     // Relación uno a muchos con PlanEstudio
     public function planesEstudio()
     {
-        return $this->hasMany(PlanEstudio::class, 'id_carrera');
+        return $this->hasMany(PlanEstudios::class, 'id_carrera');
     }
     // Relación uno a muchos con SolicitudCurso
     public function solicitudesCarrera()
     {
         return $this->hasMany(SolicitudCurso::class, 'id_carrera');
+    }
+    public function coordinadores()
+    {
+        return $this->hasMany(UsuarioCarrera::class, 'id_carrera');
     }
 }
