@@ -10,4 +10,12 @@ class FechaSolicitud extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'fechas_solicitudes';
+
+    protected $fillable = [
+        'nombre',
+        'anio',
+        'semestre',
+        'fecha_inicio',
+        'fecha_fin',
+    ];
 }

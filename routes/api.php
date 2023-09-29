@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DocenciaController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,10 @@ Route::middleware('auth:api')->prefix('usuario')->group(function(){
     Route::get('perfil', [UsuarioController::class, 'obtenerUsuario'])->middleware('scope:Coordinador');
     Route::post('editar', [UsuarioController::class, 'editeUsuario'])->middleware('scope:Profesor');
     Route::get('validar', [UsuarioController::class, 'validartoken']);
+});
+
+Route::middleware('auth:api')->group(function(){
+    Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion'])/* ->middleware('scope:Docencia') */;
 });
 
 Route::group(['prefix' => 'auth'], function (){
