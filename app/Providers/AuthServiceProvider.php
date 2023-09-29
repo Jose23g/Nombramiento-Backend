@@ -27,6 +27,7 @@ class AuthServiceProvider extends ServiceProvider
         Passport::tokensCan([
             'Coordinador' => 'Tiene acceso intermedio en la aplicacion',
             'Profesor' => 'Tiene acceso limitado a la aplicacion',
+            'Docencia' => 'Tiene acceso limitado a la aplicacion',
         ]);
 
         Passport::setDefaultScope(
