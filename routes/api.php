@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\CoordinadorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProvinciaController;
@@ -27,6 +28,8 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('distrito', [DistritoController::class, 'obtenga']);
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
+
+ Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
 
 Route::middleware('auth:api')->prefix('usuario')->group(function(){
     Route::get('perfil', [UsuarioController::class, 'obtenerUsuario'])->middleware('scope:Coordinador');
