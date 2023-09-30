@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dias', function (Blueprint $table) {
+        Schema::create('horarios', function (Blueprint $table) {
             $table->id();
-            $table->time('entrada');
-            $table->time('salida');
-            $table->unsignedBigInteger('id_dia');
-            $table->foreign('id_dia')->references('id')->on('dia');
+            $table->string('tipo');
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dias');
+        Schema::dropIfExists('horarios');
     }
 };

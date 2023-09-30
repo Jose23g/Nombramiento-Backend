@@ -40,6 +40,8 @@ Route::middleware('auth:api')->prefix('usuario')->group(function(){
 
 Route::middleware('auth:api')->group(function(){
     Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion'])/* ->middleware('scope:Docencia') */;
+    Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion'])/* ->middleware('scope:Docencia') */;
+
 });
 
 Route::group(['prefix' => 'auth'], function (){
