@@ -30,12 +30,13 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
 
- Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
+ 
 
 Route::middleware('auth:api')->prefix('usuario')->group(function(){
     Route::get('perfil', [UsuarioController::class, 'obtenerUsuario'])->middleware('scope:Coordinador');
     Route::post('editar', [UsuarioController::class, 'editeUsuario'])->middleware('scope:Profesor');
     Route::get('validar', [UsuarioController::class, 'validartoken']);
+    Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
 });
 
 Route::middleware('auth:api')->group(function(){

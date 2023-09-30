@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use App\Models\SolicitudCurso;
+use App\Models\Horario;
+use App\Models\Dias;
+use App\Models\DetalleSolicitud;
 
 use Illuminate\Http\Request;
 
@@ -33,29 +38,63 @@ class CoordinadorController extends Controller
             'detalle_solicitud.*.solicitud_grupo.*.horario.*.Entrada' => 'required',
             'detalle_solicitud.*.solicitud_grupo.*.horario.*.Salida' => 'required'
             ],
-        ); 
+       ); 
 
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
-        }
+       }
         
         DB::beginTransaction();
+        
         try {
 
+         $usuario = $request->user();
+         
+         $nuevasolicitud = SolicitudCurso::create([ 
+            'anio' => $request->anio,
+            'semestre' => $request->semestre,
+            'id_coordinador' => $usuario->id,
+            'id_carrera' => $request->id_carrera,
+            'fecha' => Carbon::now()->format('Y-m-d')
+         ]);
             
           foreach ($request->detalle_solicitud as $detalle){
-           
+            try{
+            $nuevodetalle = DetalleSolicitud::create([
+                'ciclo' => $detalle['ciclo'],    
+                'grupos' => 2,
+                'recinto' => $detalle['recinto'],
+                'carga' => $detalle['carga'],
+                'id_solicitud' => $nuevasolicitud->id,
+                'id_curso' => $detalle['id_curso'],
+            ]);
+
+            
+
+            }
+             catch(Exception $e){
+                DB::rollback();
+                return response()->json(['message' => $e->getMessage()], 422);
+             }
                 foreach ($detalle['solicitud_grupo'] as $solicitud_grupo){
                     
 
-                 foreach ($solicitud_grupo['horario'] as $horario){
-                
+                    foreach ($solicitud_grupo['horario'] as $horario){
+                      
+                        try {
+   
 
-                 }
-                }
+                        }catch(Exception $e){
+                            DB::rollback();
+                            return response()->json(['message' => $e->getMessage()], 422);
+                        }
+                        
+
+                     }
+               }
            } 
 
-     } catch(Exception $e){
+        } catch(Exception $e){
          DB::rollback();
         return response()->json(['message' => $e->getMessage()], 422);
        

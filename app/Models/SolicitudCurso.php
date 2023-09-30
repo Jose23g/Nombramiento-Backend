@@ -10,6 +10,16 @@ class SolicitudCurso extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'solicitud_cursos';
+
+    protected $fillable = [
+        'anio',
+        'semestre',
+        'id_coordinador',
+        'id_carrera',
+        'fecha'
+    ];
+
+
     // Relación muchos a uno con Usuario (Coordinador)
     public function coordinador()
     {
