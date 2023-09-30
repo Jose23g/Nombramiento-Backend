@@ -148,7 +148,6 @@ class UsuarioController extends Controller
             $persona = Persona::find($usuario->id_persona);
             $archivo = $persona->archivos()->get();
             $telefonos = $persona->telefonos()->get();
-            $barrio = Barrio::select('id', 'nombre')->find($persona->id_barrio);
             $distrito = Distrito::select('id', 'nombre')->find($persona->id_distrito);
             $canton = Canton::select('id', 'nombre')->find($persona->id_canton);
             $provincia = Provincia::select('id', 'nombre')->find($persona->id_provincia);
@@ -177,7 +176,6 @@ class UsuarioController extends Controller
                         'provincia' => $provincia,
                         'canton' => $canton,
                         'distrito' => $distrito,
-                        'barrio' => $barrio,
                         'otrassenas' => $persona->otrassenas,
                     ]
                 ]
@@ -204,7 +202,6 @@ class UsuarioController extends Controller
         $persona->otrassenas = $request->otrassenas;
         $persona->id_banco = $request->id_banco;
         $persona->id_distrito = $request->id_distrito;
-        $persona->id_barrio = $request->id_barrio;
         $persona->id_provincia = $request->id_provincia;
         $persona->id_canton = $request->id_canton;
         $persona->save();
