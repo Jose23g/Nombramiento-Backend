@@ -10,7 +10,13 @@ class Dias extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'dias';
-    // Relación uno a muchos con Horario
+    
+    protected $fillable = [
+        'entrada',
+        'salida',
+        'id_dia',
+        'id_horario'
+    ];
     public function horarios()
     {
         return $this->hasMany(Horario::class, 'id_dias');

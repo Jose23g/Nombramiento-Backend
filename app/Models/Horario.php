@@ -11,7 +11,10 @@ class Horario extends Model
     protected $guarded = [];
     protected $table = 'horarios';
     
-   
+    protected $fillable = [
+        'tipo',
+    ]; 
+
 
 
     public function dias()
