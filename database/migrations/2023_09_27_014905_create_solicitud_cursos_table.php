@@ -17,9 +17,11 @@ return new class extends Migration
             $table->string('semestre');
             $table->dateTime('fecha');
             $table->unsignedBigInteger('id_coordinador');
+            $table->unsignedBigInteger('id_estado');
             $table->unsignedBigInteger('id_carrera');
             $table->foreign('id_coordinador')->references('id')->on('usuarios');
             $table->foreign('id_carrera')->references('id')->on('carreras');
+            $table->foreign('id_estado')->references('id')->on('estados');
             $table->timestamps();
         });
     }

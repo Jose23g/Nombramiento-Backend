@@ -40,4 +40,8 @@ class SolicitudCurso extends Model
     {
         return $this->hasOne(AprobacionSolicitudCurso::class, 'id_solicitud');
     }
+    public function estado()
+    {
+        return $this->belongsTo(Estado::class, 'id_estado');
+    }
 }
