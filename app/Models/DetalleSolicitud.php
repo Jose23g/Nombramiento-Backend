@@ -10,6 +10,15 @@ class DetalleSolicitud extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'detalle_solicitudes';
+    
+    protected $fillable = [
+        'ciclo',
+        'grupos',
+        'recinto',
+        'carga',
+         'id_solicitud',
+         'id_curso'
+    ];
     // Relación muchos a uno con SolicitudCurso
     public function solicitudCurso()
     {

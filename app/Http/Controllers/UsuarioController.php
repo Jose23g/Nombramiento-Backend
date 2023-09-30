@@ -88,7 +88,6 @@ class UsuarioController extends Controller
                 'id_provincia' => $request->id_provincia,
                 'id_canton' => $request->id_canton,
                 'id_distrito' => $request->id_distrito,
-                'id_barrio' => $request->id_barrio,
                 'otrassenas' => $request->otrassenas,
             ]);
             
@@ -109,7 +108,7 @@ class UsuarioController extends Controller
             //$nuevoUsuario->usuario = $request->correo;
             $nuevoUsuario->contrasena = Hash::make($request->contrasena);
             $nuevoUsuario->id_persona = $nuevaPersona->id;
-            $nuevoUsuario->id_rol = 4;
+            $nuevoUsuario->id_rol = 3;
             $nuevoUsuario->correo = $request->correo;
             $nuevoUsuario->save();
             DB::commit();

@@ -23,7 +23,6 @@ class Persona extends Model
         'id_banco',
         'id_canton',
         'id_distrito',
-        'id_barrio',
         'otrassenas'
     ];
 

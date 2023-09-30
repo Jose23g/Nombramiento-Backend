@@ -3,6 +3,12 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use App\Models\SolicitudCurso;
+use App\Models\SolicitudGrupo;
+use App\Models\Horario;
+use App\Models\Dias;
+use App\Models\DetalleSolicitud;
 
 use Illuminate\Http\Request;
 
@@ -30,37 +36,100 @@ class CoordinadorController extends Controller
             'detalle_solicitud.*.solicitud_grupo.*.cupo' => 'required',
             'detalle_solicitud.*.solicitud_grupo.*.horario' => 'required|array|min:1',
             'detalle_solicitud.*.solicitud_grupo.*.horario.*.id_dia' => 'required',
-            'detalle_solicitud.*.solicitud_grupo.*.horario.*.Entrada' => 'required',
-            'detalle_solicitud.*.solicitud_grupo.*.horario.*.Salida' => 'required'
+            'detalle_solicitud.*.solicitud_grupo.*.horario.*.entrada' => 'required',
+            'detalle_solicitud.*.solicitud_grupo.*.horario.*.salida' => 'required'
             ],
-        ); 
+       ); 
 
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
-        }
+       }
         
         DB::beginTransaction();
+        
         try {
 
+         $usuario = $request->user();
+         
+         $nuevasolicitud = SolicitudCurso::create([ 
+            'anio' => $request->anio,
+            'semestre' => $request->semestre,
+            'id_coordinador' => $usuario->id,
+            'id_carrera' => $request->id_carrera,
+            'fecha' => Carbon::now()->format('Y-m-d')
+         ]);
             
           foreach ($request->detalle_solicitud as $detalle){
-           
+            
+            try{
+            $nuevodetalle = DetalleSolicitud::create([
+                'ciclo' => $detalle['ciclo'],    
+                'grupos' => 2,
+                'recinto' => $detalle['recinto'],
+                'carga' => $detalle['carga'],
+                'id_solicitud' => $nuevasolicitud->id,
+                'id_curso' => $detalle['id_curso'],
+            ]);
+
+            }
+             catch(Exception $e){
+                DB::rollback();
+                return response()->json(['message' => $e->getMessage()], 422);
+             }
                 foreach ($detalle['solicitud_grupo'] as $solicitud_grupo){
+                    //primero añadimos el horario general con su tipo 
+                    try{             
+                       $nuevohorario = Horario::create([
+                        'tipo' => "SolicitudGrupo"
+                    ]);
+                   
+                    ;}catch(Exeption $e){DB::rollback();
+                        return response()->json(['message' => $e->getMessage()], 422);}
+    
+
+                    foreach ($solicitud_grupo['horario'] as $dias){
+                      
+                        //verificamos los dias que viene dentro del arreglo de horarios para cada curso
+                        try {
+                         
+                           $nuevodia = Dias::create([
+                            'id_dia' => $dias['id_dia'],
+                            'entrada' => $dias['entrada'],
+                            'salida' => $dias['salida'],
+                            'id_horario' => $nuevohorario->id
+                            ]);
+                           
+                        }catch(Exception $e){
+                            DB::rollback();
+                            return response()->json(['message' => $e->getMessage()], 422);
+                        }
+                     }
+                    // ahora una vez registrados los datos del horario Horario y los dia del grupo hacemos la solicitud por grupo
+                    try {
                     
+                        $nuevogrupo = SolicitudGrupo::create([
+                        'grupo' =>  $solicitud_grupo['grupo'],
+                        'cupo'=> $solicitud_grupo['cupo'],
+                        'id_detalle' =>  $nuevodetalle->id,
+                        'id_profesor' => $solicitud_grupo['id_profesor'],
+                        'id_horario' => $nuevohorario->id
+                     ]);
 
-                 foreach ($solicitud_grupo['horario'] as $horario){
-                
-
-                 }
-                }
+                     
+                    }catch(Exeption $e){
+                        DB::rollback();
+                        return response()->json(['message' => $e->getMessage()], 422);
+                    }
+               }
            } 
 
-     } catch(Exception $e){
+        } catch(Exception $e){
          DB::rollback();
         return response()->json(['message' => $e->getMessage()], 422);
        
     }
-    return response()->json(['message' =>'ha llegado el elemento'], 200);
+    DB::commit();
+    return response()->json(['message' =>'Se ha creado la solicitud de curso con éxito', 'Solicitud' => $nuevasolicitud], 200);
 
        
     }
