@@ -50,7 +50,7 @@ class DocenciaController extends Controller
     public function comprobarFechaRecepcion(Request $request){
         $fechaActual = Carbon::now();
         $fechaSolicitud = FechaSolicitud::where('anio', $request->input('anio'))->where('semestre', $request->input('semestre'))->first();
-        dd($fechaActual);
+        
         if(!$fechaSolicitud || !$fechaActual->between($fechaSolicitud->fecha_inicio, $fechaSolicitud->fecha_fin)){
             return response()->json(['error' => 'El periodo para realizar la solicitud de curso ha finalizado o no está disponible'], 400);
         }
