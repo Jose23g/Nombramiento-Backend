@@ -52,9 +52,15 @@ class CoordinadorController extends Controller
         try {
             $fechaActual = Carbon::now();
             $fechaSolicitud = FechaSolicitud::where('anio', $request->input('anio'))->where('semestre', $request->input('semestre'))->first();
-
+            $existesolicitud = SolicitudCurso::where('anio',$request->input('anio'))->where('semestre', $request->input('semestre'))->where('id_carrera', $request->input('id_carrera'))->first();
+            if($existesolicitud){
+              return response()->json(['error' => 'Ya hay una solicitud que coincide con', 
+              'anio'=> $request->anio,
+              'semestre' => $request->semestre,
+               'id_carrera' => $request->id_carrera], 400);
+            }
             if(!$fechaSolicitud || !$fechaActual->between($fechaSolicitud->fecha_inicio, $fechaSolicitud->fecha_fin)){
-                return response()->json(['error' => 'El periodo para realizar la solicitud de curso ha finalizado o no está disponible'], 400);
+                return response()->json(['error' => 'El periodo para realizar la solicitud de curso ha finalizado o no esta disponible'], 400);
             }
             
             $usuario = $request->user();
