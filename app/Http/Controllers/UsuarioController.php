@@ -105,9 +105,10 @@ class UsuarioController extends Controller
 
             // Crear el usuario a partir de los datos de persona
             $nuevoUsuario = new Usuario();
-            //$nuevoUsuario->usuario = $request->correo;
+            $nuevoUsuario->otrocorreo = $request->otrocorreo;
             $nuevoUsuario->contrasena = Hash::make($request->contrasena);
             $nuevoUsuario->id_persona = $nuevaPersona->id;
+            $nuevoUsuario->id_estado = 2;
             $nuevoUsuario->id_rol = 3;
             $nuevoUsuario->correo = $request->correo;
             $nuevoUsuario->save();
