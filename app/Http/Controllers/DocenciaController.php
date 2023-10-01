@@ -57,4 +57,56 @@ class DocenciaController extends Controller
 
         return response()->json(['messaje' => 'se puede hacer la solicitud'], 200);
     }
+
+     public function Listar_fechas_solicitudes(Request $request){
+     
+        try{
+            $todasfechas = FechaSolicitud::all();
+            
+            if(!$todasfechas){
+                return response()->json(['message' => 'No hay fechas registradas'], 500);
+            }
+
+         return response()->json(['Fechas de Solictud' => $todasfechas]);
+
+        }catch(Exception $e){
+            return response()->json(['error' =>$e->getMessage()], 500);
+        }
+        
+     }
+
+    public function Ver_Solicitud_curso_fecha(Request $request)
+    { 
+        $validator = Validator::make($request->all(), [
+        'id_fecha' => 'required'
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+
+        $verificarfecha = FechaSolicitud::Where('id', $request->id_fecha)->first();
+        
+        if(!$verificarfecha){
+            return response()->json(['message' => 'Error al seleccionar la fecha'], 422);
+        }
+         
+        try{
+       
+            $solicitudcursos = SolicitudCurso::whereBetween('fecha', [$verificarfecha->fecha_inicio, $verificarfecha->fecha_fin])->get();
+            
+            if(!$solicitudcursos){
+                return response()->json(['message' => 'no hay solicitudes en el lapso consultado'], 422);
+            }
+            return response()->json([
+                'fecha_inicio' => $verificarfecha->fecha_inicio,
+                'fecha_fin' => $verificarfecha->fecha_fin,
+                'solicitudes' => $solicitudcursos
+            ], 200);
+
+        }catch(Exception $e){
+            return response()->json(['error' =>$e->getMessage()], 500);
+        }
+    }
 }

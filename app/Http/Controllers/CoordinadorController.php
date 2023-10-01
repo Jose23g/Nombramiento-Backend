@@ -147,21 +147,12 @@ class CoordinadorController extends Controller
         DB::commit();
         return response()->json(['message' => 'Se ha creado la solicitud de curso con éxito', 'Solicitud' => $nuevasolicitud], 200);
 
-
     }
 
-    public function Ver_Solicitud_curso(Request $request)
-    {
 
-    }
-
-    public function Editar_Solicitud_curso(Request $request)
-    {
-
-    }
 
     public function Ver_Estado_Solicitud(Request $request)
     {
-
+     
     }
 }
