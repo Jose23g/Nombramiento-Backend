@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->string('correo')->unique();
-            $table->string('otrocorreo');
+            $table->string('otrocorreo')->nullable();
             $table->string('contrasena');
             $table->unsignedBigInteger('id_rol');
             $table->foreign('id_rol')->references('id')->on('roles');
