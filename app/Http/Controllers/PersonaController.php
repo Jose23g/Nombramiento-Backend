@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Persona;
 
 class PersonaController extends Controller
 {
     public function editePersona(Request $request)
     {
-        $persona = Persona::find($request->id);
+        $persona = Persona::find($request->id_persona);
         $persona->cuenta = $request->cuenta;
         $persona->nombre = $request->nombre;
         $persona->otrassenas = $request->otrassenas;

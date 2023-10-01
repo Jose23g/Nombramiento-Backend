@@ -26,7 +26,7 @@ class UsuarioController extends Controller
     public function login(Request $request)
     {
 
-      //  dd($request);
+        //  dd($request);
         try {
             $request->validate([
                 'correo' => 'required',
@@ -46,7 +46,7 @@ class UsuarioController extends Controller
 
                 $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
                 $scope = Rol::find($usuario->id_rol);
-                return response()->json(['Persona' => $persona, 'token' => $token , 'scope' => $scope->nombre], 200);
+                return response()->json(['Persona' => $persona, 'token' => $token, 'scope' => $scope->nombre], 200);
 
             } else {
                 return response()->json(['error' => 'Credenciales incorrectas'], 401);
@@ -90,15 +90,15 @@ class UsuarioController extends Controller
                 'id_distrito' => $request->id_distrito,
                 'otrassenas' => $request->otrassenas,
             ]);
-            
+
             $numerotelefono = $request->numero;
-            
-            if($numerotelefono !== null && strlen($numerotelefono) === 8 && ctype_digit($numerotelefono)){
+
+            if ($numerotelefono !== null && strlen($numerotelefono) === 8 && ctype_digit($numerotelefono)) {
                 $nuevotelefono = Telefono::create([
-                   'id_persona' => $nuevaPersona->id,
-                   'personal' => $request->numero
+                    'id_persona' => $nuevaPersona->id,
+                    'personal' => $request->numero
                 ]);
-              }
+            }
 
             $imagenPerfil = $request->file('imagenperfil'); // Imagen de perfil
             $documento = $request->file('documento'); // Imagen de perfil
@@ -133,7 +133,7 @@ class UsuarioController extends Controller
                 }
             }
 
-            return response()->json(['Message' => 'Se ha registrado con éxito','persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
+            return response()->json(['Message' => 'Se ha registrado con éxito', 'persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
 
         } catch (Exception $e) {
             DB::rollback();
@@ -165,14 +165,14 @@ class UsuarioController extends Controller
             return response()->json([
                 'Usuario' => [
                     'correo' => $usuario->correo,
-                    'otrocorreo'=>$usuario->otrocorreo,
+                    'otrocorreo' => $usuario->otrocorreo,
                     'nombre' => $persona->nombre,
                     'cedula' => $persona->cedula,
                     'Telefono' => $telefonos,
                     'cuentabancaria' => $persona->cuenta,
                     'foto_perfil' => $usuario->imagen,
                     'archivo' => $archivo,
-                    'banco'=>$banco,
+                    'banco' => $banco,
                     'direccion' => [
                         'provincia' => $provincia,
                         'canton' => $canton,
@@ -188,24 +188,48 @@ class UsuarioController extends Controller
 
     public function editeUsuario(Request $request)
     {
-        $usuario = Usuario::find($request->id);
-        $usuario->imagen = base64_encode($request->file('imagen'));
-        $usuario->save();
-        $request->id = $usuario->id_persona;
-        PersonaController->editePersona($request);
+        $validator = Validator::make($request->all(), [
+            'imagen' => 'required',
+            'nombre' => 'required',
+            'cuenta' => 'required',
+            'id_banco' => 'required',
+            'id_provincia' => 'required',
+            'id_canton' => 'required',
+            'id_distrito' => 'required',
+            'otrassenas' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        try {
+            $usuario = Usuario::find($request->id);
+            if ($request->has('imagen')) {
+                $usuario->imagen = base64_encode($request->file('imagen'));
+                $usuario->save();
+            }
+            $request->merge(['id_persona' => $usuario->id_persona]);
+            app(PersonaController::class)->editePersona($request);
+
+            return response()->json(['message' => 'Se ha modificado exitosamente']);
+
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+
     }
 
-    public function validartoken(Request $request){
-     /*    $usuario = $request->user();
-      if($usuario!== null){
-        return response()->json(['status' => 'true', 'scope' => $usuario->getScopes() ],200);
-      } */
+    public function validartoken(Request $request)
+    {
+        /*    $usuario = $request->user();
+         if($usuario!== null){
+           return response()->json(['status' => 'true', 'scope' => $usuario->getScopes() ],200);
+         } */
 
-      $user = Auth::user(); // Obtiene el usuario autenticado
-      $scopes = $request->user()->token()->scopes; // Obtiene los scopes del token del usuario
-       
-      if ($user !== null) {
-          return response()->json(['status' => 'true', 'scopes' => $scopes], 200);
-      }
-    } 
+        $user = Auth::user(); // Obtiene el usuario autenticado
+        $scopes = $request->user()->token()->scopes; // Obtiene los scopes del token del usuario
+
+        if ($user !== null) {
+            return response()->json(['status' => 'true', 'scopes' => $scopes], 200);
+        }
+    }
 }
