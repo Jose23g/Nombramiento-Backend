@@ -70,6 +70,7 @@ class CoordinadorController extends Controller
                 'semestre' => $request->semestre,
                 'id_coordinador' => $usuario->id,
                 'id_carrera' => $request->id_carrera,
+                'id_estado' => 1,
                 'fecha' => Carbon::now()->format('Y-m-d')
             ]);
 
