@@ -19,6 +19,8 @@ return new class extends Migration {
             $table->foreign('id_rol')->references('id')->on('roles');
             $table->unsignedBigInteger('id_persona');
             $table->foreign('id_persona')->references('id')->on('personas');
+            $table->unsignedBigInteger('id_estado');
+            $table->foreign('id_estado')->references('id')->on('estados');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

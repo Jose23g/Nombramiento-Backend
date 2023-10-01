@@ -19,8 +19,6 @@ return new class extends Migration
             $table->unsignedBigInteger('id_banco');
             $table->foreign('id_banco')->references('id')->on('bancos');
             $table->string('otrassenas');
-            $table->unsignedBigInteger('id_barrio');
-            $table->foreign('id_barrio')->references('id')->on('barrios');
             $table->unsignedBigInteger('id_distrito');
             $table->foreign('id_distrito')->references('id')->on('distritos');
             $table->unsignedBigInteger('id_canton');
