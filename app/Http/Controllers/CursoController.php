@@ -6,5 +6,10 @@ use Illuminate\Http\Request;
 
 class CursoController extends Controller
 {
-    //
+    public function agregueUnCurso(){
+
+    }
+    public function obtengaPorPlanDeEstudio(){
+        
+    }
 }
