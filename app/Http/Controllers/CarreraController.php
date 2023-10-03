@@ -6,5 +6,7 @@ use Illuminate\Http\Request;
 
 class CarreraController extends Controller
 {
-    //
+    public function muestreLosProfesores(){
+
+    }
 }

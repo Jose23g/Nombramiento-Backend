@@ -6,5 +6,7 @@ use Illuminate\Http\Request;
 
 class PlanEstudiosController extends Controller
 {
-    //
+    public function agregue(){
+
+    }
 }
