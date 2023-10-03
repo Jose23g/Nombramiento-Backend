@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FechaSolicitud;
+use App\Models\SolicitudCurso;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;

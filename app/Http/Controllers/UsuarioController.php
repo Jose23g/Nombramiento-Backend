@@ -188,29 +188,36 @@ class UsuarioController extends Controller
 
     public function editeUsuario(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'imagen' => 'required',
-            'nombre' => 'required',
-            'cuenta' => 'required',
-            'id_banco' => 'required',
-            'id_provincia' => 'required',
-            'id_canton' => 'required',
-            'id_distrito' => 'required',
-            'otrassenas' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 422);
-        }
         try {
-            $usuario = Usuario::find($request->id);
-            if ($request->has('imagen')) {
-                $usuario->imagen = base64_encode($request->file('imagen'));
-                $usuario->save();
+            
+            $userID = $request->user();
+            
+            $usuario = Usuario::find($userID->id);
+            $usuario->otrocorreo = $request->input('otrocorreo');
+            $usuario->save();
+            
+            $persona = Persona::find($usuario->id_persona);
+            $persona->cuenta = $request->input('nCuenta');
+            $persona->otrassenas = $request->input('otrassenas');
+            $persona->id_banco = $request->input('idBanco');
+            $persona->id_distrito = $request->input('id_distrito');
+            $persona->id_provincia = $request->input('id_provincia');
+            $persona->id_canton = $request->input('id_canton');
+            $persona->save();
+            
+            $telefono = Telefono::where('id_persona', $persona->id)->first();
+            if (!$telefono && ($request->input('telPersonal') || $request->input('telTrabajo'))){
+                Telefono::create([
+                    'id_persona' => $persona->id,
+                    'personal' => $request->input('telPersonal'),
+                    'trabajo' => $request->input('telTrabajo'),
+                ]);
             }
-            $request->merge(['id_persona' => $usuario->id_persona]);
-            app(PersonaController::class)->editePersona($request);
-
-            return response()->json(['message' => 'Se ha modificado exitosamente']);
+            $telefono->personal = $request->input('telPersonal');
+            $telefono->trabajo = $request->input('telTrabajo');
+            $telefono->save();
+            
+            return response()->json($request->all());
 
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
