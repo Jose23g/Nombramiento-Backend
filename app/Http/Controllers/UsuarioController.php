@@ -189,7 +189,8 @@ class UsuarioController extends Controller
     public function editeUsuario(Request $request)
     {
         try {
-            $usuario = Usuario::find($request->id);
+            $user_id = $request->user()->id;
+            $usuario = Usuario::find($user_id);
             $usuario->otrocorreo = $request->otrocorreo;
             if ($request->has('imagen')) {
                 $usuario->imagen = $request->imagen;
