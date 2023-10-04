@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BancoController;
 use App\Http\Controllers\DocenciaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\CoordinadorController;
@@ -29,7 +30,7 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('distrito', [DistritoController::class, 'obtenga']);
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
-
+Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
  
 
 Route::middleware('auth:api')->prefix('usuario')->group(function(){

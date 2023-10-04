@@ -148,11 +148,11 @@ class UsuarioController extends Controller
         if ($usuario) {
             $persona = Persona::find($usuario->id_persona);
             $archivo = $persona->archivos()->get();
-            $telefonos = $persona->telefonos()->get();
+            $telefonos = $persona->telefonos()->first();
             $distrito = Distrito::select('id', 'nombre')->find($persona->id_distrito);
             $canton = Canton::select('id', 'nombre')->find($persona->id_canton);
             $provincia = Provincia::select('id', 'nombre')->find($persona->id_provincia);
-            $banco = $persona->banco()->get();
+            $banco = $persona->banco()->first();
 
             $imagenCodificada = $usuario->imagen;
             $imagenDecodificada = base64_decode($imagenCodificada);
