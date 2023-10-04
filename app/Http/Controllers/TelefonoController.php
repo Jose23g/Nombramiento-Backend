@@ -11,7 +11,7 @@ class TelefonoController extends Controller
         $telefono = Telefono::where('id_persona', $request->id_persona)->first();
         if(!$telefono){
             Telefono::create([
-                    'id_persona' => $request->persona_id,
+                    'id_persona' => $request->id_persona,
                     'personal' => $request->tel_personal,
                     'trabajo' => $request->tel_trabajo,
             ]);
