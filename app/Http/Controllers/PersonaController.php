@@ -18,5 +18,6 @@ class PersonaController extends Controller
         $persona->id_provincia = $request->id_provincia;
         $persona->id_canton = $request->id_canton;
         $persona->save();
+        app(TelefonoController::class)->editeTelefono($request);
     }
 }
