@@ -193,7 +193,7 @@ class UsuarioController extends Controller
             $usuario = Usuario::find($user_id);
             $usuario->otrocorreo = $request->otrocorreo;
             if ($request->has('imagen')) {
-                $imagen = file_get_contents($request->file('imagen')->getPathname());
+                //$imagen = file_get_contents($request->file('imagen')->getPathname());
                 $usuario->imagen = base64_encode($imagen);
             }
             $usuario->save();
