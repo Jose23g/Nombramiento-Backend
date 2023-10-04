@@ -192,9 +192,8 @@ class UsuarioController extends Controller
             $user_id = $request->user()->id;
             $usuario = Usuario::find($user_id);
             $usuario->otrocorreo = $request->otrocorreo;
-            if ($request->has('imagen')) {
-                //$imagen = file_get_contents($request->file('imagen')->getPathname());
-                $usuario->imagen = base64_encode($request->imagen);
+            if ($request->imagen) {
+                $usuario->imagen = $request->imagen;
             }
             $usuario->save();
             $request->merge(['id_persona' => $usuario->id_persona]);
