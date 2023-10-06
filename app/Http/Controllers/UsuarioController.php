@@ -101,7 +101,7 @@ class UsuarioController extends Controller
             }
 
             $imagenPerfil = $request->imagenperfil; // Imagen de perfil
-            $documento = $request->file('documento'); // Imagen de perfil
+            $documento = $request->archivos; // pdf de la persona
 
             // Crear el usuario a partir de los datos de persona
             $nuevoUsuario = new Usuario();

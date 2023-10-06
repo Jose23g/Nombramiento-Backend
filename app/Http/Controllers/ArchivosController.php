@@ -44,13 +44,13 @@ class ArchivosController extends Controller
         }
         try {
             
-            if ($documento->isValid() && in_array($documento->getClientOriginalExtension(), ['pdf'])) {
+            if ($documento) {
                 try {
-                    $contenidoPDF = file_get_contents($documento->getPathname());
-                    $pdfBase64 = base64_encode($contenidoPDF);
-                    
+                    $nombreArchivo = $persona->nombre . '_DocumentosAsociados'; // Nombre del archivo
+                    $pdfBase64 = $documento; 
+                
                     $nuevoarchivo = Archivos::create([
-                        'nombre' => $documento->getClientOriginalName(),
+                        'nombre' => $nombreArchivo,
                         'file' => $pdfBase64,
                         'id_persona' => $persona->id,
                     ]);
