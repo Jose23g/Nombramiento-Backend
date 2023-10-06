@@ -100,7 +100,7 @@ class UsuarioController extends Controller
                 ]);
             }
 
-            $imagenPerfil = $request->file('imagenperfil'); // Imagen de perfil
+            $imagenPerfil = $request->imagenperfil; // Imagen de perfil
             $documento = $request->file('documento'); // Imagen de perfil
 
             // Crear el usuario a partir de los datos de persona

@@ -20,11 +20,8 @@ class ArchivosController extends Controller
         }
         try {
 
-            if ($imagenperfil->isValid() && in_array($imagenperfil->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
-
-                $contenidoImagen = file_get_contents($imagenperfil->getPathname());
-                $imagenBase64 = base64_encode($contenidoImagen);
-                $usuario->imagen = $imagenBase64;
+            if ($imagenperfil) {
+                $usuario->imagen = $imagenperfil;
                 $usuario->save();
 
             } else {
