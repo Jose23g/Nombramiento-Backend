@@ -109,5 +109,19 @@ class DocenciaController extends Controller
         }catch(Exception $e){
             return response()->json(['error' =>$e->getMessage()], 500);
         }
+
+        
+    }
+       public function Listar_todas_solicitudes(Request $request ){
+        
+        try{
+            $solicitudcursos = SolicitudCurso::with(['usuario:id,id_persona', 'usuario.persona:id,nombre'])
+            ->get();
+            
+            return response()->json(['Solictudes' => $solicitudcursos], 200);
+        }catch(Exception $e){
+           return response()->json(['error' =>$e->getMessage()], 500);
+        }
+       
     }
 }

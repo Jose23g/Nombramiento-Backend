@@ -45,4 +45,9 @@ class SolicitudCurso extends Model
     {
         return $this->belongsTo(Estado::class, 'id_estado');
     }
+
+    public function usuario()
+    {
+        return $this->belongsTo(Usuario::class, 'id_coordinador');
+    }
 }

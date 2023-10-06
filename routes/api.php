@@ -42,6 +42,7 @@ Route::middleware('auth:api')->prefix('usuario')->group(function(){
 
 Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
 Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
+Route::get('vertodas', [DocenciaController::class, 'Listar_todas_solicitudes']);
 
 Route::middleware('auth:api')->group(function(){
     Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion'])/* ->middleware('scope:Docencia') */;
