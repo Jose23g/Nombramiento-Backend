@@ -31,9 +31,9 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
- 
 
-Route::middleware('auth:api')->prefix('usuario')->group(function(){
+
+Route::middleware('auth:api')->prefix('usuario')->group(function () {
     Route::get('perfil', [UsuarioController::class, 'obtenerUsuario']);
     Route::post('editar', [UsuarioController::class, 'editeUsuario']);
     Route::get('validar', [UsuarioController::class, 'validartoken']);
@@ -44,16 +44,13 @@ Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
 Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
 Route::get('vertodas', [DocenciaController::class, 'Listar_todas_solicitudes']);
 
-Route::middleware('auth:api')->group(function(){
-    Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion'])/* ->middleware('scope:Docencia') */;
-    Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion'])/* ->middleware('scope:Docencia') */;
+Route::middleware('auth:api')->group(function () {
+    Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion']) /* ->middleware('scope:Docencia') */;
+    Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion']) /* ->middleware('scope:Docencia') */;
 
 });
 
-Route::group(['prefix' => 'auth'], function (){
+Route::group(['prefix' => 'auth'], function () {
     Route::post('registrar', [UsuarioController::class, 'register']);
     Route::post('login', [UsuarioController::class, 'login']);
 });
-
-
-
