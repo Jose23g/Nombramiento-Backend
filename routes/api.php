@@ -23,6 +23,10 @@ use App\Http\Controllers\BarrioController;
 */
 // Ruta de prueba protegida por autenticación Passport
 
+Route::group(['prefix' => 'auth'], function () {
+    Route::post('registrar', [UsuarioController::class, 'register']);
+    Route::post('login', [UsuarioController::class, 'login']);
+});
 
 Route::group(['prefix' => 'direccion'], function () {
     Route::get('provincia', [ProvinciaController::class, 'obtenga']);
@@ -30,27 +34,32 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('distrito', [DistritoController::class, 'obtenga']);
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
-Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
 
+Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
 
 Route::middleware('auth:api')->prefix('usuario')->group(function () {
     Route::get('perfil', [UsuarioController::class, 'obtenerUsuario']);
     Route::post('editar', [UsuarioController::class, 'editeUsuario']);
     Route::get('validar', [UsuarioController::class, 'validartoken']);
-    Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
 });
 
-Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
-Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
-Route::get('vertodas', [DocenciaController::class, 'Listar_todas_solicitudes']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion']) /* ->middleware('scope:Docencia') */;
-    Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion']) /* ->middleware('scope:Docencia') */;
+    Route::middleware('scope:Docencia')->group(function () {
+        Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
+        Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion']);
+        Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion']);
+        Route::get('vertodas', [DocenciaController::class, 'Listar_todas_solicitudes']);
+        Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
 
-});
+    });
 
-Route::group(['prefix' => 'auth'], function () {
-    Route::post('registrar', [UsuarioController::class, 'register']);
-    Route::post('login', [UsuarioController::class, 'login']);
+    Route::middleware('scope:Profesor')->group(function () {
+
+    });
+
+    Route::middleware('scope:Coordinador')->group(function () {
+        Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
+
+    });
 });
