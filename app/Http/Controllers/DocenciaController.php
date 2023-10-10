@@ -130,25 +130,36 @@ class DocenciaController extends Controller
     }
 
     public function cambiarEstadoSolicitud(Request $request)
-    {
-        try {
-            $solicitudCurso = SolicitudCurso::Where('id', $request->input('id_solicitud'))->first();
-            $estado = Estado::Where('nombre', $request->input('estado'))->first();
-            //dd($estado);
+{
+    try {
+        $idSolicitud = $request->input('id_solicitud');
+        $estadoNombre = $request->input('estado');
+        $observacion = $request->input('observacion');
 
-            if ($request->input('estado') == 'Aceptado') {
-                $solicitudCurso->id_estado = $estado->id;
-                $solicitudCurso->save();
-                return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud'], 200);
-            }
-            $solicitudCurso->id_estado = $estado->id;
-            $solicitudCurso->observacion = $request->input('observacion');
-            $solicitudCurso->save();
+        $solicitudCurso = SolicitudCurso::where('id', $idSolicitud)->first();
+        $estado = Estado::where('nombre', $estadoNombre)->first();
 
-            return response()->json(['success' => true, 'message' => 'Se ha rechazado la solicitud'], 200);
-
-        }catch (Exception $e){
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (!$solicitudCurso) {
+            return response()->json(['error' => 'La solicitud no se encontró en la base de datos'], 404);
         }
+
+        if (!$estado) {
+            return response()->json(['error' => 'El estado no se encontró en la base de datos'], 404);
+        }
+
+        if ($estadoNombre == 'Aceptado') {
+            $solicitudCurso->id_estado = $estado->id;
+            $solicitudCurso->save();
+            return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud'], 200);
+        } else {
+            $solicitudCurso->id_estado = $estado->id;
+            $solicitudCurso->observacion = $observacion;
+            $solicitudCurso->save();
+            return response()->json(['success' => true, 'message' => 'Se ha rechazado la solicitud'], 200);
+        }
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
+
 }
