@@ -120,9 +120,8 @@ class DocenciaController extends Controller
     }
        public function Listar_todas_solicitudes(Request $request ){
         $solicitudcompleta = [];
-        
        
-            
+        try{
             $solicitudcursos = SolicitudCurso::all();
 
             if($solicitudcursos== null){
@@ -144,9 +143,17 @@ class DocenciaController extends Controller
                     'estado' => $estado->nombre];
 
                 $detalles[] = $solicitudarreglo;
+                
             }
 
             return response()->json(['Solicitudes de curso' => $detalles], 200);
+
+        }catch(Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+            
+
+            
         }
     
 

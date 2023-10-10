@@ -7,18 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Estado extends Model
 {
-    protected $fillable = [
+  protected $table = 'estados';  
+  
+  protected $fillable = [
         'nombre',
     ];
     
     use HasFactory;
-
-    protected $table = 'estados';
-
-    protected $fillable = [
-        'nombre'
-    ];
-
+    
     public function solicitudesCursos()
     {
         return $this->hasMany(SolicitudCurso::class, 'id_estado');
