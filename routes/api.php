@@ -51,6 +51,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion']);
         Route::get('vertodas', [DocenciaController::class, 'Listar_todas_solicitudes']);
         Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
+        Route::post('cambiar-estado', [DocenciaController::class, 'cambiarEstadoSolicitud']);
 
     });
 

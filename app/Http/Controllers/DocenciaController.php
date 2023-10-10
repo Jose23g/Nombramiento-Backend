@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estado;
 use App\Models\FechaSolicitud;
 use App\Models\SolicitudCurso;
 use Exception;
@@ -42,44 +43,46 @@ class DocenciaController extends Controller
                 'fecha_inicio' => $request->input('fecha_inicio'),
                 'fecha_fin' => $request->input('fecha_fin'),
             ]);
-            return response()->json(['message' =>'Plazo para la recepción de solicutudes de cursos establecida']);
+            return response()->json(['message' => 'Plazo para la recepción de solicutudes de cursos establecida']);
         } catch (Exception $e) {
-            return response()->json(['error' =>$e->getMessage()], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-    public function comprobarFechaRecepcion(Request $request){
+    public function comprobarFechaRecepcion(Request $request)
+    {
         $fechaActual = Carbon::now();
         $fechaSolicitud = FechaSolicitud::where('anio', $request->input('anio'))->where('semestre', $request->input('semestre'))->first();
-        
-        if(!$fechaSolicitud || !$fechaActual->between($fechaSolicitud->fecha_inicio, $fechaSolicitud->fecha_fin)){
+
+        if (!$fechaSolicitud || !$fechaActual->between($fechaSolicitud->fecha_inicio, $fechaSolicitud->fecha_fin)) {
             return response()->json(['error' => 'El periodo para realizar la solicitud de curso ha finalizado o no está disponible'], 400);
         }
 
         return response()->json(['messaje' => 'se puede hacer la solicitud'], 200);
     }
 
-     public function Listar_fechas_solicitudes(Request $request){
-     
-        try{
+    public function Listar_fechas_solicitudes(Request $request)
+    {
+
+        try {
             $todasfechas = FechaSolicitud::all();
-            
-            if(!$todasfechas){
+
+            if (!$todasfechas) {
                 return response()->json(['message' => 'No hay fechas registradas'], 500);
             }
 
-         return response()->json(['Fechas de Solictud' => $todasfechas]);
+            return response()->json(['Fechas de Solictud' => $todasfechas]);
 
-        }catch(Exception $e){
-            return response()->json(['error' =>$e->getMessage()], 500);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        
-     }
+
+    }
 
     public function Ver_Solicitud_curso_fecha(Request $request)
-    { 
+    {
         $validator = Validator::make($request->all(), [
-        'id_fecha' => 'required'
+            'id_fecha' => 'required'
         ]);
 
 
@@ -88,16 +91,16 @@ class DocenciaController extends Controller
         }
 
         $verificarfecha = FechaSolicitud::Where('id', $request->id_fecha)->first();
-        
-        if(!$verificarfecha){
+
+        if (!$verificarfecha) {
             return response()->json(['message' => 'Error al seleccionar la fecha'], 422);
         }
-         
-        try{
-       
+
+        try {
+
             $solicitudcursos = SolicitudCurso::whereBetween('fecha', [$verificarfecha->fecha_inicio, $verificarfecha->fecha_fin])->get();
-            
-            if(!$solicitudcursos){
+
+            if (!$solicitudcursos) {
                 return response()->json(['message' => 'no hay solicitudes en el lapso consultado'], 422);
             }
             return response()->json([
@@ -106,22 +109,46 @@ class DocenciaController extends Controller
                 'solicitudes' => $solicitudcursos
             ], 200);
 
-        }catch(Exception $e){
-            return response()->json(['error' =>$e->getMessage()], 500);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
 
-        
+
     }
-       public function Listar_todas_solicitudes(Request $request ){
-        
-        try{
+    public function Listar_todas_solicitudes(Request $request)
+    {
+
+        try {
             $solicitudcursos = SolicitudCurso::with(['usuario:id,id_persona', 'usuario.persona:id,nombre'])
-            ->get();
-            
+                ->get();
+
             return response()->json(['Solictudes' => $solicitudcursos], 200);
-        }catch(Exception $e){
-           return response()->json(['error' =>$e->getMessage()], 500);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-       
+
+    }
+
+    public function cambiarEstadoSolicitud(Request $request)
+    {
+        try {
+            $solicitudCurso = SolicitudCurso::Where('id', $request->input('id_solicitud'))->first();
+            $estado = Estado::Where('nombre', $request->input('estado'))->first();
+            //dd($estado);
+
+            if ($request->input('estado') == 'Aceptado') {
+                $solicitudCurso->id_estado = $estado->id;
+                $solicitudCurso->save();
+                return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud'], 200);
+            }
+            $solicitudCurso->id_estado = $estado->id;
+            $solicitudCurso->observacion = $request->input('observacion');
+            $solicitudCurso->save();
+
+            return response()->json(['success' => true, 'message' => 'Se ha rechazado la solicitud'], 200);
+
+        }catch (Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

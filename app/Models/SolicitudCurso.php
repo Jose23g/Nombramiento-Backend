@@ -17,7 +17,8 @@ class SolicitudCurso extends Model
         'id_coordinador',
         'id_carrera',
         'id_estado',
-        'fecha'
+        'fecha',
+        'observacion'
     ];
 
 
