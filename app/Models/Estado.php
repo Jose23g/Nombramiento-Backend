@@ -12,6 +12,13 @@ class Estado extends Model
     ];
     
     use HasFactory;
+
+    protected $table = 'estados';
+
+    protected $fillable = [
+        'nombre'
+    ];
+
     public function solicitudesCursos()
     {
         return $this->hasMany(SolicitudCurso::class, 'id_estado');

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Estado;
 use App\Models\FechaSolicitud;
 use App\Models\SolicitudCurso;
+use App\Models\Persona;
+use App\Models\Usuario;
+use App\Models\Carrera;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -113,42 +116,62 @@ class DocenciaController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-
+        
     }
-    public function Listar_todas_solicitudes(Request $request)
-    {
+       public function Listar_todas_solicitudes(Request $request ){
+        $solicitudcompleta = [];
+        
+       
+            
+            $solicitudcursos = SolicitudCurso::all();
 
-        try {
-            $solicitudcursos = SolicitudCurso::with(['usuario:id,id_persona', 'usuario.persona:id,nombre'])
-                ->get();
-
-            return response()->json(['Solictudes' => $solicitudcursos], 200);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-
-    }
-
-    public function cambiarEstadoSolicitud(Request $request)
-    {
-        try {
-            $solicitudCurso = SolicitudCurso::Where('id', $request->input('id_solicitud'))->first();
-            $estado = Estado::Where('nombre', $request->input('estado'))->first();
-            //dd($estado);
-
-            if ($request->input('estado') == 'Aceptado') {
-                $solicitudCurso->id_estado = $estado->id;
-                $solicitudCurso->save();
-                return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud'], 200);
+            if($solicitudcursos== null){
+                return response()->json(['Message' => 'No hay solicitudes de cursos'], 200);
             }
-            $solicitudCurso->id_estado = $estado->id;
-            $solicitudCurso->observacion = $request->input('observacion');
-            $solicitudCurso->save();
 
-            return response()->json(['success' => true, 'message' => 'Se ha rechazado la solicitud'], 200);
+            foreach($solicitudcursos as $solicitud){
+              $nombrecarrera = Carrera::where('id', $solicitud->id_carrera )->select('nombre')->first();
+              $usuario = Usuario::where('id', $solicitud->id_coordinador)->first();
+              $nombrepersona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
+              $estado = Estado::where('id', $solicitud->id_estado)->select('nombre')->first();
+            
+              $solicitudarreglo = [
+                    'id'=> $solicitud->id,
+                    'fecha' => $solicitud->fecha,
+                    'semestre'=> $solicitud->semestre,
+                    'carrera' =>$nombrecarrera->nombre,
+                    'coordinador'=> $nombrepersona->nombre,
+                    'estado' => $estado->nombre];
 
-        }catch (Exception $e){
-            return response()->json(['error' => $e->getMessage()], 500);
+                $detalles[] = $solicitudarreglo;
+            }
+
+            return response()->json(['Solicitudes de curso' => $detalles], 200);
+        }
+    
+
+
+        public function cambiarEstadoSolicitud(Request $request)
+        {
+            try {
+                $solicitudCurso = SolicitudCurso::Where('id', $request->input('id_solicitud'))->first();
+                $estado = Estado::Where('nombre', $request->input('estado'))->first();
+                //dd($estado);
+    
+                if ($request->input('estado') == 'Aceptado') {
+                    $solicitudCurso->id_estado = $estado->id;
+                    $solicitudCurso->save();
+                    return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud'], 200);
+                }
+                $solicitudCurso->id_estado = $estado->id;
+                $solicitudCurso->observacion = $request->input('observacion');
+                $solicitudCurso->save();
+    
+                return response()->json(['success' => true, 'message' => 'Se ha rechazado la solicitud'], 200);
+    
+            }catch (Exception $e){
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
         }
     }
-}
+    
