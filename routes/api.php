@@ -61,6 +61,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::middleware('scope:Coordinador')->group(function () {
         Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
+        Route::get('ultimasolicitud', [CoordinadorController::class, 'ultimaSolicitud']);
 
     });
 });
