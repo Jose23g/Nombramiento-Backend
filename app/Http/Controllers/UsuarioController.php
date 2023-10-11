@@ -70,6 +70,8 @@ class UsuarioController extends Controller
             'id_canton' => 'required',
             'id_distrito' => 'required',
             'otrassenas' => 'required',
+        ],[
+            'required' => 'El campo :attribute es requerido.',
         ]);
 
         if ($validator->fails()) {
