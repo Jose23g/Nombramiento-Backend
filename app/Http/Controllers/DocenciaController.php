@@ -44,7 +44,7 @@ class DocenciaController extends Controller
 
 
             if($solicitud_existente){
-                return response()->json(['Errormessage' => 'Ya se ha establecido una fecha para año y semestre solicitado please try again'], 402);
+                return response()->json(['Errormessage' => 'Ya se ha establecido una fecha para año y semestre solicitado please try again'], 400);
             }
 
             FechaSolicitud::create([
