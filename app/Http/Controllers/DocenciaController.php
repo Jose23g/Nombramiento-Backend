@@ -133,6 +133,7 @@ class DocenciaController extends Controller
               $usuario = Usuario::where('id', $solicitud->id_coordinador)->first();
               $nombrepersona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
               $estado = Estado::where('id', $solicitud->id_estado)->select('nombre')->first();
+              $solicitud->fecha = Carbon::parse($solicitud->fecha)->format('Y-m-d');
             
               $solicitudarreglo = [
                     'id'=> $solicitud->id,
