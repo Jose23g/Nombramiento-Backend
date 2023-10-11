@@ -39,6 +39,14 @@ class DocenciaController extends Controller
             if ($validator->fails()) {
                 return response()->json(['error' => $validator->errors()], 400);
             }
+
+            $solicitud_existente = FechaSolicitud::where('anio',$request->anio)->where('semestre', $request->semestre)->first();
+
+
+            if($solicitud_existente){
+                return response()->json(['Errormessage' => 'Ya se ha establecido una fecha para año y semestre solicitado please try again'], 402);
+            }
+
             FechaSolicitud::create([
                 'nombre' => $request->input('nombre'),
                 'anio' => $request->input('anio'),
