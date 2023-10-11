@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('anio');
             $table->string('semestre');
+            $table->string('observacion');
             $table->dateTime('fecha');
             $table->unsignedBigInteger('id_coordinador');
             $table->unsignedBigInteger('id_estado');

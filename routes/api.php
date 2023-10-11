@@ -10,6 +10,11 @@ use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\CantonController;
 use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\BarrioController;
+use App\Http\Controllers\PlanEstudiosController;
+use App\Http\Controllers\CursoController;
+use App\Http\Controllers\CarreraController;
+use App\Http\Controllers\SolicitudCursoController;
+use App\Http\Controllers\DetalleSolicitudController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,9 +40,7 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
 
-Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
-
-Route::middleware('auth:api')->prefix('usuario')->group(function () {
+Route::middleware('auth:api')->prefix('usuario')->group(function(){
     Route::get('perfil', [UsuarioController::class, 'obtenerUsuario']);
     Route::post('editar', [UsuarioController::class, 'editeUsuario']);
     Route::get('validar', [UsuarioController::class, 'validartoken']);
@@ -61,6 +64,18 @@ Route::middleware('auth:api')->group(function () {
 
     Route::middleware('scope:Coordinador')->group(function () {
         Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
+        Route::get('ultimasolicitud', [CoordinadorController::class, 'ultimaSolicitud']);
 
     });
 });
+
+Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
+Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
+Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
+
+Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
+Route::post('addcurse', [CursoController::class, 'agregueUnCurso']);
+Route::get('getcurse', [CursoController::class, 'obtengaPorPlanDeEstudio']);
+Route::get('getprof', [CarreraController::class, 'muestreLosProfesores']);
+Route::get('getsol', [SolicitudCursoController::class, 'muestreUnaSolicitud']);
+Route::get('getdet', [DetalleSolicitudController::class, 'muestreElDetalleDeLaSolicitud']);

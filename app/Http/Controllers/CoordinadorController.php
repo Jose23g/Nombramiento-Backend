@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estado;
 use App\Models\FechaSolicitud;
+use App\Models\Persona;
+use Exception;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -100,7 +103,7 @@ class CoordinadorController extends Controller
                         ]);
 
                         ;
-                    } catch (Exeption $e) {
+                    } catch (Exception $e) {
                         DB::rollback();
                         return response()->json(['message' => $e->getMessage()], 422);
                     }
@@ -135,7 +138,7 @@ class CoordinadorController extends Controller
                         ]);
 
 
-                    } catch (Exeption $e) {
+                    } catch (Exception $e) {
                         DB::rollback();
                         return response()->json(['message' => $e->getMessage()], 422);
                     }
@@ -152,10 +155,28 @@ class CoordinadorController extends Controller
 
     }
 
-
-
-    public function Ver_Estado_Solicitud(Request $request)
+    public function ultimaSolicitud(Request $request)
     {
+        $usuario = $request->user();
 
+        $solicitud = SolicitudCurso::where('id_coordinador', $usuario->id)->orderBy('created_at', 'desc')->first();
+        $solicitud->fecha = Carbon::parse($solicitud->fecha)->format('Y-m-d');
+
+        if (!$solicitud) {
+            return response()->json(['message' => 'No posee ninguna solicitud'], 200);
+        }
+
+        $persona = Persona::where('id', $usuario->id_persona)->first();
+        $estado = Estado::find($usuario->id_estado);
+
+        $datos = [
+            'id' => $solicitud->id,
+            'fecha' => $solicitud->fecha,
+            'semestre' => $solicitud->semestre,
+            'coordinador' => $persona->nombre,
+            'estado' => $estado->nombre,
+            'observacion' => $solicitud->observacion,
+        ];
+        return response()->json($datos, 200);
     }
 }
