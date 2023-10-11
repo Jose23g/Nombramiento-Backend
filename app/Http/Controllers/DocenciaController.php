@@ -146,7 +146,7 @@ class DocenciaController extends Controller
                 
             }
 
-            return response()->json(['Solicitudes de curso' => $detalles], 200);
+            return response()->json(['Solicitudes_de_curso' => $detalles], 200);
 
         }catch(Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);
