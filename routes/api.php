@@ -1,20 +1,19 @@
 <?php
 
 use App\Http\Controllers\BancoController;
-use App\Http\Controllers\DocenciaController;
-use App\Http\Controllers\UsuarioController;
-use App\Http\Controllers\CoordinadorController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProvinciaController;
-use App\Http\Controllers\CantonController;
-use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\BarrioController;
-use App\Http\Controllers\PlanEstudiosController;
-use App\Http\Controllers\CursoController;
+use App\Http\Controllers\CantonController;
 use App\Http\Controllers\CarreraController;
-use App\Http\Controllers\SolicitudCursoController;
+use App\Http\Controllers\CoordinadorController;
+use App\Http\Controllers\CursoController;
 use App\Http\Controllers\DetalleSolicitudController;
+use App\Http\Controllers\DistritoController;
+use App\Http\Controllers\DocenciaController;
+use App\Http\Controllers\PlanEstudiosController;
+use App\Http\Controllers\ProvinciaController;
+use App\Http\Controllers\SolicitudCursoController;
+use App\Http\Controllers\UsuarioController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,9 +27,9 @@ use App\Http\Controllers\DetalleSolicitudController;
 */
 // Ruta de prueba protegida por autenticación Passport
 
-Route::group(['prefix' => 'auth'], function () {
-    Route::post('registrar', [UsuarioController::class, 'register']);
-    Route::post('login', [UsuarioController::class, 'login']);
+Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
+    Route::post('registrar', 'register');
+    Route::post('login', 'login');
 });
 
 Route::group(['prefix' => 'direccion'], function () {
@@ -40,42 +39,43 @@ Route::group(['prefix' => 'direccion'], function () {
     Route::get('barrio', [BarrioController::class, 'obtenga']);
 });
 
-Route::middleware('auth:api')->prefix('usuario')->group(function(){
-    Route::get('perfil', [UsuarioController::class, 'obtenerUsuario']);
-    Route::post('editar', [UsuarioController::class, 'editeUsuario']);
-    Route::get('validar', [UsuarioController::class, 'validartoken']);
+Route::middleware('auth:api')->prefix('usuario')->controller(UsuarioController::class)->group(function () {
+    Route::get('perfil', 'obtenerUsuario');
+    Route::post('editar', 'editeUsuario');
+    Route::get('validar', 'validartoken');
 });
 
-
 Route::middleware('auth:api')->group(function () {
-    Route::middleware('scope:Docencia')->group(function () {
-        Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
-        Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion']);
-        Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion']);
-        Route::get('vertodas', [DocenciaController::class, 'Listar_todas_solicitudes']);
-        Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
-        Route::post('cambiar-estado', [DocenciaController::class, 'cambiarEstadoSolicitud']);
-
+    Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
+        Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
+        Route::post('/establecer-plazo', 'fechaRecepcion');
+        Route::post('/comprobar', 'comprobarFechaRecepcion');
+        Route::get('vertodas', 'Listar_todas_solicitudes');
+        Route::get('fechas', 'Listar_fechas_solicitudes');
+        Route::post('cambiar-estado', 'cambiarEstadoSolicitud');
     });
 
     Route::middleware('scope:Profesor')->group(function () {
-
     });
 
-    Route::middleware('scope:Coordinador')->group(function () {
-        Route::post('solicitud', [CoordinadorController::class, 'Solicitud_de_curso']);
-        Route::get('ultimasolicitud', [CoordinadorController::class, 'ultimaSolicitud']);
-
+    Route::middleware('scope:Coordinador')->controller(CoordinadorController::class)->group(function () {
+        Route::post('solicitud', 'Solicitud_de_curso');
+        Route::get('ultimasolicitud', 'ultimaSolicitud');
     });
 });
 
-Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
-Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
-Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
+Router::controller(DocenciaController::class)->group(function () {
+    Route::get('fechas', 'Listar_fechas_solicitudes');
+    Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
+});
 
+Router::controller(CursoController::class)->group(function () {
+    Route::post('addcurse', 'agregueUnCurso');
+    Route::get('getcurse', 'obtengaPorPlanDeEstudio');
+});
+
+Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
 Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
-Route::post('addcurse', [CursoController::class, 'agregueUnCurso']);
-Route::get('getcurse', [CursoController::class, 'obtengaPorPlanDeEstudio']);
 Route::get('getprof', [CarreraController::class, 'muestreLosProfesores']);
 Route::get('getsol', [SolicitudCursoController::class, 'muestreUnaSolicitud']);
 Route::get('getdet', [DetalleSolicitudController::class, 'muestreElDetalleDeLaSolicitud']);
