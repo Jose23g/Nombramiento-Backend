@@ -61,15 +61,16 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('scope:Coordinador')->controller(CoordinadorController::class)->group(function () {
         Route::post('solicitud', 'Solicitud_de_curso');
         Route::get('ultimasolicitud', 'ultimaSolicitud');
+        Route::get('listado', 'obtengaElListadoDeSolicitudes');
     });
 });
 
-Router::controller(DocenciaController::class)->group(function () {
+Route::controller(DocenciaController::class)->group(function () {
     Route::get('fechas', 'Listar_fechas_solicitudes');
     Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
 });
 
-Router::controller(CursoController::class)->group(function () {
+Route::controller(CursoController::class)->group(function () {
     Route::post('addcurse', 'agregueUnCurso');
     Route::get('getcurse', 'obtengaPorPlanDeEstudio');
 });
