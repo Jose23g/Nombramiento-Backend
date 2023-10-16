@@ -172,7 +172,7 @@ class CoordinadorController extends Controller
     public function obtengaElListadoDeSolicitudes(Request $request)
     {
         $usuario = $request->user();
-        $solicitudesCurso = $usuario->solicitudesCurso()->with('carrera')->with('estado')->with('coordinador')->orderBy('created_at', 'desc')->get();
+        $solicitudesCurso = $usuario->solicitudesCurso()->with(['detallesSolicitud', 'detallesSolicitud.curso.cursoPlanes'])->with('estado')->orderBy('created_at', 'desc')->get();
 
         return response()->json($solicitudesCurso, 200);
     }
