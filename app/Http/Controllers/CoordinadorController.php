@@ -172,8 +172,26 @@ class CoordinadorController extends Controller
     public function obtengaElListadoDeSolicitudes(Request $request)
     {
         $usuario = $request->user();
-        $solicitudesCurso = $usuario->solicitudesCurso()->with(['detallesSolicitud', 'detallesSolicitud.curso.cursoPlanes'])->with('estado')->orderBy('created_at', 'desc')->get();
+        $solicitudesCurso = $usuario->solicitudesCurso()->with(['detallesSolicitud', 'detallesSolicitud.curso.cursoPlanes', 'estado'])->orderBy('created_at', 'desc')->get();
+        $solicitudesCursoRefactorized = $solicitudesCurso->map(function ($solicitud) {
+            $detallesSolicitud = $solicitud->detallesSolicitud->first();
+            $plan = $detallesSolicitud->curso->cursoPlanes->first();
+            $solicitudRefactorized = collect([
+                'id' => $solicitud->id,
+                'fecha' => $solicitud->fecha,
+                'estado' => $solicitud->estado->nombre,
+                'id_detalle' => $detallesSolicitud->id,
+                'ciclo' => $detallesSolicitud->ciclo,
+                'carga' => $detallesSolicitud->carga,
+                'id_curso' => $detallesSolicitud->curso->id,
+                'sigla_curso' => $detallesSolicitud->curso->sigla,
+                'nombre_curso' => $detallesSolicitud->curso->nombre,
+                'fecha_plan' => $plan->fecha,
+            ]);
 
-        return response()->json($solicitudesCurso, 200);
+            return $solicitudRefactorized;
+        });
+
+        return response()->json($solicitudesCursoRefactorized, 200);
     }
 }
