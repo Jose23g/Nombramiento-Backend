@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,12 +12,10 @@ return new class extends Migration
     {
         Schema::create('detalle_aprobacion_cursos', function (Blueprint $table) {
             $table->id();
-            $table->string('ciclo');
-            $table->string('grupos');
-            $table->unsignedBigInteger('id_aprobacion');
-            $table->unsignedBigInteger('id_curso');
-            $table->foreign('id_aprobacion')->references('id')->on('aprobacion_solicitud_cursos');
-            $table->foreign('id_curso')->references('id')->on('cursos');
+            $table->unsignedBigInteger('id_detalle');
+            $table->unsignedBigInteger('id_solicitud');
+            $table->foreign('id_detalle')->references('id')->on('detalle_solicitudes');
+            $table->foreign('id_solicitud')->references('id')->on('aprobacion_solicitud_cursos');
             $table->timestamps();
         });
     }
