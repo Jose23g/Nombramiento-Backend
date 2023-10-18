@@ -54,7 +54,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('cambiar-estado', [DocenciaController::class, 'cambiarEstadoSolicitud']);
 
     });
-
+    
     Route::middleware('scope:Profesor')->group(function () {
 
     });
@@ -64,3 +64,4 @@ Route::middleware('auth:api')->group(function () {
 
     });
 });
+Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
