@@ -48,13 +48,15 @@ Route::middleware('auth:api')->prefix('usuario')->group(function(){
 
 
 Route::middleware('auth:api')->group(function () {
-    Route::middleware('scope:Docencia')->group(function () {
+    Route::middleware('scope:Docencia')->group(function () { // <- acciones que solo le corresponden al Docencia
+
         Route::post('solicitudfecha', [DocenciaController::class, 'Ver_Solicitud_curso_fecha']);
         Route::post('/establecer-plazo', [DocenciaController::class, 'fechaRecepcion']);
         Route::post('/comprobar', [DocenciaController::class, 'comprobarFechaRecepcion']);
         Route::get('vertodas', [DocenciaController::class, 'Listar_todas_solicitudes']);
         Route::get('fechas', [DocenciaController::class, 'Listar_fechas_solicitudes']);
         Route::post('cambiar-estado', [DocenciaController::class, 'cambiarEstadoSolicitud']);
+        
 
     });
 
@@ -79,3 +81,4 @@ Route::get('getcurse', [CursoController::class, 'obtengaPorPlanDeEstudio']);
 Route::get('getprof', [CarreraController::class, 'muestreLosProfesores']);
 Route::get('getsol', [SolicitudCursoController::class, 'muestreUnaSolicitud']);
 Route::get('getdet', [DetalleSolicitudController::class, 'muestreElDetalleDeLaSolicitud']);
+Route::get('metodo', [DocenciaController::class, 'metodo1']);
