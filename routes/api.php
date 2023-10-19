@@ -62,7 +62,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('solicitud', 'Solicitud_de_curso');
         Route::get('ultimasolicitud', 'ultimaSolicitud');
         Route::get('listado', 'obtengaElListadoDeSolicitudes');
-
+        
+        Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
             Route::get('getcurse', 'obtengaPorPlanDeEstudio');
@@ -73,7 +74,6 @@ Route::middleware('auth:api')->group(function () {
 
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
-Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
 Route::get('getprof', [CarreraController::class, 'muestreLosProfesores']);
 Route::get('getsol', [SolicitudCursoController::class, 'muestreUnaSolicitud']);
 Route::get('getdet', [DetalleSolicitudController::class, 'muestreElDetalleDeLaSolicitud']);
