@@ -62,18 +62,15 @@ Route::middleware('auth:api')->group(function () {
         Route::post('solicitud', 'Solicitud_de_curso');
         Route::get('ultimasolicitud', 'ultimaSolicitud');
         Route::get('listado', 'obtengaElListadoDeSolicitudes');
+
+        Route::controller(CursoController::class)->group(function () {
+            Route::post('addcurse', 'agregueUnCurso');
+            Route::get('getcurse', 'obtengaPorPlanDeEstudio');
+        });
     });
 });
 
-Route::controller(DocenciaController::class)->group(function () {
-    Route::get('fechas', 'Listar_fechas_solicitudes');
-    Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
-});
 
-Route::controller(CursoController::class)->group(function () {
-    Route::post('addcurse', 'agregueUnCurso');
-    Route::get('getcurse', 'obtengaPorPlanDeEstudio');
-});
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
 Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
