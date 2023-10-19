@@ -10,13 +10,10 @@ return new class() extends Migration {
      */
     public function up(): void
     {
-        Schema::create('plan_estudios', function (Blueprint $table) {
+        Schema::create('jornadas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_carrera');
-            $table->unsignedBigInteger('id_grado');
-            $table->date('fecha');
-            $table->foreign('id_carrera')->references('id')->on('carreras');
-            $table->foreign('id_grado')->references('id')->on('grados');
+            $table->string('sigla_jornada');
+            $table->string('horas_jornada');
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class() extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('plan_estudios');
+        Schema::dropIfExists('jornadas');
     }
 };
