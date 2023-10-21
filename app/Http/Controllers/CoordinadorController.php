@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\FechaSolicitud;
+use Exception;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Models\Curso;
 use Carbon\Carbon;
 use App\Models\SolicitudCurso;
 use App\Models\SolicitudGrupo;
@@ -100,7 +102,7 @@ class CoordinadorController extends Controller
                         ]);
 
                         ;
-                    } catch (Exeption $e) {
+                    } catch (Exception $e) {
                         DB::rollback();
                         return response()->json(['message' => $e->getMessage()], 422);
                     }
@@ -135,7 +137,7 @@ class CoordinadorController extends Controller
                         ]);
 
 
-                    } catch (Exeption $e) {
+                    } catch (Exception $e) {
                         DB::rollback();
                         return response()->json(['message' => $e->getMessage()], 422);
                     }
@@ -165,24 +167,12 @@ class CoordinadorController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'id_solicitud' /* ,
-   'anio' => 'required',
-   'semestre' => 'required',
-   'id_carrera' => 'required',
-   'fecha' => 'required|date',
-   'detalle_solicitud' => 'required|array|min:1',
-   'detalle_solicitud.*.id_curso' => 'required',
-   'detalle_solicitud.*.ciclo' => 'required',
-   'detalle_solicitud.*.recinto' => 'required',
-   'detalle_solicitud.*.carga' => 'required',
-   'detalle_solicitud.*.solicitud_grupo' => 'required|array|min:1',
-   'detalle_solicitud.*.solicitud_grupo.*.id_profesor' => 'required',
-   'detalle_solicitud.*.solicitud_grupo.*.grupo' => 'required',
-   'detalle_solicitud.*.solicitud_grupo.*.cupo' => 'required',
-   'detalle_solicitud.*.solicitud_grupo.*.horario' => 'required|array|min:1',
-   'detalle_solicitud.*.solicitud_grupo.*.horario.*.id_dia' => 'required',
-   'detalle_solicitud.*.solicitud_grupo.*.horario.*.entrada' => 'required',
-   'detalle_solicitud.*.solicitud_grupo.*.horario.*.salida' => 'required' */
+                'id_solicitud',
+                'anio' => 'required',
+                'semestre' => 'required',
+                'id_carrera' => 'required',
+                'fecha' => 'required|date',
+
             ],
         );
 
@@ -193,121 +183,263 @@ class CoordinadorController extends Controller
         $detallesrequest = $request->detalle_solicitud;
         $cursos_solicitud_anterior = Detallesolicitud::where('id_solicitud', $request->id_solicitud)->get();
 
-        if ($detallesrequest) {
+        try {
+            if ($detallesrequest) {
+                $historialcambiosnuevosdetalles = [];
+                $historialcambiosdetallesexistentes=[];
+                $historialcambiosdetalleseliminados=[];
+                $nuevos = [];
+                $detallexistente = [];
 
-            $nuevos = [];
-            $detallexistente = [];
+                foreach ($detallesrequest as $detallessolicitud) {
 
-            foreach ($detallesrequest as $detallessolicitud) {
+                    if (!array_key_exists("id", $detallessolicitud)) {
+                        // significa que este detalle es nuevo por ende se puede validar antes de tratar de ingresarlo
+                        $validator2 = Validator::make(
+                            $detallessolicitud,
+                            [
+                                'ciclo' => 'required',
+                                'grupos' => 'required',
+                                'recinto' => 'required',
+                                'carga' => 'required',
+                                'id_curso' => 'required|exists:cursos,id',
+                                'solicitud_grupo' => 'required|array|min:1',
+                                'solicitud_grupo.*.id_profesor' => 'required|exists:usuarios,id',
+                                'solicitud_grupo.*.grupo' => 'required',
+                                'solicitud_grupo.*.cupo' => 'required',
+                                'solicitud_grupo.*.horario' => 'required|array|min:1',
+                                'detalle_solicitud.*.solicitud_grupo.*.horario' => 'required|array|min:1',
+                                'solicitud_grupo.*.horario.*.id_dia' => 'required|exists:dia,id',
+                                'solicitud_grupo.*.horario.*.entrada' => 'required',
+                                'solicitud_grupo.*.horario.*.salida' => 'required'
+                            ],
+                            [
+                                'solicitud_grupo.required' => 'Se ha ingresado un curso sin grupos',
+                                'solicitud_grupo.array' => 'El campo solicitud de grupo debe ser un arreglo.',
+                                'solicitud_grupo.min' => 'Los cursos deben traer grupos asociados',
+                                'solicitud_grupo.*.grupo' => 'Cada grupo tiene que tener su numero',
+                                'solicitud_grupo.*.id_profesor.exists' => 'Error al señalar profesor',
+                                'solicitud_grupo.*.cupo' => 'El cupo es requerido para cada grupo',
+                                'detalle_solicitud.*.solicitud_grupo.*.horario.required' => 'El horario es requerido',
+                                'detalle_solicitud.*.solicitud_grupo.*.horario.min' => 'El horario no trae dias'
+                            ]
+                        );
+                        if ($validator2->fails()) {
+                            // puedo generar un error general o uno especifico
+                            return response()->json(['message' => $validator2->errors()], 400);
+                        } else {
 
-                if (!array_key_exists("id", $detallessolicitud)) {
+                            $nuevos[] = $detallessolicitud; // quiere decir que el detalle es nuevo.
+                        }
+                    } else {
+                        $validarcursoexistente = Validator::make(
+                            $detallessolicitud,
+                            [
+                                'id' => 'required|exists:detalle_solicitudes,id',
+                                'ciclo' => 'required',
+                                'grupos' => 'required',
+                                'recinto' => 'required',
+                                'carga' => 'required',
+                                'id_curso' => 'required|exists:cursos,id',
+                                'solicitud_grupo' => 'required|array|min:1',
+                                'solicitud_grupo.*.id_profesor' => 'required|exists:usuarios,id',
+                                'solicitud_grupo.*.grupo' => 'required',
+                                'solicitud_grupo.*.cupo' => 'required',
+                                'solicitud_grupo.*.horario' => 'required|array|min:1',
+                                'detalle_solicitud.*.solicitud_grupo.*.horario' => 'required|array|min:1',
+                                'solicitud_grupo.*.horario.*.id_dia' => 'required|exists:dia,id',
+                                'solicitud_grupo.*.horario.*.entrada' => 'required',
+                                'solicitud_grupo.*.horario.*.salida' => 'required'
+                            ],
+                            [
+                                'id.required' => 'Revise los detalles adjuntados',
+                                'id.exists' => 'Error detalles invalidos',
+                                'solicitud_grupo.required' => 'Se ha ingresado un curso sin grupos',
+                                'solicitud_grupo.array' => 'El campo solicitud de grupo debe ser un arreglo.',
+                                'solicitud_grupo.min' => 'Los cursos deben traer grupos asociados',
+                                'solicitud_grupo.*.grupo' => 'Cada grupo tiene que tener su numero',
+                                'solicitud_grupo.*.id_profesor.exists' => 'Error al señalar profesor',
+                                'solicitud_grupo.*.cupo' => 'El cupo es requerido para cada grupo',
+                                'detalle_solicitud.*.solicitud_grupo.*.horario.required' => 'El horario es requerido',
+                                'detalle_solicitud.*.solicitud_grupo.*.horario.min' => 'El horario no trae dias'
+                            ]
+                        );
+                        if ($validarcursoexistente->fails()) {
+                            // puedo generar un error general o uno especifico
+                            return response()->json(['message' => $validarcursoexistente->errors()], 400);
+                        } else {
 
-                    $nuevos[] = $detallessolicitud; // quiere decir que el detalle es nuevo.
+                            $detallexistente[] = $detallessolicitud; // quiere decir que el detalle es nuevo.
+                        }
 
-                } else {
-                    $detallexistente[] = $detallessolicitud; // quiere decir que el detalle ya está dentro de la bd
-
-                }
-            }
-            $nuevalistacursos = $detallexistente;
-
-            // iniciamos el bloque try 
-
-            // si vienen que ya estaban en la bd
-            if ($nuevalistacursos) {
-                
-                foreach ($cursos_solicitud_anterior as $cursoanterior) {
-
-                    if (!in_array($cursoanterior->id, array_column($nuevalistacursos, 'id'), true)) {
-
-                        $this->Eliminaciones_editar_solicitud($cursoanterior->id, 1); // si no esta el curso manda a borrarlo a la base de datos
                     }
+                }
+                // si vienen crusos nuevos se agregan diurectamente a la base de datos
+                if ($nuevos) {
+                    
+                    try {
+                        echo ('vienen nuevos los agregamos');
+                        $agregarnuevodetalle = $this->Ingresar_nuevos_detalle($nuevos, $request->id_solicitud);
+                        $historialcambiosnuevosdetalles [] = $agregarnuevodetalle;
 
-                    //buscamos los grupos asociados al curso anterior
-                    $grupos_cruso_anterior = SolicitudGrupo::where('id_detalle', $cursoanterior->id)->get();
+                    } catch (Exception $e) {
+                        return response(['error' => $e->getMessage()], 400);
+                    }
+                }
 
-                    // se procede a verificar la existencia de un detalle que coincideda con el anterior de la base de datos
-                    $detallenuevo = current(array_filter($nuevalistacursos, fn($detalle) => $detalle['id'] == $cursoanterior->id));
-                    // quiere decir debido a que este detalle esta dentro de la bd y dentro de la nueva lista entonces vamos a compararlos a ver que pedo
-                    if ($detallenuevo) {
+                $nuevalistacursos = $detallexistente;
 
-                        //actualizamos los datos de ser cambiados del detalle actual en la base de datos acorbde a lo que viene
-                        $detalleactualizar = Detallesolicitud::find($cursoanterior->id);
-                        $detalleactualizar->grupos = $detallenuevo['grupos'];
-                        $detalleactualizar->carga = $detallenuevo['carga'];
-                        $detalleactualizar->recinto = $detallenuevo['recinto'];
-                        $detalleactualizar->save();
+                // iniciamos el bloque try 
+                // si vienen que ya estaban en la bd
+                if ($nuevalistacursos) {
 
-                        $gruposnuevos = []; // va almacenaar los grupos nuevos que vienen del request  para un detalle que existe en la bd
-                        $grupoexistente = []; //va almacenaar los modificados para un detalle que existe en la bd
-                        // Recorremos todos los grupos que viene del request para almacenarlos en su arreglo debido
-                        foreach ($detallenuevo['solicitud_grupo'] as $gruposrequest) {
+                    foreach ($cursos_solicitud_anterior as $cursoanterior) {
 
-                            if (!array_key_exists('id', $gruposrequest)) {
-                                $gruposnuevos[] = $gruposrequest; // quiere decir que tiene grupos nuevos que deben ingresarse a la bd
-                            } else {
-                                $grupoexistente[] = $gruposrequest; // quiere decir que estos vienen para actualizar
+                        if (!in_array($cursoanterior->id, array_column($nuevalistacursos, 'id'), true)) {
+
+                            try {
+
+                                $eliminardetalle = $this->Eliminaciones_editar_solicitud($cursoanterior->id, 1); // si no esta el curso manda a borrarlo a la base de datos 
+                                // Ingresar al registro de acciones
+                                $historialcambiosdetalleseliminados[] = $eliminardetalle;
+
+                            } catch (Exception $e) {
+                                return response()->json(['error' => $e->getMessage()], 400);
                             }
-                        }
 
-                        if ($gruposnuevos) {
-                            $this->Añadir_grupo($cursoanterior->id, $gruposnuevos);
-                        }
+                        } else { //sabemos que si existe y viene dentro del nuevo request
+                            $cursodetalle = Curso::where('id', $cursoanterior->id_curso)->first();
+                            $grupos_cruso_anterior = SolicitudGrupo::where('id_detalle', $cursoanterior->id)->get();
+                            $historialcambiosdetalle = [];
+                            // se procede a verificar la existencia de un detalle que coincideda con el anterior de la base de datos
+                            $detallenuevo = current(array_filter($nuevalistacursos, fn($detalle) => $detalle['id'] == $cursoanterior->id));
+                            // quiere decir debido a que este detalle esta dentro de la bd y dentro de la nueva lista entonces vamos a compararlos a ver que pedo
+                            if ($detallenuevo) {
 
-                        foreach ($grupos_cruso_anterior as $grupo) {
-                            // verificamos si el grupo que esta en la base de datos no viene de la nueva lista de grupos asociados a un detalle para namdarlo a eliminar
-                            if (!in_array($grupo->id, array_column($grupoexistente, 'id'), true)) {
-                                // como no viene llamamos al metoso eliminar y le mandamos el id_referencia de grupo y la acion 2 que elimina grupo y horario de la base de datos
-                                $this->Eliminaciones_editar_solicitud($grupo->id, 2);
-                            } else {
-                                // como si viene el grupo se procede a editar en base a lo que viene de la bd
+                                //actualizamos los datos de ser cambiados del detalle actual en la base de datos acorbde a lo que viene
+                                $detalleactualizar = Detallesolicitud::find($cursoanterior->id);
+                                $detalleactualizar->grupos = $detallenuevo['grupos'];
+                                $detalleactualizar->carga = $detallenuevo['carga'];
+                                $detalleactualizar->recinto = $detallenuevo['recinto'];
+                                $detalleactualizar->save();
 
-                                $grupoaeditar = current(array_filter($grupoexistente, fn($grupoe) => $grupoe['id'] == $grupo->id)); // busco el grupo a editar en el request
+                                $gruposnuevos = []; // va almacenaar los grupos nuevos que vienen del request  para un detalle que existe en la bd
+                                $grupoexistente = []; //va almacenaar los modificados para un detalle que existe en la bd
+                                // Recorremos todos los grupos que viene del request para almacenarlos en su arreglo debido
+                                foreach ($detallenuevo['solicitud_grupo'] as $gruposrequest) {
 
-                                if ($grupoaeditar) { // if solo para validarsh
-                                    $this->Actualizar_grupo($grupo->id, $grupoaeditar);
+                                    if (!array_key_exists('id', $gruposrequest)) {
+                                        $gruposnuevos[] = $gruposrequest; // quiere decir que tiene grupos nuevos que deben ingresarse a la bd
+                                    } else {
+                                        $grupoexistente[] = $gruposrequest; // quiere decir que estos vienen para actualizar
+                                    }
+                                }
+
+                                if ($gruposnuevos) {
+
+                                    try {
+                                        $nuevogrupo = $this->Añadir_grupo($cursoanterior->id, $gruposnuevos); // añadimos a los grupos nuevos del detalle
+                                        // Ingresar al registro de acciones
+                                        $historialcambiosdetalle [] = $nuevogrupo;
+                                    } catch (Exception $e) {
+                                        return response()->json(['error' => $e->getMessage()], 400);
+                                    }
+
+                                }
+
+                                foreach ($grupos_cruso_anterior as $grupo) {
+                                    // verificamos si el grupo que esta en la base de datos no viene de la nueva lista de grupos asociados a un detalle para namdarlo a eliminar
+                                    if (!in_array($grupo->id, array_column($grupoexistente, 'id'), true)) {
+                                        // como no viene llamamos al metoso eliminar y le mandamos el id_referencia de grupo y la acion 2 que elimina grupo y horario de la base de datos
+                                        try {
+
+                                            $grupoeliminar = $this->Eliminaciones_editar_solicitud($grupo->id, 2);
+
+                                            //ingresar al registro de acciones
+                                            $historialcambiosdetalle [] = $grupoeliminar;
+                                        } catch (Exception $e) {
+                                            return response()->json(['error' => $e->getMessage()], 400);
+                                        }
+
+                                    } else {
+                                        // como si viene el grupo se procede a editar en base a lo que viene de la bd
+                                        $grupoaeditar = current(array_filter($grupoexistente, fn($grupoe) => $grupoe['id'] == $grupo->id)); // busco el grupo a editar en el request
+
+                                        if ($grupoaeditar) { // if solo para validarsh
+                                            try {
+
+                                                $grupoactualizar = $this->Actualizar_grupo($grupo->id, $grupoaeditar); // manda a actualizar segun venga el metodo
+                                                $historialcambiosdetalle [] = $grupoactualizar;
+                                            } catch (Exception $e) {
+                                                return response()->json(['error' => $e->getMessage()], 400);
+                                            }
+
+                                        }
+                                    }
+
                                 }
                             }
 
+                             $cambioshechosaldetalle=[
+                                'curso' => $cursodetalle->nombre,
+                                'cambios realizados' => $historialcambiosdetalle
+                             ];
+                             //agrego los cambios del detalle al historial general
+                             $historialcambiosdetallesexistentes[] = $cambioshechosaldetalle;
+                        }
+                    }
+
+                } else { // si no viene cursos ya existentes dentro de la bd se mandan a eliminar
+                    foreach ($cursos_solicitud_anterior as $detalleeliminar) {
+                        
+                        try{
+
+                            $eliminardetallebd =$this->Eliminaciones_editar_solicitud($detalleeliminar->id, 1);
+                            $historialcambiosdetalleseliminados[]= $eliminardetallebd;
+
+                        }catch(Exception $e) {
+                            return response()->json(['error' => $e->getMessage()], 400);
                         }
                     }
                 }
+                
+                //retorno la respuesta con todo el resumen realizado 
 
-            } else {
-                foreach ($cursos_solicitud_anterior as $detalleeliminar) {
-                    $this->Eliminaciones_editar_solicitud($detalleeliminar->id, 1);
+            } else { // Si no viene una lista de cursos en la base de datos se elimina toda la solicitud
+
+                try {
+                    // eliminamos todos los registros de los detalles
+                    foreach ($cursos_solicitud_anterior as $detalleeliminar) {
+                        $this->Eliminaciones_editar_solicitud($detalleeliminar->id, 1);
+                    }
+                    // Ahora eliminamos la solicitud ya que al estar vacía no tiene sentido tenerla sin nada
+
+                    SolicitudCurso::where('id', $request->id_solicitud)->delete();
+
+                    return response()->json(['message' => 'Se han eliminado los datos y la solicitud'], 200);
+
+                } catch (Exception $e) {
+                    return response()->json(['error' => $e->getMessage()], 422);
                 }
             }
 
-            // si vienen crusos nuevos se agregan
-            if ($nuevos) {
-                echo ('vienen nuevos los agregamos');
-                $this->Ingresar_nuevos_detalle($nuevos, $request->id_solicitud);
-            }
+            //retorno de estado del metodo
+            return response()->json(['la solicitud ha sido procesada',
+             'Cursos agregados' => $historialcambiosnuevosdetalles,
+             'Cursos actualizados' =>$historialcambiosdetallesexistentes,
+             'Cursos eliminados'=>$historialcambiosdetalleseliminados], 200);
 
-        } else {
-            try {
-                // eliminamos todos los registros de los detalles
-                foreach ($cursos_solicitud_anterior as $detalleeliminar) {
-                    $this->Eliminaciones_editar_solicitud($detalleeliminar->id, 1);
-                }
-                // Ahora eliminamos la solicitud ya que al estar vacía no tiene sentido tenerla sin nada
-
-                SolicitudCurso::where('id', $request->id_solicitud)->delete();
-
-                return response()->json(['message' => 'Se han eliminado los datos y la solicitud'], 200);
-
-            } catch (Exception $e) {
-                return response()->json(['error' => $e->getMessage()], 422);
-            }
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         }
+
     }
 
     public function Ingresar_nuevos_detalle($listadetallesnueva, $id_solicitud)
     {
 
         try {
-
+            $detallesagregrados = [];
             foreach ($listadetallesnueva as $deta) {
 
                 //creamos el nuevo detalle segun los nuevos detalles del request
@@ -319,8 +451,7 @@ class CoordinadorController extends Controller
                     'id_solicitud' => $id_solicitud,
                     'id_curso' => $deta['id_curso'],
                 ]);
-
-
+                $nombrecurso = Curso::where('id', $deta['id_curso'])->first();
 
                 // ahora recorremos el arreglo de los grupos del detalle
                 foreach ($deta['solicitud_grupo'] as $nuevogrupo) {
@@ -349,9 +480,13 @@ class CoordinadorController extends Controller
                     ]);
 
                 }
+                $detallesagregrados[] = $nombrecurso->nombre;
+
             }
-        } catch (Execption $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
+            return ([' Se agregaron los cursos ' =>  $detallesagregrados]);
+
+        } catch (Exception $e) {
+            throw $e;
         }
 
     }
@@ -363,21 +498,26 @@ class CoordinadorController extends Controller
 
                 case 1: // Case para eliminar curso,grupo,horarios y dia
                     try {
+
                         $grupos = SolicitudGrupo::where('id_detalle', $id_detalle)->get();
+                        $buscardetalle = DetalleSolicitud::where('id', $id_detalle)->first();
+                        $cursoeliminado = Curso::where('id', $buscardetalle->id_curso)->first();
 
                         foreach ($grupos as $grupo) {
                             // almacenamos el id horario antes de eliminar el grupo
                             $id_horario = $grupo->id_horario;
-
                             SolicitudGrupo::where('id', $grupo->id)->delete();
-                            DetalleSolicitud::where('id', $id_detalle)->delete();
-
                             // una vez eliminado el grupo eliminamos los dias y el horario asignado al grupo
                             Dias::where('id_horario', '=', $id_horario)->delete(); // Elimina los dias del horario
                             Horario::where('id', $id_horario)->delete(); // Elimina el horario asociado al grupo
                         }
+
+                        DetalleSolicitud::where('id', $id_detalle)->delete();
+
+                        return ([' se ha eliminado el curso ' =>  $cursoeliminado->nombre]);
+
                     } catch (Exception $e) {
-                        return response()->json(['Message' => $e->getMessage()], 500);
+                        throw $e;
                     }
 
                     break;
@@ -385,16 +525,16 @@ class CoordinadorController extends Controller
                 case 2:
 
                     try {
-                        // almacena el id del horario para eliminar dias y horario respectivo
-                        $grupoeliminar = SolicitudGrupo::Where('id', $id_detalle)->select('id_horario')->first();
+
+                        $grupoeliminar = SolicitudGrupo::Where('id', $id_detalle)->first();
                         SolicitudGrupo::Where('id', $id_detalle)->delete();
                         Dias::Where('id_horario', $grupoeliminar->id_horario)->delete();
                         Horario::Where('id', $grupoeliminar->id_horario)->delete();
 
-                        echo ('eliminamos de la bd' . $id_detalle);
+                        return ([' se ha eliminado el grupo ' =>  $grupoeliminar->grupo]);
 
                     } catch (Exception $e) {
-                        return response()->json(['Message' => $e->getMessage()], 500);
+                        throw $e;
                     }
 
                     break;
@@ -413,6 +553,10 @@ class CoordinadorController extends Controller
     {
 
         try {
+
+            $idcurso = DetalleSolicitud::find($id_detalle);
+            $nombrecurso = Curso::where('id', $idcurso->id_curso)->first();
+
             foreach ($grupo as $nuevogrupo) {
 
                 //por orben de las relaciones primero hacemos el horario
@@ -438,10 +582,9 @@ class CoordinadorController extends Controller
                     'id_horario' => $nuevohorario->id
                 ]);
             }
-            echo ('Agregamos a la bd' . $nuevogrupo->grupo);
-
+            return ([' se añadio el grupo ' =>  $nuevogrupo->grupo]);
         } catch (Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            throw $e;
         }
 
     }
@@ -468,11 +611,13 @@ class CoordinadorController extends Controller
                 ]);
             }
             $grupoeditar->save();
+            return ([' se actualizo el grupo ' => $grupoeditar->grupo]);
 
         } catch (Exception $e) {
 
-            return response()->json(['message' => $e->getMessage()], 422);
+            throw $e;
 
         }
     }
+
 }
