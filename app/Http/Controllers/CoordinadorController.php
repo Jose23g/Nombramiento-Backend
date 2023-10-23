@@ -172,7 +172,7 @@ class CoordinadorController extends Controller
     public function obtengaElListadoDeSolicitudes(Request $request)
     {
         $usuario = $request->user();
-        $solicitudesCurso = $usuario->solicitudesCurso()->with(['detallesSolicitud', 'detallesSolicitud.curso.cursoPlanes', 'estado'])->orderBy('created_at', 'desc')->get();
+        $solicitudesCurso = $usuario->solicitudesCurso()->with(['detallesSolicitud', 'detallesSolicitud.curso.cursoPlanes', 'estado', 'carrera'])->orderBy('created_at', 'desc')->get();
         $solicitudesCursoRefactorized = $solicitudesCurso->map(function ($solicitud) {
             $detallesSolicitud = $solicitud->detallesSolicitud->first();
             $plan = $detallesSolicitud->curso->cursoPlanes->first();
@@ -187,6 +187,7 @@ class CoordinadorController extends Controller
                 'sigla_curso' => $detallesSolicitud->curso->sigla,
                 'nombre_curso' => $detallesSolicitud->curso->nombre,
                 'fecha_plan' => $plan->fecha,
+                'carrera' => $solicitud->carrera->nombre,
             ]);
 
             return $solicitudRefactorized;
