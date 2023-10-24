@@ -28,8 +28,4 @@ class Carrera extends Model
     {
         return $this->hasMany(UsuarioCarrera::class, 'id_carrera');
     }
-    public function carreraUsuarios()
-    {
-        return $this->hasManyThrough(Usuario::class, UsuarioCarrera::class, 'id_carrera', 'id', 'id', 'id_coordinador');
-    }
 }

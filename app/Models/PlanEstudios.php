@@ -25,8 +25,4 @@ class PlanEstudios extends Model
     {
         return $this->hasMany(CursoPlan::class, 'id_plan');
     }
-    public function planCursos()
-    {
-        return $this->hasManyThrough(Curso::class, CursoPlan::class, 'id_plan', 'id', 'id', 'id_curso');
-    }
 }

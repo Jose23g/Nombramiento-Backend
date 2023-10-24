@@ -2,22 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AprobacionSolicitudCurso;
-use App\Models\DetalleAprobacionCurso;
-use App\Models\DetalleSolicitud;
 use App\Models\Estado;
 use App\Models\FechaSolicitud;
-use App\Models\GrupoAprobado;
 use App\Models\SolicitudCurso;
 use App\Models\Persona;
-use App\Models\SolicitudGrupo;
 use App\Models\Usuario;
 use App\Models\Carrera;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class DocenciaController extends Controller
 {
@@ -45,14 +39,6 @@ class DocenciaController extends Controller
             if ($validator->fails()) {
                 return response()->json(['error' => $validator->errors()], 400);
             }
-
-            $solicitud_existente = FechaSolicitud::where('anio', $request->anio)->where('semestre', $request->semestre)->first();
-
-
-            if ($solicitud_existente) {
-                return response()->json(['Errormessage' => 'Ya se ha establecido una fecha para año y semestre solicitado please try again'], 400);
-            }
-
             FechaSolicitud::create([
                 'nombre' => $request->input('nombre'),
                 'anio' => $request->input('anio'),
@@ -60,7 +46,7 @@ class DocenciaController extends Controller
                 'fecha_inicio' => $request->input('fecha_inicio'),
                 'fecha_fin' => $request->input('fecha_fin'),
             ]);
-            return response()->json(['message' => 'Plazo para la recepción de solicutudes de cursos establecida'], 200);
+            return response()->json(['message' => 'Plazo para la recepción de solicutudes de cursos establecida']);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -80,13 +66,15 @@ class DocenciaController extends Controller
 
     public function Listar_fechas_solicitudes(Request $request)
     {
+
         try {
             $todasfechas = FechaSolicitud::all();
+
             if (!$todasfechas) {
-                return response()->json(['message' => 'No hay fechas registradas'], 400);
+                return response()->json(['message' => 'No hay fechas registradas'], 500);
             }
 
-            return response()->json(['Fechas_de_Solictud' => $todasfechas]);
+            return response()->json(['Fechas de Solictud' => $todasfechas]);
 
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -94,7 +82,6 @@ class DocenciaController extends Controller
 
     }
 
-    //Obtiene una lista de solicitudes para un lapso establecido de recepción
     public function Ver_Solicitud_curso_fecha(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -129,153 +116,79 @@ class DocenciaController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-
+        
     }
-
-    //Obtiene todas las solicitudes realizadas
-    public function Listar_todas_solicitudes(Request $request)
-    {
+       public function Listar_todas_solicitudes(Request $request ){
         $solicitudcompleta = [];
-
-        try {
+       
+        try{
             $solicitudcursos = SolicitudCurso::all();
 
-            if ($solicitudcursos == null) {
+            if($solicitudcursos== null){
                 return response()->json(['Message' => 'No hay solicitudes de cursos'], 200);
             }
 
-            foreach ($solicitudcursos as $solicitud) {
-                $nombrecarrera = Carrera::where('id', $solicitud->id_carrera)->select('nombre')->first();
-                $usuario = Usuario::where('id', $solicitud->id_coordinador)->first();
-                $nombrepersona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
-                $estado = Estado::where('id', $solicitud->id_estado)->select('nombre')->first();
-                $solicitud->fecha = Carbon::parse($solicitud->fecha)->format('Y-m-d');
-
-                $solicitudarreglo = [
-                    'id' => $solicitud->id,
+            foreach($solicitudcursos as $solicitud){
+              $nombrecarrera = Carrera::where('id', $solicitud->id_carrera )->select('nombre')->first();
+              $usuario = Usuario::where('id', $solicitud->id_coordinador)->first();
+              $nombrepersona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
+              $estado = Estado::where('id', $solicitud->id_estado)->select('nombre')->first();
+            
+              $solicitudarreglo = [
+                    'id'=> $solicitud->id,
                     'fecha' => $solicitud->fecha,
-                    'semestre' => $solicitud->semestre,
-                    'carrera' => $nombrecarrera->nombre,
-                    'coordinador' => $nombrepersona->nombre,
-                    'estado' => $estado->nombre
-                ];
+                    'semestre'=> $solicitud->semestre,
+                    'carrera' =>$nombrecarrera->nombre,
+                    'coordinador'=> $nombrepersona->nombre,
+                    'estado' => $estado->nombre];
 
                 $detalles[] = $solicitudarreglo;
-
+                
             }
 
-            return response()->json(['Solicitudes_de_curso' => $detalles], 200);
+            return response()->json(['Solicitudes de curso' => $detalles], 200);
 
-        } catch (Exception $e) {
+        }catch(Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);
         }
+            
+
+            
+        }
+    
 
 
-
-    }
-
-    //Cambia estado de una solicitud, o sea (ACEPTADA/RECHADA) 
     public function cambiarEstadoSolicitud(Request $request)
-    {
-        try {
-            $idSolicitud = $request->input('id_solicitud');
-            $estadoNombre = $request->input('estado');
-            $observacion = $request->input('observacion');
+{
+    try {
+        $idSolicitud = $request->input('id_solicitud');
+        $estadoNombre = $request->input('estado');
+        $observacion = $request->input('observacion');
 
-            $solicitudCurso = SolicitudCurso::where('id', $idSolicitud)->first();
-            $estado = Estado::where('nombre', $estadoNombre)->first();
+        $solicitudCurso = SolicitudCurso::where('id', $idSolicitud)->first();
+        $estado = Estado::where('nombre', $estadoNombre)->first();
 
-            if (!$solicitudCurso) {
-                return response()->json(['errorMesage' => 'La solicitud no se encontró en la base de datos'], 400);
-            }
-
-            if (!$estado) {
-                return response()->json(['errorMesage' => 'El estado no se encontró en la base de datos'], 400);
-            }
-
-            $validator = Validator::make($request->all(), [
-                'obervacion' => Rule::requiredIf($estadoNombre == 'Rechazado'),
-            ], [
-                'observacion.required' => 'Si usted rechazó la solicitud, es obligatorio poner una observación del por qué'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['errorMesage' => $validator->errors()], 400);
-            }
-
-            $result = [];
-            if ($estadoNombre == 'Aceptado') {
-                $solicitudCurso->id_estado = $estado->id;
-                $solicitudCurso->save();
-                $this->aprobarUnaSolicitud($solicitudCurso, $request->user()->id, $result);
-
-                return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud', 'result' => $result], 200);
-            } else {
-                $solicitudCurso->id_estado = $estado->id;
-                $solicitudCurso->observacion = $observacion;
-                $solicitudCurso->save();
-                return response()->json(['success' => true, 'message' => 'Se ha rechazado la solicitud'], 200);
-            }
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (!$solicitudCurso) {
+            return response()->json(['error' => 'La solicitud no se encontró en la base de datos'], 404);
         }
-    }
 
-    //Cuando se acepta una solicitud se asocia a un encargado y a un registro de aceptacion
-    public function aprobarUnaSolicitud($solicitud, $idEncargado, &$result)
-    {
-        $solicitudAprobada = AprobacionSolicitudCurso::create([
-            'id_solicitud' => $solicitud->id,
-            'id_encargado' => $idEncargado,
-
-        ]);
-        $cursosaceptados = $this->aprobarUnCursoDeUnaSolicitud($solicitudAprobada, $solicitud);
-        $result[] = [
-            'solicitudAprobada' => $solicitudAprobada,
-            'cursosaceptados' => $cursosaceptados
-        ];
-    }
-
-    //Sirve para aprobar un curso de una solicitud
-    public function aprobarUnCursoDeUnaSolicitud($solcitudAprobada, $solicitud)
-    {
-        $cursoaceptados = [];
-        $detalleCurso = DetalleSolicitud::where('id_solicitud', $solicitud->id)->get();
-
-        //para un curso
-        foreach ($detalleCurso as $curso) {
-            $cursoaceptado = DetalleAprobacionCurso::create([
-                'id_solicitud' => $solcitudAprobada->id,
-                //Id de la solicitud aprobada
-                'id_detalle' => $curso->id,
-                //Id de los cursos que estan en la solicitud
-
-            ]);
-
-            $grupoaceptados = $this->aprobarGruposParaUnaSolicitud($cursoaceptado, $curso);
-            $cursoaceptados[] = [
-                'cursoaceptado' => $cursoaceptado,
-                'grupoaceptado' => $grupoaceptados,
-            ];
+        if (!$estado) {
+            return response()->json(['error' => 'El estado no se encontró en la base de datos'], 404);
         }
-        return $cursoaceptados;
-    }
 
-    //Sirve para aprobar los grupos dentro de un curso para una solicitud
-    public function aprobarGruposParaUnaSolicitud($cursoaceptado, $curso)
-    {
-        $grupoaceptados = [];
-        $cursogrupo = SolicitudGrupo::where('id_detalle', $curso->id)->get();
-        foreach ($cursogrupo as $grupo) {
-            $grupoAceptado = GrupoAprobado::create([
-                'id_detalle' => $cursoaceptado->id,
-                //id del curso que aceptaron
-                'id_solicitud' => $grupo->id,
-                //id del grupo que estan en la solicitud
-            ]);
-            $grupoaceptados[] = ['grupoaceptado' => $grupoAceptado];
-            $grupoaceptados = array_merge($grupoaceptados, $this->aprobarGruposParaUnaSolicitud($grupoAceptado, $grupo));
+        if ($estadoNombre == 'Aceptado') {
+            $solicitudCurso->id_estado = $estado->id;
+            $solicitudCurso->save();
+            return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud'], 200);
+        } else {
+            $solicitudCurso->id_estado = $estado->id;
+            $solicitudCurso->observacion = $observacion;
+            $solicitudCurso->save();
+            return response()->json(['success' => true, 'message' => 'Se ha rechazado la solicitud'], 200);
         }
-        return $grupoaceptados;
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
+
 }
