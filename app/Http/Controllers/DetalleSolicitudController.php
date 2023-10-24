@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Carrera;
+use App\Models\DetalleSolicitud;
 use Illuminate\Support\Facades\Validator;
 
-class CarreraController extends Controller
+class DetalleSolicitudController extends Controller
 {
-    public function muestreLosProfesores(Request $request)
-    {
+    public function muestreElDetalleDeLaSolicitud(Request $request){
         $validator =
             Validator::make($request->all(), ['id' => 'required'], [
                 'required' => 'El campo :attribute es requerido.',
@@ -18,6 +17,6 @@ class CarreraController extends Controller
             return response()->json(['message' => $validator->errors()], 422);
         }
         $validatedData = $validator->validated();
-        return Carrera::find($validatedData['id'])->carreraUsuarios;
+        return DetalleSolicitud::where('id_solicitud',$validatedData['id'])->with('curso')->with('solicitudCurso')->first();
     }
 }

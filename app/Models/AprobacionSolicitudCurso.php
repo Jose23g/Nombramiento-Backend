@@ -10,6 +10,11 @@ class AprobacionSolicitudCurso extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'aprobacion_solicitud_cursos';
+    protected $fillable = [
+        'id_solicitud',
+        'id_encargado',
+    ];
+
     // Relación muchos a uno con SolicitudCurso
     public function solicitudCurso()
     {
