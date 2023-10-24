@@ -193,6 +193,6 @@ class CoordinadorController extends Controller
             return $solicitudRefactorized;
         });
 
-        return response()->json($solicitudesCursoRefactorized, 200);
+        return response()->json($solicitudesCursoRefactorized, 201);
     }
 }
