@@ -77,6 +77,4 @@ Route::get('getprof', [CarreraController::class, 'muestreLosProfesores']);
 Route::get('getsol', [SolicitudCursoController::class, 'muestreUnaSolicitud']);
 Route::get('getdet', [DetalleSolicitudController::class, 'muestreElDetalleDeLaSolicitud']);
 
-    });
-});
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
