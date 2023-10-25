@@ -10,4 +10,9 @@ class Grado extends Model
     use HasFactory;
     protected $table = 'grados';
     protected $guarded = [];
+
+    public function planEstudios(): HasMany
+    {
+        return $this->hasMany(PlanEstudios::class, 'grado_id', 'id');
+    }
 }

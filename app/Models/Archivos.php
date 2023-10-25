@@ -11,4 +11,9 @@ class Archivos extends Model
     protected $table = 'archivos';
     protected $guarded = [];
     public $timestamps = false;
+
+    public function persona(): BelongsTo
+    {
+        return $this->belongsTo(Persona::class, 'persona_id', 'id');
+    }
 }

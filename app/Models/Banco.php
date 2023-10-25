@@ -11,4 +11,9 @@ class Banco extends Model
     protected $table = 'bancos';
 
     protected $guarded = [];
+
+    public function persona(): HasMany
+    {
+        return $this->hasMany(Persona::class, 'banco_id', 'id');
+    }
 }

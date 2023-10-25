@@ -10,4 +10,14 @@ class Dias extends Model
     use HasFactory;
     protected $table = 'dias';
     protected $guarded = [];
+
+    public function horarioGrupos(): HasMany
+    {
+        return $this->hasMany(HorariosGrupo::class, 'dia_id', 'id');
+    }
+
+    public function horarioTrabajo(): HasMany
+    {
+        return $this->hasMany(HorariosTrabajo::class, 'dia_id', 'id');
+    }
 }

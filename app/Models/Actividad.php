@@ -13,6 +13,16 @@ class Actividad extends Model
 
     public function carga(): BelongsTo
     {
-        return $this->belongsTo(Carga::class, 'id', 'carga_id');
+        return $this->belongsTo(Carga::class, 'carga_id', 'id');
+    }
+
+    public function estado(): BelongsTo
+    {
+        return $this->belongsTo(Estado::class, 'estado_id', 'id');
+    }
+
+    public function pSeis(): BelongsTo
+    {
+        return $this->belongsTo(PSeis::class, 'p_seis_id', 'id');
     }
 }

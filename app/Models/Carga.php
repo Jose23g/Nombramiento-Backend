@@ -15,4 +15,14 @@ class Carga extends Model
     {
         return $this->hasMany(Actividades::class, 'carga_id', 'id');
     }
+
+    public function solicitudGrupos(): HasMany
+    {
+        return $this->hasMany(SolicitudGrupo::class, 'carga_id', 'id');
+    }
+
+    public function cursos(): HasMany
+    {
+        return $this->hasMany(Curso::class, 'carga_id', 'id');
+    }
 }

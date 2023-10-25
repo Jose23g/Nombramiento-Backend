@@ -10,4 +10,14 @@ class Provincia extends Model
     use HasFactory;
     protected $table = 'provincias';
     protected $guarded = [];
+
+    public function cantones(): HasMany
+    {
+        return $this->hasMany(Canton::class, 'provincia_id', 'id');
+    }
+
+    public function personas(): HasMany
+    {
+        return $this->hasMany(Persona::class, 'provincia_id', 'id');
+    }
 }
