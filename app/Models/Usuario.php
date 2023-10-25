@@ -5,21 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 
 class Usuario extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $guarded = [];
-
     public $timestamps = false;
 
     protected $table = 'usuarios';
+    protected $password = 'contrasena';
 
     protected $fillable = [
         'usuario',
@@ -29,7 +30,6 @@ class Usuario extends Authenticatable
         'correo',
         'imagen',
     ];
-
 
     protected $hidden = [
         'contrasena',
@@ -43,7 +43,6 @@ class Usuario extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'contrasena' => 'hashed',
     ];
 
     public function rol()
@@ -56,4 +55,18 @@ class Usuario extends Authenticatable
         return $this->belongsTo(Persona::class, 'id_persona');
     }
 
+    public function carreras()
+    {
+        return $this->hasMany(UsuarioCarrera::class, 'id_coordinador');
+    }
+
+    public function usuarioCarreras()
+    {
+        return $this->hasManyThrough(Carrera::class, UsuarioCarrera::class, 'id_coordinador', 'id', 'id', 'id_carrera');
+    }
+
+    public function solicitudesCurso()
+    {
+        return $this->hasMany(SolicitudCurso::class, 'id_coordinador');
+    }
 }

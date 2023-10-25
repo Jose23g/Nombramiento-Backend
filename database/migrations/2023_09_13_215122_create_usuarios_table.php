@@ -12,17 +12,20 @@ return new class extends Migration {
     {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
-            $table->string('usuario');
+            $table->string('correo')->unique();
+            $table->string('otrocorreo')->nullable();
             $table->string('contrasena');
             $table->unsignedBigInteger('id_rol');
             $table->foreign('id_rol')->references('id')->on('roles');
             $table->unsignedBigInteger('id_persona');
             $table->foreign('id_persona')->references('id')->on('personas');
-            $table->string('correo')->unique();
+            $table->unsignedBigInteger('id_estado');
+            $table->foreign('id_estado')->references('id')->on('estados');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
+        DB::statement("ALTER TABLE usuarios ADD imagen MEDIUMBLOB");
     }
 
     /**

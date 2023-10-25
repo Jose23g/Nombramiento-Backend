@@ -19,9 +19,10 @@ class Persona extends Model
         'cedula',
         'nombre',
         'id_provincia',
+        'cuenta',
+        'id_banco',
         'id_canton',
         'id_distrito',
-        'id_barrio',
         'otrassenas'
     ];
 
@@ -38,7 +39,12 @@ class Persona extends Model
 
     public function archivos()
     {
-        return $this->hasMany(Archivo::class, 'id_persona');
+        return $this->hasMany(Archivos::class, 'id_persona');
+    }
+    
+    public function banco()
+    {
+        return $this->belongsTo(Banco::class, 'id_banco');
     }
 
     public function barrio()
