@@ -2,50 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barrio;
 use App\Models\Canton;
 use App\Models\Distrito;
-use App\Models\Persona;
 use App\Models\Provincia;
-use App\Models\Rol;
 use App\Models\Telefono;
+use Exception;
+use App\Models\Archivos;
+use App\Models\Persona;
 use App\Models\Usuario;
+use App\Models\Rol;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Passport\Passport;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
 {
     public function login(Request $request)
     {
+
         //  dd($request);
         try {
             $request->validate([
                 'correo' => 'required',
-                'contrasena' => 'required',
+                'contrasena' => 'required'
             ]);
 
-            $usuario = Usuario::where('correo', $request->input('correo'))->with(['persona', 'usuarioCarreras'])->first();
+            $usuario = Usuario::where('correo', $request->input('correo'))->first();
 
             if (!$usuario) {
                 return response()->json(['Error' => 'Credenciales incorrectas'], 401);
             }
             if (Hash::check($request->input('contrasena'), $usuario->contrasena)) {
+
                 Passport::actingAs($usuario);
                 $rolScope = $usuario->rol()->first()->nombre;
-                $persona = $usuario->persona->nombre;
-                $carrera = $usuario->usuarioCarreras->first()->nombre;
                 $token = $usuario->createToken('MyAppToken', [$rolScope])->accessToken;
 
+                $persona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
                 $scope = Rol::find($usuario->id_rol);
+                return response()->json(['Persona' => $persona, 'token' => $token, 'scope' => $scope->nombre], 200);
 
-                return response()->json(['nombre' => $persona, 'carrera' => $carrera, 'token' => $token, 'scope' => $scope->nombre], 200);
             } else {
                 return response()->json(['error' => 'Credenciales incorrectas'], 401);
             }
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
     }
@@ -63,7 +70,7 @@ class UsuarioController extends Controller
             'id_canton' => 'required',
             'id_distrito' => 'required',
             'otrassenas' => 'required',
-        ], [
+        ],[
             'required' => 'El campo :attribute es requerido.',
         ]);
 
@@ -91,7 +98,7 @@ class UsuarioController extends Controller
             if ($numerotelefono !== null && strlen($numerotelefono) === 8 && ctype_digit($numerotelefono)) {
                 $nuevotelefono = Telefono::create([
                     'id_persona' => $nuevaPersona->id,
-                    'personal' => $request->numero,
+                    'personal' => $request->numero
                 ]);
             }
 
@@ -113,7 +120,7 @@ class UsuarioController extends Controller
                 $imagen = app()->make(ArchivosController::class);
                 try {
                     $resultado = $imagen->guardarimagen($nuevoUsuario->id, $imagenPerfil);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     return response(['mensaje' => $e->getMessage()]);
                 }
             }
@@ -121,17 +128,17 @@ class UsuarioController extends Controller
             if ($documento !== null) {
                 try {
                     $pdf = app()->make(ArchivosController::class);
-                    // dd($nuevaPersona->id);
+                    //dd($nuevaPersona->id);
                     $resultado = $pdf->guardardocumento($nuevaPersona->id, $documento);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     return response(['mensaje' => $e->getMessage()]);
                 }
             }
 
             return response()->json(['Message' => 'Se ha registrado con éxito', 'persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
-        } catch (\Exception $e) {
-            DB::rollback();
 
+        } catch (Exception $e) {
+            DB::rollback();
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -151,6 +158,7 @@ class UsuarioController extends Controller
 
             $imagenCodificada = $usuario->imagen;
             $imagenDecodificada = base64_decode($imagenCodificada);
+
 
             $response = response($imagenDecodificada, 200);
 
@@ -172,8 +180,8 @@ class UsuarioController extends Controller
                         'canton' => $canton,
                         'distrito' => $distrito,
                         'otrassenas' => $persona->otrassenas,
-                    ],
-                ],
+                    ]
+                ]
             ], 200);
         } else {
             return response()->json(['Error' => 'Usuario no autenticado'], 401);
@@ -192,11 +200,13 @@ class UsuarioController extends Controller
             $usuario->save();
             $request->merge(['id_persona' => $usuario->id_persona]);
             app(PersonaController::class)->editePersona($request);
-
+            
             return response()->json($request->all());
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+
     }
 
     public function validartoken(Request $request)
