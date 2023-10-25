@@ -8,10 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Banco extends Model
 {
     use HasFactory;
-    protected $guarded = [];
+    protected $table = 'bancos';
 
-    public function personas()
-    {
-        return $this->hasMany(Persona::class, 'id_banco');
-    }
+    protected $guarded = [];
 }

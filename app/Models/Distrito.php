@@ -8,21 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Distrito extends Model
 {
     use HasFactory;
+    protected $table = 'distritos';
     protected $guarded = [];
-
-    public function canton()
-    {
-        return $this->belongsTo(Canton::class, 'id_canton');
-    }
-
-    public function provincia()
-    {
-        return $this->belongsTo(Provincia::class, 'id_provincia');
-    }
-
-    public function barrios()
-    {
-        return $this->hasMany(Barrio::class, 'id_distrito');
-    }
-
 }

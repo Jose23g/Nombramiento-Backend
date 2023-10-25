@@ -9,27 +9,20 @@ use Laravel\Passport\HasApiTokens;
 
 class Usuario extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-
     public $timestamps = false;
 
     protected $table = 'usuarios';
     protected $password = 'contrasena';
 
-    protected $fillable = [
-        'usuario',
-        'contrasena',
-        'id_persona',
-        'id_rol',
-        'correo',
-        'imagen',
-    ];
-
+    protected $guarded = [];
 
     protected $hidden = [
         'contrasena',
@@ -44,22 +37,4 @@ class Usuario extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    public function rol()
-    {
-        return $this->belongsTo(Rol::class, 'id_rol');
-    }
-
-    public function persona()
-    {
-        return $this->belongsTo(Persona::class, 'id_persona');
-    }
-    public function carreras()
-    {
-        return $this->hasMany(UsuarioCarrera::class, 'id_coordinador');
-    }
-    public function solicitudesCurso()
-    {
-        return $this->hasMany(SolicitudCurso::class, 'id_coordinador');
-    }
 }
