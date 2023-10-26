@@ -141,10 +141,10 @@ class UsuarioController extends Controller
             $persona = Persona::find($usuario->persona_id);
             $archivo = $persona->archivos;
             $telefono = $persona->telefono;
-            $distrito = $persona->distrito->nombre;
-            $canton = $persona->canton->nombre;
-            $provincia = $persona->provincia->nombre;
-            $banco = $persona->banco->nombre;
+            $distrito = $persona->distrito;
+            $canton = $persona->canton;
+            $provincia = $persona->provincia;
+            $banco = $persona->banco;
 
             $imagenCodificada = $usuario->imagen;
             $imagenDecodificada = base64_decode($imagenCodificada);
