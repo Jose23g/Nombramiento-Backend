@@ -85,7 +85,7 @@ class UsuarioController extends Controller
 
             $numeroTelefono = $request->numero;
 
-            if ($numeroTelefono !== null && strlen($numeroTelefono) === 8 && ctype_digit($numeroTelefono)) {
+            if ($numeroTelefono && strlen($numeroTelefono) === 8 && ctype_digit($numeroTelefono)) {
                 $nuevotelefono = Telefono::create([
                     'persona_id' => $nuevaPersona->id,
                     'personal' => $request->numero,
@@ -97,7 +97,7 @@ class UsuarioController extends Controller
 
             // Crear el usuario a partir de los datos de persona
             $nuevoUsuario = Usuario::create([
-            'rol_id' => 3,
+            'rol_id' => 1,
             'persona_id' => $nuevaPersona->id,
             'estado_id' => 5,
             'correo' => $request->correo,
@@ -106,7 +106,7 @@ class UsuarioController extends Controller
             ]);
             DB::commit();
 
-            if ($imagenPerfil !== null) {
+            if ($imagenPerfil) {
                 $imagen = app()->make(ArchivosController::class);
                 try {
                     $resultado = $imagen->guardarimagen($nuevoUsuario->id, $imagenPerfil);
@@ -115,7 +115,7 @@ class UsuarioController extends Controller
                 }
             }
 
-            if ($documento !== null) {
+            if ($documento) {
                 try {
                     $pdf = app()->make(ArchivosController::class);
                     // dd($nuevaPersona->id);

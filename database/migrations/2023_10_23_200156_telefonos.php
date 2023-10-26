@@ -14,7 +14,7 @@ return new class() extends Migration {
             $table->id();
             $table->unsignedBigInteger('persona_id')->unique();
             $table->string('personal');
-            $table->string('trabajo');
+            $table->string('trabajo')->nullable();
             $table->foreign('persona_id')->references('id')->on('personas');
             $table->timestamps();
         });
