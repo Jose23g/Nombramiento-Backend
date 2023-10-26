@@ -11,7 +11,7 @@ class Jornada extends Model
     protected $table = 'jornadas';
     protected $guarded = [];
 
-    public function trabajos(): HasMany
+    public function trabajos()
     {
         return $this->hasMany(Trabajo::class, 'jornada_id', 'id');
     }

@@ -11,17 +11,17 @@ class Carga extends Model
     protected $table = 'cargas';
     protected $guarded = [];
 
-    public function actividades(): HasMany
+    public function actividades()
     {
         return $this->hasMany(Actividades::class, 'carga_id', 'id');
     }
 
-    public function solicitudGrupos(): HasMany
+    public function solicitudGrupos()
     {
         return $this->hasMany(SolicitudGrupo::class, 'carga_id', 'id');
     }
 
-    public function cursos(): HasMany
+    public function cursos()
     {
         return $this->hasMany(Curso::class, 'carga_id', 'id');
     }

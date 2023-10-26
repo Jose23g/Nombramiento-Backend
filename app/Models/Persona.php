@@ -13,37 +13,37 @@ class Persona extends Model
     protected $guarded = [];
     public $timestamps = false;
 
-    public function archivos(): HasMany
+    public function archivos()
     {
         return $this->hasMany(Archivos::class, 'persona_id', 'id');
     }
 
-    public function telefono(): HasOne
+    public function telefono()
     {
         return $this->hasOne(Telefono::class, 'persona_id', 'id');
     }
 
-    public function banco(): BelongsTo
+    public function banco()
     {
         return $this->belongsTo(Banco::class, 'banco_id', 'id');
     }
 
-    public function provincia(): BelongsTo
+    public function provincia()
     {
         return $this->belongsTo(Provincia::class, 'provincia_id', 'id');
     }
 
-    public function canton(): BelongsTo
+    public function canton()
     {
         return $this->belongsTo(Canton::class, 'canton_id', 'id');
     }
 
-    public function distrito(): BelongsTo
+    public function distrito()
     {
         return $this->belongsTo(Distrito::class, 'distrito_id', 'id');
     }
 
-    public function usuario(): HasOne
+    public function usuario()
     {
         return $this->hasOne(Usuario::class, 'persona_id', 'id');
     }

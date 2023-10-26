@@ -11,12 +11,12 @@ class Dias extends Model
     protected $table = 'dias';
     protected $guarded = [];
 
-    public function horarioGrupos(): HasMany
+    public function horarioGrupos()
     {
         return $this->hasMany(HorariosGrupo::class, 'dia_id', 'id');
     }
 
-    public function horarioTrabajo(): HasMany
+    public function horarioTrabajo()
     {
         return $this->hasMany(HorariosTrabajo::class, 'dia_id', 'id');
     }

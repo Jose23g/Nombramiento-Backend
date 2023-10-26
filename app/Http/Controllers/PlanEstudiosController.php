@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlanEstudios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\PlanEstudios;
 
 class PlanEstudiosController extends Controller
 {
@@ -13,6 +13,7 @@ class PlanEstudiosController extends Controller
         $validator = Validator::make($request->all(), [
             'id_carrera' => 'required',
             'id_grado' => 'required',
+            'fecha' => 'required',
         ], [
             'required' => 'El campo :attribute es requerido.',
         ]);
@@ -21,6 +22,7 @@ class PlanEstudiosController extends Controller
         }
         $validatedData = $validator->validated();
         PlanEstudios::create(['id_carrera' => $validatedData['id_carrera'], 'id_grado' => $validatedData['id_grado']]);
+
         return response()->json(['message' => 'Se ha registrado el plan de estudios con exito'], 200);
     }
 }

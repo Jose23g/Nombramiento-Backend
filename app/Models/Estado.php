@@ -11,22 +11,22 @@ class Estado extends Model
     protected $table = 'estados';
     protected $guarded = [];
 
-    public function actividades(): HasMany
+    public function actividades()
     {
         return $this->hasMany(Actividades::class, 'estado_id', 'id');
     }
 
-    public function trabajos(): HasMany
+    public function trabajos()
     {
         return $this->hasMany(Trabajo::class, 'estado_id', 'id');
     }
 
-    public function usuarios(): HasMany
+    public function usuarios()
     {
         return $this->hasMany(Usuario::class, 'estado_id', 'id');
     }
 
-    public function solicitudCursos(): HasMany
+    public function solicitudCursos()
     {
         return $this->hasMany(SolicitudCurso::class, 'estado_id', 'id');
     }

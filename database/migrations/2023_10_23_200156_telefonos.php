@@ -12,7 +12,7 @@ return new class() extends Migration {
     {
         Schema::create('telefonos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('persona_id');
+            $table->unsignedBigInteger('persona_id')->unique();
             $table->string('personal');
             $table->string('trabajo');
             $table->foreign('persona_id')->references('id')->on('personas');

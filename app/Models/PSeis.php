@@ -11,17 +11,17 @@ class PSeis extends Model
     protected $table = 'p_seis';
     protected $guarded = [];
 
-    public function actividades(): HasMany
+    public function actividades()
     {
         return $this->hasMany(Actividades::class, 'p_seis_id', 'id');
     }
 
-    public function profesor(): BelongsTo
+    public function profesor()
     {
         return $this->belongsTo(Usuario::class, 'profesor_id', 'id');
     }
 
-    public function solicitudGrupo(): BelongsTo
+    public function solicitudGrupo()
     {
         return $this->belongsTo(SolicitudGrupo::class, 'solicitud_grupo_id', 'id');
     }

@@ -11,12 +11,12 @@ class CursoPlan extends Model
     protected $table = 'curso_plan';
     protected $guarded = [];
 
-    public function curso(): BelongsTo
+    public function curso()
     {
         return $this->belongsTo(Curso::class, 'curso_id', 'id');
     }
 
-    public function planEstudio(): BelongsTo
+    public function planEstudio()
     {
         return $this->belongsTo(PlanEstudios::class, 'plan_estudios_id', 'id');
     }

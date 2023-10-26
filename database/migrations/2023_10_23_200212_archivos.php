@@ -14,7 +14,6 @@ return new class() extends Migration {
             $table->id();
             $table->unsignedBigInteger('persona_id');
             $table->string('nombre');
-            $table->string('tipo');
             $table->binary('archivo');
             $table->foreign('persona_id')->references('id')->on('personas');
             $table->timestamps();

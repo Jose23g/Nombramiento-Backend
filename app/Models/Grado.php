@@ -11,7 +11,7 @@ class Grado extends Model
     protected $table = 'grados';
     protected $guarded = [];
 
-    public function planEstudios(): HasMany
+    public function planEstudios()
     {
         return $this->hasMany(PlanEstudios::class, 'grado_id', 'id');
     }

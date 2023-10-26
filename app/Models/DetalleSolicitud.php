@@ -11,22 +11,22 @@ class DetalleSolicitud extends Model
     protected $table = 'detalle_solicitudes';
     protected $guarded = [];
 
-    public function curso(): BelongsTo
+    public function curso()
     {
         return $this->belongsTo(Curso::class, 'curso_id', 'id');
     }
 
-    public function solicitudCurso(): BelongsTo
+    public function solicitudCurso()
     {
         return $this->belongsTo(SolicitudCurso::class, 'solicitud_curso_id', 'id');
     }
 
-    public function detalleAprobacionCursos(): HasMany
+    public function detalleAprobacionCursos()
     {
         return $this->hasMany(DetalleAprobacionCurso::class, 'detalle_solicitud_id', 'id');
     }
 
-    public function solicitudGrupos(): HasMany
+    public function solicitudGrupos()
     {
         return $this->hasMany(SolicitudGrupo::class, 'detalle_solicitud_id', 'id');
     }

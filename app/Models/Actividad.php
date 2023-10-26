@@ -11,17 +11,17 @@ class Actividad extends Model
     protected $table = 'actividades';
     protected $guarded = [];
 
-    public function carga(): BelongsTo
+    public function carga()
     {
         return $this->belongsTo(Carga::class, 'carga_id', 'id');
     }
 
-    public function estado(): BelongsTo
+    public function estado()
     {
         return $this->belongsTo(Estado::class, 'estado_id', 'id');
     }
 
-    public function pSeis(): BelongsTo
+    public function pSeis()
     {
         return $this->belongsTo(PSeis::class, 'p_seis_id', 'id');
     }

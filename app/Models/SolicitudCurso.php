@@ -11,32 +11,32 @@ class SolicitudCurso extends Model
     protected $table = 'solicitud_cursos';
     protected $guarded = [];
 
-    public function aprobacionSolicitudCursos(): HasMany
+    public function aprobacionSolicitudCursos()
     {
         return $this->hasMany(AprobacionSolicitudCurso::class, 'solicitud_curso_id', 'id');
     }
 
-    public function carrera(): BelongsTo
+    public function carrera()
     {
         return $this->belongsTo(Carrera::class, 'carrera_id', 'id');
     }
 
-    public function detalleSolicitudes(): HasMany
+    public function detalleSolicitudes()
     {
         return $this->hasMany(DetalleSolicitud::class, 'solicitud_curso_id', 'id');
     }
 
-    public function estado(): BelongsTo
+    public function estado()
     {
         return $this->belongsTo(Estado::class, 'estado_id', 'id');
     }
 
-    public function fechaSolicitud(): BelongsTo
+    public function fechaSolicitud()
     {
         return $this->belongsTo(FechaSolicitud::class, 'fecha_solicitud_id', 'id');
     }
 
-    public function coordinador(): BelongsTo
+    public function coordinador()
     {
         return $this->belongsTo(Usuario::class, 'coordinador_id', 'id');
     }

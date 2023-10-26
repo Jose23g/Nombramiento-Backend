@@ -11,12 +11,12 @@ class HorariosGrupo extends Model
     protected $table = 'horarios_grupo';
     protected $guarded = [];
 
-    public function dia(): BelongsTo
+    public function dia()
     {
         return $this->belongsTo(Dias::class, 'dia_id', 'id');
     }
 
-    public function solicitudGrupo(): BelongsTo
+    public function solicitudGrupo()
     {
         return $this->belongsTo(SolicitudGrupo::class, 'solicitud_grupo_id', 'id');
     }

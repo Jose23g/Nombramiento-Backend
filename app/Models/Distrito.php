@@ -11,12 +11,12 @@ class Distrito extends Model
     protected $table = 'distritos';
     protected $guarded = [];
 
-    public function canton(): BelongsTo
+    public function canton()
     {
         return $this->belongsTo(Canton::class, 'canton_id', 'id');
     }
 
-    public function personas(): HasMany
+    public function personas()
     {
         return $this->hasMany(Persona::class, 'distrito_id', 'id');
     }

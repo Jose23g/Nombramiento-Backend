@@ -38,47 +38,47 @@ class Usuario extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function aprobacionSolicitudCursos(): HasMany
+    public function aprobacionSolicitudCursos()
     {
         return $this->hasMany(AprobacionSolicitudCurso::class, 'encargado_id', 'id');
     }
 
-    public function carreras(): BelongsToMany
+    public function carreras()
     {
         return $this->belongsToMany(Carrera::class, 'usuario_carreras', 'usuario_id', 'carrera_id');
     }
 
-    public function usuarioCarreras(): HasMany
+    public function usuarioCarreras()
     {
         return $this->hasMany(UsuarioCarrera::class, 'usuario_id', 'id');
     }
 
-    public function solicitudCursos(): HasMany
+    public function solicitudCursos()
     {
         return $this->hasMany(SolicitudCurso::class, 'coordinador_id', 'id');
     }
 
-    public function pSeis(): HasMany
+    public function pSeis()
     {
         return $this->hasMany(PSeis::class, 'profesor_id', 'id');
     }
 
-    public function trabajos(): HasMany
+    public function trabajos()
     {
         return $this->hasMany(Trabajo::class, 'usuario_id', 'id');
     }
 
-    public function persona(): BelongsTo
+    public function persona()
     {
-        return $this->belongTo(Persona::class, 'persona_id', 'id');
+        return $this->belongsTo(Persona::class, 'persona_id', 'id');
     }
 
-    public function estado(): BelongsTo
+    public function estado()
     {
         return $this->belongsTo(Estado::class, 'estado_id', 'id');
     }
 
-    public function rol(): BelongsTo
+    public function rol()
     {
         return $this->belongsTo(Rol::class, 'rol_id', 'id');
     }

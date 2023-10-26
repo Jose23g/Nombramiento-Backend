@@ -13,12 +13,14 @@ return new class() extends Migration {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('rol_id');
-            $table->unsignedBigInteger('persona_id');
+            $table->unsignedBigInteger('persona_id')->unique();
             $table->unsignedBigInteger('estado_id');
-            $table->string('correo');
-            $table->string('otro_correo');
-            $table->string('contasena');
+            $table->string('correo')->unique();
+            $table->string('otro_correo')->nullable();
+            $table->string('contrasena');
             $table->binary('imagen');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
             $table->foreign('rol_id')->references('id')->on('roles');
             $table->foreign('persona_id')->references('id')->on('personas');
@@ -32,6 +34,11 @@ return new class() extends Migration {
      */
     public function down(): void
     {
+        Schema::table('usuarios', function ($table) {
+            $table->dropForeign(['rol_id']);
+            $table->dropForeign(['persona_id']);
+            $table->dropForeign(['estado_id']);
+        });
         Schema::dropIfExists('usuarios');
     }
 };

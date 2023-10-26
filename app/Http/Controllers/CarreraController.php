@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Carrera;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CarreraController extends Controller
@@ -18,6 +18,7 @@ class CarreraController extends Controller
             return response()->json(['message' => $validator->errors()], 422);
         }
         $validatedData = $validator->validated();
-        return Carrera::find($validatedData['id'])->carreraUsuarios;
+
+        return Carrera::with('usuarios')->find($validatedData['id']);
     }
 }

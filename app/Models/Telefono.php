@@ -11,7 +11,7 @@ class Telefono extends Model
     protected $table = 'telefonos';
     protected $guarded = [];
 
-    public function persona(): BelongsTo
+    public function persona()
     {
         return $this->belongsTo(Persona::class, 'persona_id', 'id');
     }

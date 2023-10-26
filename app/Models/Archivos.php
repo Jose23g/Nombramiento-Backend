@@ -12,7 +12,7 @@ class Archivos extends Model
     protected $guarded = [];
     public $timestamps = false;
 
-    public function persona(): BelongsTo
+    public function persona()
     {
         return $this->belongsTo(Persona::class, 'persona_id', 'id');
     }

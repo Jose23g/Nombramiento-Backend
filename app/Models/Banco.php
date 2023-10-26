@@ -12,7 +12,7 @@ class Banco extends Model
 
     protected $guarded = [];
 
-    public function persona(): HasMany
+    public function persona()
     {
         return $this->hasMany(Persona::class, 'banco_id', 'id');
     }

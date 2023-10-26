@@ -11,17 +11,17 @@ class DetalleAprobacionCurso extends Model
     protected $table = 'detalle_aprobacion_cursos';
     protected $guarded = [];
 
-    public function aprobacionSolicitudCurso(): BelongsTo
+    public function aprobacionSolicitudCurso()
     {
         return $this->belongsTo(AprobacionSolicitudCurso::class, 'curso_aprobado_id', 'id');
     }
 
-    public function detalleSolicitud(): BelongsTo
+    public function detalleSolicitud()
     {
         return $this->belongsTo(DetalleSolicitud::class, 'detalle_solicitud_id', 'id');
     }
 
-    public function gruposAprobados(): HasMany
+    public function gruposAprobados()
     {
         return $this->hasMany(GrupoAprobado::class, 'detalle_aprobado_id', 'id');
     }

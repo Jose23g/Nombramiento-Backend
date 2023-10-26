@@ -11,12 +11,12 @@ class Provincia extends Model
     protected $table = 'provincias';
     protected $guarded = [];
 
-    public function cantones(): HasMany
+    public function cantones()
     {
         return $this->hasMany(Canton::class, 'provincia_id', 'id');
     }
 
-    public function personas(): HasMany
+    public function personas()
     {
         return $this->hasMany(Persona::class, 'provincia_id', 'id');
     }

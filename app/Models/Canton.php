@@ -11,17 +11,17 @@ class Canton extends Model
     protected $table = 'cantones';
     protected $guarded = [];
 
-    public function provincia(): BelongsTo
+    public function provincia()
     {
         return $this->belongsTo(Provincia::class, 'provincia_id', 'id');
     }
 
-    public function distritos(): HasMany
+    public function distritos()
     {
         return $this->hasMany(Distrito::class, 'canton_id', 'id');
     }
 
-    public function personas(): HasMany
+    public function personas()
     {
         return $this->hasMany(Persona::class, 'canton_id', 'id');
     }

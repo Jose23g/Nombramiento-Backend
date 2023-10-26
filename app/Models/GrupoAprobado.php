@@ -11,12 +11,12 @@ class GrupoAprobado extends Model
     protected $table = 'grupos_aprobados';
     protected $guarded = [];
 
-    public function detalleAprobacionCurso(): BelongsTo
+    public function detalleAprobacionCurso()
     {
         return $this->belongsTo(DetalleAprobacionCurso::class, 'detalle_aprobado_id', 'id');
     }
 
-    public function solicitudGrupo(): BelongsTo
+    public function solicitudGrupo()
     {
         return $this->belongsTo(SolicitudGrupo::class, 'solicitud_grupo_id', 'id');
     }

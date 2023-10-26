@@ -11,7 +11,7 @@ class FechaSolicitud extends Model
     protected $table = 'fechas_solicitudes';
     protected $guarded = [];
 
-    public function solicitudCursos(): HasMany
+    public function solicitudCursos()
     {
         return $this->hasMany(SolicitudCurso::class, 'fecha_solicitud_id', 'id');
     }

@@ -11,22 +11,22 @@ class PlanEstudios extends Model
     protected $table = 'plan_estudios';
     protected $guarded = [];
 
-    public function carrera(): BelongsTo
+    public function carrera()
     {
         return $this->belongsTo(Carrera::class, 'carrera_id', 'id');
     }
 
-    public function cursos(): BelongsToMany
+    public function cursos()
     {
         return $this->belongsToMany(Curso::class, 'curso_plan', 'plan_estudios_id', 'curso_id');
     }
 
-    public function cursoPlanes(): HasMany
+    public function cursoPlanes()
     {
         return $this->hasMany(CursoPlan::class, 'plan_estudios_id', 'id');
     }
 
-    public function grado(): BelongsTo
+    public function grado()
     {
         return $this->belongsTo(Grado::class, 'grado_id', 'id');
     }
