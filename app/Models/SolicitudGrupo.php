@@ -35,4 +35,9 @@ class SolicitudGrupo extends Model
     {
         return $this->hasMany(PSeis::class, 'solicitud_grupo_id', 'id');
     }
+
+    public function profesor()
+    {
+        return $this->belongsTo(Usuario::class, 'profesor_id', 'id');
+    }
 }

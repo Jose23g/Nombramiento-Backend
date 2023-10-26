@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class HorariosTrabajo extends Model
 {
     use HasFactory;
-    protected $table = 'horarios_trabajo';
+    protected $table = 'horarios_trabajos';
     protected $guarded = [];
 
     public function dia()

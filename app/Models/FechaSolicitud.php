@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class FechaSolicitud extends Model
 {
     use HasFactory;
-    protected $table = 'fechas_solicitudes';
+    protected $table = 'fecha_solicitudes';
     protected $guarded = [];
 
     public function solicitudCursos()

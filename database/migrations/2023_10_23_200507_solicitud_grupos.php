@@ -17,9 +17,9 @@ return new class() extends Migration {
             $table->unsignedBigInteger('carga_id');
             $table->string('grupo');
             $table->string('cupo');
-            $table->string('individual_colegiado');
-            $table->string('tutoria');
-            $table->string('horas');
+            $table->string('individual_colegiado')->nullable();
+            $table->string('tutoria')->nullable();
+            $table->string('horas')->nullable();
             $table->string('recinto');
             $table->foreign('profesor_id')->references('id')->on('usuarios');
             $table->foreign('detalle_solicitud_id')->references('id')->on('detalle_solicitudes');

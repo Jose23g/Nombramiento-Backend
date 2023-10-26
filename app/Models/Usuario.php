@@ -58,6 +58,11 @@ class Usuario extends Authenticatable
         return $this->hasMany(SolicitudCurso::class, 'coordinador_id', 'id');
     }
 
+    public function solicitudGrupos()
+    {
+        return $this->hasMany(SolicitudGrupo::class, 'profesor_id', 'id');
+    }
+
     public function pSeis()
     {
         return $this->hasMany(PSeis::class, 'profesor_id', 'id');
