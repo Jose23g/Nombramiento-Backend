@@ -8,6 +8,7 @@ use App\Models\Dias;
 use App\Models\Estado;
 use App\Models\FechaSolicitud;
 use App\Models\Horario;
+use App\Models\HorariosGrupo;
 use App\Models\Persona;
 use App\Models\SolicitudCurso;
 use App\Models\SolicitudGrupo;
@@ -20,26 +21,32 @@ class CoordinadorController extends Controller
 {
     public function Solicitud_de_curso(Request $request)
     {
+        
         $validator = Validator::make(
             $request->all(),
             [
-                'anio' => 'required',
-                'semestre' => 'required',
-                'id_carrera' => 'required',
-                'fecha' => 'required|date',
+                'carrera_id' => 'required',
+                'fecha_id' => 'required',
+                'carga_total' => 'required',
                 'detalle_solicitud' => 'required|array|min:1',
-                'detalle_solicitud.*.id_curso' => 'required',
-                'detalle_solicitud.*.ciclo' => 'required',
-                'detalle_solicitud.*.recinto' => 'required',
-                'detalle_solicitud.*.carga' => 'required',
+                'detalle_solicitud.*.curso_id' => 'required',
+                'detalle_solicitud.*.grupos' => 'required',
+                'detalle_solicitud.*.horas_teoricas' => 'required',
+                'detalle_solicitud.*.horas_practicas' => 'required',
+                'detalle_solicitud.*.horas_laboratorio' => 'required',
                 'detalle_solicitud.*.solicitud_grupo' => 'required|array|min:1',
-                'detalle_solicitud.*.solicitud_grupo.*.id_profesor' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.profesor_id' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.carga_id' => 'required',
                 'detalle_solicitud.*.solicitud_grupo.*.grupo' => 'required',
                 'detalle_solicitud.*.solicitud_grupo.*.cupo' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.individual_colegiado' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.tutoria' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.horas' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.recinto' => 'required',
                 'detalle_solicitud.*.solicitud_grupo.*.horario' => 'required|array|min:1',
-                'detalle_solicitud.*.solicitud_grupo.*.horario.*.id_dia' => 'required',
-                'detalle_solicitud.*.solicitud_grupo.*.horario.*.entrada' => 'required',
-                'detalle_solicitud.*.solicitud_grupo.*.horario.*.salida' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.horario.*.dia_id' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.horario.*.hora_inicio' => 'required',
+                'detalle_solicitud.*.solicitud_grupo.*.horario.*.hora_fin' => 'required',
             ],
         );
 
@@ -51,87 +58,89 @@ class CoordinadorController extends Controller
 
         try {
             $fechaActual = Carbon::now();
-            $fechaSolicitud = FechaSolicitud::where('anio', $request->input('anio'))->where('semestre', $request->input('semestre'))->first();
-            $existesolicitud = SolicitudCurso::where('anio', $request->input('anio'))->where('semestre', $request->input('semestre'))->where('id_carrera', $request->input('id_carrera'))->first();
-            if ($existesolicitud) {
-                return response()->json([
-                    'error' => 'Ya hay una solicitud que coincide con',
-                    'anio' => $request->anio,
-                    'semestre' => $request->semestre,
-                    'id_carrera' => $request->id_carrera,
-                ], 400);
-            }
-            if (!$fechaSolicitud || !$fechaActual->between($fechaSolicitud->fecha_inicio, $fechaSolicitud->fecha_fin)) {
-                return response()->json(['error' => 'El periodo para realizar la solicitud de curso ha finalizado o no esta disponible'], 400);
-            }
+            // $fechaSolicitud = FechaSolicitud::where('anio', $request->input('anio'))->where('semestre', $request->input('semestre'))->first();
+            // $existesolicitud = SolicitudCurso::where('anio', $request->input('anio'))->where('semestre', $request->input('semestre'))->where('id_carrera', $request->input('id_carrera'))->first();
+            // if ($existesolicitud) {
+            //     return response()->json([
+            //         'error' => 'Ya hay una solicitud que coincide con',
+            //         'anio' => $request->anio,
+            //         'semestre' => $request->semestre,
+            //         'id_carrera' => $request->id_carrera,
+            //     ], 400);
+            // }
+            // if (!$fechaSolicitud || !$fechaActual->between($fechaSolicitud->fecha_inicio, $fechaSolicitud->fecha_fin)) {
+            //     return response()->json(['error' => 'El periodo para realizar la solicitud de curso ha finalizado o no esta disponible'], 400);
+            // }
 
             $usuario = $request->user();
 
             $nuevasolicitud = SolicitudCurso::create([
-                'anio' => $request->anio,
-                'semestre' => $request->semestre,
-                'id_coordinador' => $usuario->id,
-                'id_carrera' => $request->id_carrera,
-                'id_estado' => 1,
-                'fecha' => Carbon::now()->format('Y-m-d'),
+                'fecha_solicitud_id' => $request->fecha_id,
+                'carga_total' => $request->carga_total,
+                'coordinador_id' => $usuario->id,
+                'carrera_id' => $request->carrera_id,
+                'estado_id' => 2,
             ]);
 
+            
+
             foreach ($request->detalle_solicitud as $detalle) {
+               
                 try {
                     $nuevodetalle = DetalleSolicitud::create([
-                        'ciclo' => $detalle['ciclo'],
-                        'grupos' => 2,
-                        'recinto' => $detalle['recinto'],
-                        'carga' => $detalle['carga'],
-                        'id_solicitud' => $nuevasolicitud->id,
-                        'id_curso' => $detalle['id_curso'],
+                        'grupos' => $detalle['grupos'],
+                        'horas_teoricas' => $detalle['horas_teoricas'],
+                        'horas_practicas' => $detalle['horas_practicas'],
+                        'horas_laboratorio' => $detalle['horas_laboratorio'],
+                        'solicitud_curso_id' => $nuevasolicitud->id,
+                        'curso_id' => $detalle['curso_id'],
                     ]);
+
+                    
                 } catch (\Exception $e) {
                     DB::rollback();
 
                     return response()->json(['message' => $e->getMessage()], 422);
                 }
                 foreach ($detalle['solicitud_grupo'] as $solicitud_grupo) {
-                    // primero añadimos el horario general con su tipo
+          // creamos el grupo
                     try {
-                        $nuevohorario = Horario::create([
-                            'tipo' => 'SolicitudGrupo',
+                        $nuevogrupo = SolicitudGrupo::create([
+                            'profesor_id' => $solicitud_grupo['profesor_id'],
+                            'grupo' => $solicitud_grupo['grupo'],
+                            'cupo' => $solicitud_grupo['cupo'],
+                            'carga_id' => $solicitud_grupo['carga_id'],
+                            'individual_colegiado' => $solicitud_grupo['individual_colegiado'],
+                            'tutoria' => $solicitud_grupo['tutoria'],
+                            'horas' => $solicitud_grupo['horas'],
+                            'recinto' => $solicitud_grupo['recinto'],
+                            'detalle_solicitud_id' => $nuevodetalle->id,
                         ]);
-                    } catch (\Exception $e) {
+                        
+
+                    } catch (Exception $e) {
                         DB::rollback();
 
                         return response()->json(['message' => $e->getMessage()], 422);
                     }
-
+                   
                     foreach ($solicitud_grupo['horario'] as $dias) {
-                        // verificamos los dias que viene dentro del arreglo de horarios para cada curso
+                        // verificamos los dias que vienen para un  grupo y lo agregamos en la base de datos
                         try {
-                            $nuevodia = Dias::create([
-                                'id_dia' => $dias['id_dia'],
-                                'entrada' => $dias['entrada'],
-                                'salida' => $dias['salida'],
-                                'id_horario' => $nuevohorario->id,
+                            $nuevodia = HorariosGrupo::create([
+                                'dia_id' => $dias['dia_id'],
+                                'solicitud_grupo_id' => $nuevogrupo->id,
+                                'hora_inicio' => $dias['hora_inicio'],
+                                'hora_fin' => $dias['hora_fin'],
                             ]);
+                            
                         } catch (\Exception $e) {
                             DB::rollback();
 
                             return response()->json(['message' => $e->getMessage()], 422);
                         }
                     }
-                    // ahora una vez registrados los datos del horario Horario y los dia del grupo hacemos la solicitud por grupo
-                    try {
-                        $nuevogrupo = SolicitudGrupo::create([
-                            'grupo' => $solicitud_grupo['grupo'],
-                            'cupo' => $solicitud_grupo['cupo'],
-                            'id_detalle' => $nuevodetalle->id,
-                            'id_profesor' => $solicitud_grupo['id_profesor'],
-                            'id_horario' => $nuevohorario->id,
-                        ]);
-                    } catch (\Exception $e) {
-                        DB::rollback();
 
-                        return response()->json(['message' => $e->getMessage()], 422);
-                    }
                 }
             }
         } catch (\Exception $e) {
@@ -176,10 +185,9 @@ class CoordinadorController extends Controller
             $request->all(),
             [
                 'id_solicitud',
-                'anio' => 'required',
-                'semestre' => 'required',
-                'id_carrera' => 'required',
-                'fecha' => 'required|date',
+                'carga_total' => 'required',
+
+
             ],
         );
 
@@ -188,8 +196,8 @@ class CoordinadorController extends Controller
         }
 
         $detallesrequest = $request->detalle_solicitud;
-        $cursos_solicitud_anterior = Detallesolicitud::where('id_solicitud', $request->id_solicitud)->get();
-
+        $cursos_solicitud_anterior = Detallesolicitud::where('solicitud_curso_id', $request->id_solicitud)->get();
+     
         try {
             if ($detallesrequest) {
                 $historialcambiosnuevosdetalles = [];
@@ -204,27 +212,32 @@ class CoordinadorController extends Controller
                         $validator2 = Validator::make(
                             $detallessolicitud,
                             [
-                                'ciclo' => 'required',
+                                'curso_id' => 'required',
                                 'grupos' => 'required',
-                                'recinto' => 'required',
-                                'carga' => 'required',
-                                'id_curso' => 'required|exists:cursos,id',
+                                'horas_teoricas' => 'required',
+                                'horas_practicas' => 'required',
+                                'horas_laboratorio' => 'required',
                                 'solicitud_grupo' => 'required|array|min:1',
-                                'solicitud_grupo.*.id_profesor' => 'required|exists:usuarios,id',
+                                'solicitud_grupo.*.profesor_id' => 'required|exists:usuarios,id',
+                                'solicitud_grupo.*.carga_id' => 'required',
                                 'solicitud_grupo.*.grupo' => 'required',
                                 'solicitud_grupo.*.cupo' => 'required',
+                                'solicitud_grupo.*.individual_colegiado' => 'required',
+                                'solicitud_grupo.*.tutoria' => 'required',
+                                'solicitud_grupo.*.horas' => 'required',
+                                'solicitud_grupo.*.recinto' => 'required',
                                 'solicitud_grupo.*.horario' => 'required|array|min:1',
                                 'detalle_solicitud.*.solicitud_grupo.*.horario' => 'required|array|min:1',
-                                'solicitud_grupo.*.horario.*.id_dia' => 'required|exists:dia,id',
-                                'solicitud_grupo.*.horario.*.entrada' => 'required',
-                                'solicitud_grupo.*.horario.*.salida' => 'required',
+                                'solicitud_grupo.*.horario.*.dia_id' => 'required|exists:dias,id',
+                                'solicitud_grupo.*.horario.*.hora_inicio' => 'required',
+                                'solicitud_grupo.*.horario.*.hora_fin' => 'required'
                             ],
                             [
                                 'solicitud_grupo.required' => 'Se ha ingresado un curso sin grupos',
                                 'solicitud_grupo.array' => 'El campo solicitud de grupo debe ser un arreglo.',
                                 'solicitud_grupo.min' => 'Los cursos deben traer grupos asociados',
                                 'solicitud_grupo.*.grupo' => 'Cada grupo tiene que tener su numero',
-                                'solicitud_grupo.*.id_profesor.exists' => 'Error al señalar profesor',
+                                'solicitud_grupo.*.profesor_id.exists' => 'Error al señalar profesor',
                                 'solicitud_grupo.*.cupo' => 'El cupo es requerido para cada grupo',
                                 'detalle_solicitud.*.solicitud_grupo.*.horario.required' => 'El horario es requerido',
                                 'detalle_solicitud.*.solicitud_grupo.*.horario.min' => 'El horario no trae dias',
@@ -234,27 +247,34 @@ class CoordinadorController extends Controller
                             // puedo generar un error general o uno especifico
                             return response()->json(['message' => $validator2->errors()], 400);
                         } else {
+                            
                             $nuevos[] = $detallessolicitud; // quiere decir que el detalle es nuevo.
+                            
                         }
                     } else {
                         $validarcursoexistente = Validator::make(
                             $detallessolicitud,
                             [
                                 'id' => 'required|exists:detalle_solicitudes,id',
-                                'ciclo' => 'required',
+                                'curso_id' => 'required',
                                 'grupos' => 'required',
-                                'recinto' => 'required',
-                                'carga' => 'required',
-                                'id_curso' => 'required|exists:cursos,id',
+                                'horas_teoricas' => 'required',
+                                'horas_practicas' => 'required',
+                                'horas_laboratorio' => 'required',
                                 'solicitud_grupo' => 'required|array|min:1',
-                                'solicitud_grupo.*.id_profesor' => 'required|exists:usuarios,id',
+                                'solicitud_grupo.*.profesor_id' => 'required|exists:usuarios,id',
+                                'solicitud_grupo.*.carga_id' => 'required',
                                 'solicitud_grupo.*.grupo' => 'required',
                                 'solicitud_grupo.*.cupo' => 'required',
+                                'solicitud_grupo.*.individual_colegiado' => 'required',
+                                'solicitud_grupo.*.tutoria' => 'required',
+                                'solicitud_grupo.*.horas' => 'required',
+                                'solicitud_grupo.*.recinto' => 'required',
                                 'solicitud_grupo.*.horario' => 'required|array|min:1',
                                 'detalle_solicitud.*.solicitud_grupo.*.horario' => 'required|array|min:1',
-                                'solicitud_grupo.*.horario.*.id_dia' => 'required|exists:dia,id',
-                                'solicitud_grupo.*.horario.*.entrada' => 'required',
-                                'solicitud_grupo.*.horario.*.salida' => 'required',
+                                'solicitud_grupo.*.horario.*.dia_id' => 'required|exists:dias,id',
+                                'solicitud_grupo.*.horario.*.hora_inicio' => 'required',
+                                'solicitud_grupo.*.horario.*.hora_fin' => 'required'
                             ],
                             [
                                 'id.required' => 'Revise los detalles adjuntados',
@@ -263,7 +283,7 @@ class CoordinadorController extends Controller
                                 'solicitud_grupo.array' => 'El campo solicitud de grupo debe ser un arreglo.',
                                 'solicitud_grupo.min' => 'Los cursos deben traer grupos asociados',
                                 'solicitud_grupo.*.grupo' => 'Cada grupo tiene que tener su numero',
-                                'solicitud_grupo.*.id_profesor.exists' => 'Error al señalar profesor',
+                                'solicitud_grupo.*.profesor_id.exists' => 'Error al señalar profesor',
                                 'solicitud_grupo.*.cupo' => 'El cupo es requerido para cada grupo',
                                 'detalle_solicitud.*.solicitud_grupo.*.horario.required' => 'El horario es requerido',
                                 'detalle_solicitud.*.solicitud_grupo.*.horario.min' => 'El horario no trae dias',
@@ -274,6 +294,7 @@ class CoordinadorController extends Controller
                             return response()->json(['message' => $validarcursoexistente->errors()], 400);
                         } else {
                             $detallexistente[] = $detallessolicitud; // quiere decir que el detalle es nuevo.
+                            
                         }
                     }
                 }
@@ -302,19 +323,22 @@ class CoordinadorController extends Controller
                             } catch (\Exception $e) {
                                 return response()->json(['error' => $e->getMessage()], 400);
                             }
-                        } else { // sabemos que si existe y viene dentro del nuevo request
-                            $cursodetalle = Curso::where('id', $cursoanterior->id_curso)->first();
-                            $grupos_cruso_anterior = SolicitudGrupo::where('id_detalle', $cursoanterior->id)->get();
+
+                        } else { //sabemos que si existe y viene dentro del nuevo request
+                            $cursodetalle = Curso::where('id', $cursoanterior->curso_id)->first();
+                            $grupos_cruso_anterior = SolicitudGrupo::where('detalle_solicitud_id', $cursoanterior->id)->get();
                             $historialcambiosdetalle = [];
                             // se procede a verificar la existencia de un detalle que coincideda con el anterior de la base de datos
                             $detallenuevo = current(array_filter($nuevalistacursos, fn ($detalle) => $detalle['id'] == $cursoanterior->id));
                             // quiere decir debido a que este detalle esta dentro de la bd y dentro de la nueva lista entonces vamos a compararlos a ver que pedo
                             if ($detallenuevo) {
-                                // actualizamos los datos de ser cambiados del detalle actual en la base de datos acorbde a lo que viene
+                                
+                                //actualizamos los datos de ser cambiados del detalle actual en la base de datos acorbde a lo que viene
                                 $detalleactualizar = Detallesolicitud::find($cursoanterior->id);
                                 $detalleactualizar->grupos = $detallenuevo['grupos'];
-                                $detalleactualizar->carga = $detallenuevo['carga'];
-                                $detalleactualizar->recinto = $detallenuevo['recinto'];
+                                $detalleactualizar->horas_teoricas = $detallenuevo['horas_teoricas'];
+                                $detalleactualizar->horas_practicas = $detallenuevo['horas_practicas'];
+                                $detalleactualizar->horas_laboratorio = $detallenuevo['horas_laboratorio'];
                                 $detalleactualizar->save();
 
                                 $gruposnuevos = []; // va almacenaar los grupos nuevos que vienen del request  para un detalle que existe en la bd
@@ -330,6 +354,7 @@ class CoordinadorController extends Controller
 
                                 if ($gruposnuevos) {
                                     try {
+                                        
                                         $nuevogrupo = $this->Añadir_grupo($cursoanterior->id, $gruposnuevos); // añadimos a los grupos nuevos del detalle
                                         // Ingresar al registro de acciones
                                         $historialcambiosdetalle[] = $nuevogrupo;
@@ -415,45 +440,49 @@ class CoordinadorController extends Controller
     public function Ingresar_nuevos_detalle($listadetallesnueva, $id_solicitud)
     {
         try {
+            
             $detallesagregrados = [];
+
             foreach ($listadetallesnueva as $deta) {
-                // creamos el nuevo detalle segun los nuevos detalles del request
+           
+                //creamos el nuevo detalle segun los nuevos detalles del request
                 $nuevodetallesolicitud = DetalleSolicitud::create([
-                    'ciclo' => $deta['ciclo'],
                     'grupos' => $deta['grupos'],
-                    'recinto' => $deta['recinto'],
-                    'carga' => $deta['carga'],
-                    'id_solicitud' => $id_solicitud,
-                    'id_curso' => $deta['id_curso'],
+                    'horas_teoricas' => $deta['horas_teoricas'],
+                    'horas_practicas' => $deta['horas_practicas'],
+                    'horas_laboratorio' => $deta['horas_laboratorio'],
+                    'solicitud_curso_id' => $id_solicitud,
+                    'curso_id' => $deta['curso_id'],
                 ]);
-                $nombrecurso = Curso::where('id', $deta['id_curso'])->first();
-
+                $nombrecurso = Curso::where('id', $nuevodetallesolicitud->curso_id)->first();
                 // ahora recorremos el arreglo de los grupos del detalle
-                foreach ($deta['solicitud_grupo'] as $nuevogrupo) {
-                    // Primeramente recorremos los dias del grupo en donde creamos el horario y añadimos referencia
-                    $nuevohorario = Horario::create([
-                        'tipo' => 'SolicitudGrupo',
+                foreach ($deta['solicitud_grupo'] as $lineanuevogrupo) {
+                   
+                    //creamos el grupo
+                    $nuevogrupo = SolicitudGrupo::create([
+                        'profesor_id' => $lineanuevogrupo['profesor_id'],
+                        'grupo' => $lineanuevogrupo['grupo'],
+                        'cupo' => $lineanuevogrupo['cupo'],
+                        'carga_id' => $lineanuevogrupo['carga_id'],
+                        'individual_colegiado' => $lineanuevogrupo['individual_colegiado'],
+                        'tutoria' => $lineanuevogrupo['tutoria'],
+                        'horas' => $lineanuevogrupo['horas'],
+                        'recinto' => $lineanuevogrupo['recinto'],
+                        'detalle_solicitud_id' => $nuevodetallesolicitud->id,
                     ]);
-
-                    foreach ($nuevogrupo['horario'] as $dias) {
-                        $nuevodiahorario = Dias::create([
-                            'id_dia' => $dias['id_dia'],
-                            'entrada' => $dias['entrada'],
-                            'salida' => $dias['salida'],
-                            'id_horario' => $nuevohorario->id,
+                    foreach ($lineanuevogrupo['horario'] as $dias) {
+                        $nuevodia = HorariosGrupo::create([
+                            'dia_id' => $dias['dia_id'],
+                            'solicitud_grupo_id' => $nuevogrupo->id,
+                            'hora_inicio' => $dias['hora_inicio'],
+                            'hora_fin' => $dias['hora_fin'],
                         ]);
                     }
-                    // una vez creado el horario procedemos a añadir el grupo
-                    $nuevalineacurso = SolicitudGrupo::create([
-                        'grupo' => $nuevogrupo['grupo'],
-                        'cupo' => $nuevogrupo['cupo'],
-                        'id_detalle' => $nuevodetallesolicitud->id,
-                        'id_profesor' => $nuevogrupo['id_profesor'],
-                        'id_horario' => $nuevohorario->id,
-                    ]);
                 }
                 $detallesagregrados[] = $nombrecurso->nombre;
             }
+           
+            
 
             return [' Se agregaron los cursos ' => $detallesagregrados];
         } catch (\Exception $e) {
@@ -467,19 +496,17 @@ class CoordinadorController extends Controller
             switch ($accion) {
                 case 1: // Case para eliminar curso,grupo,horarios y dia
                     try {
-                        $grupos = SolicitudGrupo::where('id_detalle', $id_detalle)->get();
+
+                        $grupos = SolicitudGrupo::where('detalle_solicitud_id', $id_detalle)->get();
                         $buscardetalle = DetalleSolicitud::where('id', $id_detalle)->first();
-                        $cursoeliminado = Curso::where('id', $buscardetalle->id_curso)->first();
+                        $cursoeliminado = Curso::where('id', $buscardetalle->curso_id)->first();
 
                         foreach ($grupos as $grupo) {
-                            // almacenamos el id horario antes de eliminar el grupo
-                            $id_horario = $grupo->id_horario;
+                            // eliminamos los dias y luego el grupo asociado
+                            HorariosGrupo::where('solicitud_grupo_id',$grupo->id)->delete();
                             SolicitudGrupo::where('id', $grupo->id)->delete();
                             // una vez eliminado el grupo eliminamos los dias y el horario asignado al grupo
-                            Dias::where('id_horario', '=', $id_horario)->delete(); // Elimina los dias del horario
-                            Horario::where('id', $id_horario)->delete(); // Elimina el horario asociado al grupo
                         }
-
                         DetalleSolicitud::where('id', $id_detalle)->delete();
 
                         return [' se ha eliminado el curso ' => $cursoeliminado->nombre];
@@ -493,8 +520,7 @@ class CoordinadorController extends Controller
                     try {
                         $grupoeliminar = SolicitudGrupo::Where('id', $id_detalle)->first();
                         SolicitudGrupo::Where('id', $id_detalle)->delete();
-                        Dias::Where('id_horario', $grupoeliminar->id_horario)->delete();
-                        Horario::Where('id', $grupoeliminar->id_horario)->delete();
+                        HorariosGrupo::where('solicitud_grupo_id',$id_detalle)->delete();
 
                         return [' se ha eliminado el grupo ' => $grupoeliminar->grupo];
                     } catch (\Exception $e) {
@@ -515,31 +541,33 @@ class CoordinadorController extends Controller
     {
         try {
             $idcurso = DetalleSolicitud::find($id_detalle);
-            $nombrecurso = Curso::where('id', $idcurso->id_curso)->first();
+            $nombrecurso = Curso::where('id', $idcurso->curso_id)->first();
 
             foreach ($grupo as $nuevogrupo) {
-                // por orben de las relaciones primero hacemos el horario
-                $nuevohorario = Horario::create([
-                    'tipo' => 'SolicitudGrupo',
-                ]);
-
-                // Recorremos e insertamos los dias del nuevo grupo
-                foreach ($nuevogrupo['horario'] as $dias) {
-                    $nuevodia = Dias::create([
-                        'id_dia' => $dias['id_dia'],
-                        'entrada' => $dias['entrada'],
-                        'salida' => $dias['salida'],
-                        'id_horario' => $nuevohorario->id,
-                    ]);
-                }
-                // ahora si ingresamos la referencia del grupo a la base de datos
+                
                 $nuevogrupo = SolicitudGrupo::create([
+                    'profesor_id' => $nuevogrupo['profesor_id'],
                     'grupo' => $nuevogrupo['grupo'],
                     'cupo' => $nuevogrupo['cupo'],
-                    'id_detalle' => $id_detalle,
-                    'id_profesor' => $nuevogrupo['id_profesor'],
-                    'id_horario' => $nuevohorario->id,
+                    'carga_id' => $nuevogrupo['carga_id'],
+                    'individual_colegiado' => $nuevogrupo['individual_colegiado'],
+                    'tutoria' => $nuevogrupo['tutoria'],
+                    'horas' => $nuevogrupo['horas'],
+                    'recinto' => $nuevogrupo['recinto'],
+                    'detalle_solicitud_id' => $id_detalle,
                 ]);
+
+            // ahora agregamos el nuevo horario
+                foreach ($nuevogrupo['horario'] as $dias) {
+
+                    $nuevodia = HorariosGrupo::create([
+                        'dia_id' => $dias['dia_id'],
+                        'solicitud_grupo_id' => $nuevogrupo->id,
+                        'hora_inicio' => $dias['hora_inicio'],
+                        'hora_fin' => $dias['hora_fin'],
+                    ]);
+                }
+
             }
 
             return [' se añadio el grupo ' => $nuevogrupo->grupo];
@@ -550,22 +578,30 @@ class CoordinadorController extends Controller
 
     public function Actualizar_grupo($idgrupobd, $gruporequest)
     {
+   
         try {
             // fragmento para editar un grupo
             $grupoeditar = SolicitudGrupo::find($idgrupobd);
             $grupoeditar->grupo = $gruporequest['grupo'];
             $grupoeditar->cupo = $gruporequest['cupo'];
-            $grupoeditar->id_profesor = $gruporequest['id_profesor'];
-            // vamos a editar el horario eliminando los dias que hay y agregando los nuevos sin alterar el id del horario
-            Dias::where('id_horario', $grupoeditar->id_horario)->delete();
+            $grupoeditar->profesor_id = $gruporequest['profesor_id'];
+            $grupoeditar->carga_id = $gruporequest['carga_id'];
+            $grupoeditar->individual_colegiado = $gruporequest['individual_colegiado'];
+            $grupoeditar->tutoria = $gruporequest['tutoria'];
+            $grupoeditar->horas = $gruporequest['horas'];
+            $grupoeditar->recinto = $gruporequest['recinto'];
+            
+            //vamos a editar el horario eliminando los dias que hay y agregando los nuevos sin alterar el id del horario
+            HorariosGrupo::where('solicitud_grupo_id',$idgrupobd)->delete();
+
             // recorremos los nuevos dias de su grupo
             foreach ($gruporequest['horario'] as $dias) {
-                // añadimos los nuevos dia con su referencia apropiada
-                $nuevodia = Dias::create([
-                    'id_dia' => $dias['id_dia'],
-                    'entrada' => $dias['entrada'],
-                    'salida' => $dias['salida'],
-                    'id_horario' => $grupoeditar->id_horario,
+                //añadimos los nuevos dia con su referencia apropiada
+                $nuevodia = HorariosGrupo::create([
+                    'dia_id' => $dias['dia_id'],
+                    'solicitud_grupo_id' => $idgrupobd,
+                    'hora_inicio' => $dias['hora_inicio'],
+                    'hora_fin' => $dias['hora_fin'],
                 ]);
             }
             $grupoeditar->save();
