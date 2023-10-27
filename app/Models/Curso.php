@@ -11,11 +11,6 @@ class Curso extends Model
     protected $table = 'cursos';
     protected $guarded = [];
 
-    public function carga()
-    {
-        return $this->belongsTo(Carga::class, 'carga_id', 'id');
-    }
-
     public function planEstudios()
     {
         return $this->belongsToMany(PlanEstudios::class, 'curso_plan', 'curso_id', 'plan_estudios_id');

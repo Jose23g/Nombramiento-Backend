@@ -20,9 +20,4 @@ class Carga extends Model
     {
         return $this->hasMany(SolicitudGrupo::class, 'carga_id', 'id');
     }
-
-    public function cursos()
-    {
-        return $this->hasMany(Curso::class, 'carga_id', 'id');
-    }
 }
