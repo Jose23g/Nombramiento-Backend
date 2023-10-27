@@ -138,7 +138,7 @@ class UsuarioController extends Controller
         $usuario = $request->user();
 
         if ($usuario) {
-            $persona = Persona::find($usuario->persona_id);
+            $persona = $usuario->persona;
             $archivo = $persona->archivos;
             $telefono = $persona->telefono;
             $distrito = $persona->distrito;

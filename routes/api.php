@@ -8,9 +8,11 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\DetalleSolicitudController;
 use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\DocenciaController;
+use App\Http\Controllers\HorariosGrupoController;
 use App\Http\Controllers\PlanEstudiosController;
 use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\SolicitudCursoController;
+use App\Http\Controllers\SolicitudGrupoController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,11 +58,15 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('scope:Profesor')->group(function () {
     });
 
-    Route::middleware('scope:Coordinador')->controller(CoordinadorController::class)->group(function () {
-        Route::post('solicitud', 'Solicitud_de_curso');
-        Route::get('ultimasolicitud', 'ultimaSolicitud');
-        Route::get('listado', 'obtengaElListadoDeSolicitudes');
-
+    Route::middleware('scope:Coordinador')->group(function () {
+        Route::get('listadoSolicitudCursos', [SolicitudCursoController::class, 'obtengaLaLista']);
+        Route::get('listadoDetalleSolicitud', [DetalleSolicitudController::class, 'obtengaLaLista']);
+        Route::get('listadoSolicitudGrupos', [SolicitudGrupoController::class, 'obtengaLaLista']);
+        Route::get('listadoHorarioGrupos', [HorariosGrupoController::class, 'obtengaLaLista']);
+        Route::controller(CoordinadorController::class)->group(function () {
+            Route::post('solicitud', 'Solicitud_de_curso');
+            Route::get('ultimasolicitud', 'ultimaSolicitud');
+        });
         Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
@@ -71,7 +77,5 @@ Route::middleware('auth:api')->group(function () {
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
 Route::get('getprof', [CarreraController::class, 'muestreLosProfesores']);
-Route::get('getsol', [SolicitudCursoController::class, 'muestreUnaSolicitud']);
-Route::get('getdet', [DetalleSolicitudController::class, 'muestreElDetalleDeLaSolicitud']);
 
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DetalleSolicitud;
+use App\Models\SolicitudGrupo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class DetalleSolicitudController extends Controller
+class SolicitudGrupoController extends Controller
 {
     public function obtengaLaLista(Request $request)
     {
@@ -17,8 +17,8 @@ class DetalleSolicitudController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        $detalleSolicitudes = DetalleSolicitud::where('solicitud_curso_id', $request->id)->with(['curso.planEstudios'])->get();
+        $solicitudesGrupo = SolicitudGrupo::where('detalle_solicitud_id', $request->id)->with(['carga', 'profesor.persona'])->get();
 
-        return response()->json($detalleSolicitudes, 200);
+        return response()->json($solicitudesGrupo, 200);
     }
 }
