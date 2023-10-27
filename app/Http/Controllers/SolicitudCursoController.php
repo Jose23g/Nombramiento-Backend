@@ -9,7 +9,7 @@ class SolicitudCursoController extends Controller
     public function obtengaLaLista(Request $request)
     {
         $usuario = $request->user();
-        $solicitudesCurso = $usuario->solicitudCursos()->with(['coordinador', 'carrera', 'estado', 'fechaSolicitud'])->get();
+        $solicitudesCurso = $usuario->solicitudCursos()->with(['coordinador.persona', 'carrera', 'estado', 'fechaSolicitud'])->get();
 
         return response()->json($solicitudesCurso, 200);
     }
