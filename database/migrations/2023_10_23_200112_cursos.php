@@ -12,13 +12,11 @@ return new class() extends Migration {
     {
         Schema::create('cursos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('carga_id');
             $table->string('sigla');
             $table->string('nombre');
             $table->string('creditos');
             $table->string('grado_anual');
             $table->string('ciclo');
-            $table->foreign('carga_id')->references('id')->on('cargas');
             $table->timestamps();
         });
     }
