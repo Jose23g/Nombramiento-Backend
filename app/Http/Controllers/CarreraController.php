@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+
 class CarreraController extends Controller
 {
-    public function obtengaLaListaDeProfesoresPorCarrera()
+    public function obtengaLaListaDeProfesoresPorCarrera(Request $request)
     {
         $carrera = $request->user()->carreras->first();
         if ($carrera) {
@@ -18,7 +20,7 @@ class CarreraController extends Controller
         return response()->json(['message' => 'No se encontrado'], 500);
     }
 
-    public function obtengaLaListaDePlanEstudiosPorCarrera()
+    public function obtengaLaListaDePlanEstudiosPorCarrera(Request $request)
     {
         $carrera = $request->user()->carreras->first();
         if ($carrera) {
