@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Carga;
 
 class CargaController extends Controller
 {
-    //
+    public function obtengaLaListaDeCargas()
+    {
+        return Carga::all()->toJson();
+    }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BancoController;
 use App\Http\Controllers\CantonController;
+use App\Http\Controllers\CargaController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\CoordinadorController;
 use App\Http\Controllers\CursoController;
@@ -72,13 +73,15 @@ Route::middleware('auth:api')->group(function () {
         Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
-            Route::get('getcurse', 'obtengaPorPlanDeEstudio');
         });
     });
 });
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
-Route::get('getprof', [CarreraController::class, 'muestreLosProfesores']);
+Route::get('listadoDeProfesores', [CarreraController::class, 'obtengaLaListaDeProfesoresPorCarrera']);
+Route::get('listadoDePlanEstudios', [CarreraController::class, 'obtengaLaListaDePlanEstudiosPorCarrera']);
+Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);
+Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
 
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
 

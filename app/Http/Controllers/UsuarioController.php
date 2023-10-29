@@ -210,4 +210,6 @@ class UsuarioController extends Controller
             return response()->json(['status' => 'true', 'scopes' => $scopes], 200);
         }
     }
+
+
 }
