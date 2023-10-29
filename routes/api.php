@@ -48,6 +48,10 @@ Route::middleware('auth:api')->prefix('usuario')->controller(UsuarioController::
 });
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('listadoDeProfesores', [CarreraController::class, 'obtengaLaListaDeProfesoresPorCarrera']);
+    Route::get('listadoDePlanEstudios', [CarreraController::class, 'obtengaLaListaDePlanEstudiosPorCarrera']);
+    Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);
+    Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
     Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
         Route::post('/establecer-plazo', 'fechaRecepcion');
@@ -78,10 +82,5 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
-Route::get('listadoDeProfesores', [CarreraController::class, 'obtengaLaListaDeProfesoresPorCarrera']);
-Route::get('listadoDePlanEstudios', [CarreraController::class, 'obtengaLaListaDePlanEstudiosPorCarrera']);
-Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);
-Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
 
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
-

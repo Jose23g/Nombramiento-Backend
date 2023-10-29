@@ -31,15 +31,7 @@ class CarreraController extends Controller
 
     public function obtengaLaListaDePlanEstudiosPorCarrera(Request $request)
     {
-        $validator =
-            Validator::make($request->all(), ['id' => 'required'], [
-                'required' => 'El campo :attribute es requerido.',
-            ]);
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 422);
-        }
-        $validatedData = $validator->validated();
-        $carrera = Carrera::find($request->id);
+        $carrera = $request->user()->carreras->first();
         if ($carrera) {
             $planEstudios = $carrera->planEstudios()->with('grado')->get()->map(function ($planEstudio) {
                 return ['id' => $planEstudio->id, 'nombre' => $planEstudio->anio.' - '.$planEstudio->grado->nombre];
