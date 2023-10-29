@@ -9,6 +9,7 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\DetalleSolicitudController;
 use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\DocenciaController;
+use App\Http\Controllers\FechaSolicitudController;
 use App\Http\Controllers\HorariosGrupoController;
 use App\Http\Controllers\PlanEstudiosController;
 use App\Http\Controllers\ProvinciaController;
@@ -52,6 +53,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('listadoDePlanEstudios', [CarreraController::class, 'obtengaLaListaDePlanEstudiosPorCarrera']);
     Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);
     Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
+    Route::get('coordinadorActual', [UsuarioController::class, 'obtengaElCoordinadorActual']);
     Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
         Route::post('/establecer-plazo', 'fechaRecepcion');
@@ -86,5 +88,6 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
+Route::get('listadoDeFechas', [FechaSolicitudController::class, 'obtengaLaListaDeFechas']);
 
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);

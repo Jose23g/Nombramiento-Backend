@@ -211,5 +211,11 @@ class UsuarioController extends Controller
         }
     }
 
+    public function obtengaElCoordinadorActual(Request $request)
+    {
+        $carrera = $request->user()->carreras->first();
+        $persona = $request->user()->persona;
 
+        return ['coordinador_id' => $request->user()->id, 'nombre' => $persona->nombre, 'carrera_id' => $carrera->id, 'carrera_nombre' => $carrera->nombre];
+    }
 }
