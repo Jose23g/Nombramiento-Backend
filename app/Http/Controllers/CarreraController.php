@@ -2,22 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Carrera;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-
 class CarreraController extends Controller
 {
-    public function obtengaLaListaDeProfesoresPorCarrera(Request $request)
+    public function obtengaLaListaDeProfesoresPorCarrera()
     {
-        $validator =
-            Validator::make($request->all(), ['id' => 'required'], [
-                'required' => 'El campo :attribute es requerido.',
-            ]);
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 422);
-        }
-        $carrera = Carrera::find($request->id);
+        $carrera = $request->user()->carreras->first();
         if ($carrera) {
             $profesores = $carrera->usuarios()->with('persona')->where('rol_id', 1)->get()->map(function ($profesor) {
                 return ['id' => $profesor->id, 'nombre' => $profesor->persona->nombre];
@@ -29,7 +18,7 @@ class CarreraController extends Controller
         return response()->json(['message' => 'No se encontrado'], 500);
     }
 
-    public function obtengaLaListaDePlanEstudiosPorCarrera(Request $request)
+    public function obtengaLaListaDePlanEstudiosPorCarrera()
     {
         $carrera = $request->user()->carreras->first();
         if ($carrera) {
