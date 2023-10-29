@@ -63,6 +63,10 @@ Route::middleware('auth:api')->group(function () {
 
     Route::middleware('scope:Profesor')->group(function () {
         Route::post('trabajo', [TrabajoController::class, 'Agregar_trabajo']);
+        Route::get('listartrabajoshorario', [TrabajoController::class, 'Obtener_listado_trabajos_Persona']);
+        Route::post('editartrabajo', [TrabajoController::class, 'Editar_trabajo']);
+        Route::post('eliminartrabajo', [TrabajoController::class, 'Eliminar_trabajo']);
+        Route::post('buscartrabajo', [TrabajoController::class, 'Buscar_trabajo']);
     });
 
     Route::middleware('scope:Coordinador')->group(function () {
