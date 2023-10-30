@@ -140,6 +140,7 @@ class TrabajoController extends Controller
                     'Lugar' => $trabajo['lugar_trabajo'],
                     'Cargo' => $trabajo['cargo'],
                     'jornada' => $jornada->sigla_jornada,
+                    'horas_jornada' => $jornada->horas_jornada,
                     'horario_trabajo' => $horario
                 ];
 
@@ -312,7 +313,7 @@ class TrabajoController extends Controller
         try {
 
             $usuario = $request->user();
-            
+
             $carga = Carga::find($request->carga_id);
 
             $nuevaactividad = Actividad::create([
@@ -326,7 +327,7 @@ class TrabajoController extends Controller
                 'fecha_fin' => $request->fecha_fin,
                 'carga_id' => $request->carga_id,
                 'usuario_id' => $usuario->id,
-                'estado_id'=>5
+                'estado_id' => 5
             ]);
 
             return response()->json([
@@ -346,16 +347,163 @@ class TrabajoController extends Controller
     }
     public function Listar_trabajosfinal_graduacion(Request $request)
     {
+        $usuario = $request->user();
 
+        try {
+
+            $actividades = Actividad::where('usuario_id', $usuario->id)->where('categoria', 'trabajofinalgraduacion')->where('estado_id', 5)->get();
+            
+            if($actividades->isEmpty()){
+
+                return response()->json(['message' => 'no se encuentran trabajos de graduacion activos'], 200);
+            }
+
+            $listaactividades = [];
+
+            foreach ($actividades as $actividad) {
+
+                $carga = Carga::find($actividad['carga_id']);
+
+                $lineaactividad = (object) [
+                    'id' => $actividad['id'],
+                    'tipo' => $actividad['tipo'],
+                    'estudiante' => $actividad->estudiante,
+                    'modalidad' => $actividad['modalidad'],
+                    'grado' => $actividad['grado'],
+                    'postgrado' => $actividad['postgrado'],
+                    'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
+                    'carga' => $carga->nombre
+                ];
+                $listaactividades[] = $lineaactividad;
+            }
+
+            return response()->json(['TFG' => $listaactividades], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
     }
     public function Editar_trabajofinal_graduacion(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+            'estudiante' => 'required',
+            'modalidad' => 'required',
+            'grado' => 'required',
+            'postgrado' => 'required',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date'
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $trabajofinaleditar = Actividad::find($request->id);
+            $trabajofinaleditar->estudiante = $request->estudiante;
+            $trabajofinaleditar->modalidad = $request->modalidad;
+            $trabajofinaleditar->grado = $request->grado;
+            $trabajofinaleditar->postgrado = $request->postgrado;
+            $trabajofinaleditar->fecha_inicio = $request->fecha_inicio;
+            $trabajofinaleditar->fecha_fin = $request->fecha_fin;
+            $trabajofinaleditar->save();
+
+            $carga = Carga::find($trabajofinaleditar->carga_id);
+
+            return response()->json([
+                'message' => 'se ha editado con exito el trabajo final de graduacion',
+                'id' => $trabajofinaleditar->id,
+                'tipo' => $trabajofinaleditar->tipo,
+                'estudiante' =>$trabajofinaleditar->estudiante,
+                'modalidad' => $trabajofinaleditar->modalidad,
+                'grado' => $trabajofinaleditar->grado,
+                'postgrado' => $trabajofinaleditar->postgrado,
+                'carga' => $carga->nombre,
+                'vigencia' => $trabajofinaleditar->fecha_inicio . '/' . $trabajofinaleditar->fecha_fin,
+
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
     }
     public function Eliminar_trabajofinal_graduacion(Request $request)
     {
+        $validator =  Validator::make($request->all(),[
+            'id' => 'required|exists:actividades,id'
+        ]);
 
+        if($validator->fails()) {
+            return response()->json(['error'=> $validator->errors()],422);  
+        }
+
+        try {
+            
+            $actividadeliminar = Actividad::find($request->id);
+            //pendiente el metodo eliminar real
+            $actividadeliminar->estado_id = 6;
+            $actividadeliminar->save();
+
+            $carga = Carga::find($actividadeliminar->carga_id);
+
+            return response()->json([
+                'message' => 'se ha eliminado con exito el trabajo final de graduacion',
+                'id' => $actividadeliminar->id,
+                'tipo' => $actividadeliminar->tipo,
+                'estudiante' =>$actividadeliminar->estudiante,
+                'modalidad' => $actividadeliminar->modalidad,
+                'grado' => $actividadeliminar->grado,
+                'postgrado' => $actividadeliminar->postgrado,
+                'carga' => $carga->nombre,
+                'vigencia' => $actividadeliminar->fecha_inicio . '/' . $actividadeliminar->fecha_fin,
+
+            ], 200);
+            
+        }catch(Exception $e){
+
+            return response()->json(['error'=> $validator->errors()],422);
+
+        }
     }
+
+    public function Buscar_trabajofinal_graduacion(Request $request){
+
+        $validator =  Validator::make($request->all(),[
+            'id' => 'required|exists:actividades,id'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(['error'=> $validator->errors()],422);  
+        }
+
+        try {
+            
+            $actividadbuscada = Actividad::find($request->id);
+            $carga = Carga::find($actividadbuscada->carga_id);
+            return response()->json([
+                'message' => ' El trabajo final de graduacion consultado es',
+                'id' => $actividadbuscada->id,
+                'tipo' => $actividadbuscada->tipo,
+                'estudiante' =>$actividadbuscada->estudiante,
+                'modalidad' => $actividadbuscada->modalidad,
+                'grado' => $actividadbuscada->grado,
+                'postgrado' => $actividadbuscada->postgrado,
+                'carga' => $carga->nombre,
+                'vigencia' => $actividadbuscada->fecha_inicio . '/' . $actividadbuscada->fecha_fin,
+
+            ], 200);
+            
+        }catch(Exception $e){
+
+            return response()->json(['error'=> $validator->errors()],422);
+
+        }
+    }
+
 
     //Proyectos de investigacion Accionsocial P6
 
