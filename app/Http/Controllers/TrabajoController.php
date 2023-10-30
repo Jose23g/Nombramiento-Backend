@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Actividad;
 use App\Models\HorariosTrabajo;
 use App\Models\Persona;
 use Exception;
@@ -9,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Trabajo;
 use App\Models\Usuario;
+use App\Models\Carga;
 use App\Models\Dias;
 use App\Models\Jornada;
 use Illuminate\Support\Facades\Validator;
@@ -254,40 +256,152 @@ class TrabajoController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        try{
+        try {
 
-        $trabajo = Trabajo::find($request->id);
-        $horariotrabajo = HorariosTrabajo::where('trabajo_id', $trabajo->id)->get();
-        $horario=[];
-         foreach ($horariotrabajo as $dia){
-            $nombredia = Dias::find($dia['dia_id']);
-            
-            $lineadia = (object) [
-                'id' => $dia['id'],
-                'dia' => $nombredia->nombre,
-                'hora_inicio' => $dia['hora_inicio'],
-                'hora_fin' => $dia['hora_fin']
-            ];
-            $horario[] = $lineadia;
-         }
+            $trabajo = Trabajo::find($request->id);
+            $horariotrabajo = HorariosTrabajo::where('trabajo_id', $trabajo->id)->get();
+            $horario = [];
+            foreach ($horariotrabajo as $dia) {
+                $nombredia = Dias::find($dia['dia_id']);
 
-        $jornada = Jornada::find($trabajo->jornada_id);
-       
+                $lineadia = (object) [
+                    'id' => $dia['id'],
+                    'dia' => $nombredia->nombre,
+                    'hora_inicio' => $dia['hora_inicio'],
+                    'hora_fin' => $dia['hora_fin']
+                ];
+                $horario[] = $lineadia;
+            }
 
-        return response()->json([
-            'message' => 'Se ha encontrado el trabajo solicitado',
-            'id' => $trabajo->id,
-            'lugar' => $trabajo->lugar_trabajo,
-            'cargo' => $trabajo->cargo,
-            'jornada' => $jornada->sigla_jornada,
-            'horario' => $horario
-        ], 200);
+            $jornada = Jornada::find($trabajo->jornada_id);
 
-        }catch (Exception $e){
+
+            return response()->json([
+                'message' => 'Se ha encontrado el trabajo solicitado',
+                'id' => $trabajo->id,
+                'lugar' => $trabajo->lugar_trabajo,
+                'cargo' => $trabajo->cargo,
+                'jornada' => $jornada->sigla_jornada,
+                'horario' => $horario
+            ], 200);
+
+        } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
+    // TRABAJOS FINALES DE GRADUACION P6
+    public function Agregar_trabajofinal_graduacion(Request $request)
+    {
+
+        $Validator = Validator::make($request->all(), [
+            'tipo' => 'required',
+            'estudiante' => 'required',
+            'modalidad' => 'required',
+            'grado' => 'required',
+            'postgrado' => 'required',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date',
+            'carga_id' => 'required|exists:cargas,id',
+        ]);
+
+        if ($Validator->fails()) {
+
+            return response()->json(['error' => $Validator->errors()]);
+        }
+        try {
+
+            $usuario = $request->user();
+            
+            $carga = Carga::find($request->carga_id);
+
+            $nuevaactividad = Actividad::create([
+                'categoria' => "trabajofinalgraduacion",
+                'tipo' => $request->tipo,
+                'estudiante' => $request->estudiante,
+                'modalidad' => $request->modalidad,
+                'grado' => $request->grado,
+                'postgrado' => $request->postgrado,
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_fin' => $request->fecha_fin,
+                'carga_id' => $request->carga_id,
+                'usuario_id' => $usuario->id,
+                'estado_id'=>5
+            ]);
+
+            return response()->json([
+                'message' => 'Se ha inresado Trabajo Final de Graduacion',
+                'tipo' => $nuevaactividad->tipo,
+                'estudiante' => $nuevaactividad->estudiante,
+                'modalidad' => $nuevaactividad->modalidad,
+                'vigencia' => $nuevaactividad->fecha_inicio . ' / ' . $nuevaactividad->fecha_fin,
+                'carga' => $carga->nombre
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+
+    }
+    public function Listar_trabajosfinal_graduacion(Request $request)
+    {
+
+    }
+    public function Editar_trabajofinal_graduacion(Request $request)
+    {
+
+    }
+    public function Eliminar_trabajofinal_graduacion(Request $request)
+    {
+
+    }
+
+    //Proyectos de investigacion Accionsocial P6
+
+    public function Agregar_proyecto_accion(Request $request)
+    {
+
+    }
+    public function Listar_proyectos_accion(Request $request)
+    {
+
+    }
+    public function Editar_proyectos_accion(Request $request)
+    {
+
+    }
+    public function Eliminar_proyectos_accion(Request $request)
+    {
+
+    }
+
+    // Cargos docente, administrativos, comisiones 
+    public function Agregar_cargo_DAC(Request $request)
+    {
+
+    }
+    public function Listar__cargos_DAC(Request $request)
+    {
+
+    }
+    public function Editar__cargo_DAC(Request $request)
+    {
+
+    }
+    public function Eliminar__cargo_DAC(Request $request)
+    {
+
+    }
+    // METODO PARA OBTENER TODAS LAS OTRAS ACTIVIDADES DE UN USUARIO PARA P6
+
+    public function Obtener_trabajo_actividades_persona(Request $request)
+    {
+
+    }
 
 }
+
+
+
 

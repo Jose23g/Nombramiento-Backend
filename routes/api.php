@@ -71,6 +71,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('editartrabajo', [TrabajoController::class, 'Editar_trabajo']);
         Route::post('eliminartrabajo', [TrabajoController::class, 'Eliminar_trabajo']);
         Route::post('buscartrabajo', [TrabajoController::class, 'Buscar_trabajo']);
+        Route::post('agregartrabajofinal', [TrabajoController::class, 'Agregar_trabajofinal_graduacion']);
     });
 
     Route::middleware('scope:Coordinador')->group(function () {
