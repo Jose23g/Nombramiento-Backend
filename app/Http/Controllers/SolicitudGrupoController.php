@@ -54,7 +54,7 @@ class SolicitudGrupoController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        $solicitudesGrupo = SolicitudGrupo::where('detalle_solicitud_id', $request->id)->with(['carga', 'profesor.persona'])->get();
+        $solicitudesGrupo = SolicitudGrupo::where('detalle_solicitud_id', $request->id)->with(['carga', 'profesor.persona'])->orderByDesc('id')->get();
 
         return response()->json($solicitudesGrupo, 200);
     }

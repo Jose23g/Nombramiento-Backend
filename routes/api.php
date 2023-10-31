@@ -76,6 +76,7 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('scope:Coordinador')->group(function () {
         Route::controller(SolicitudCursoController::class)->group(function () {
             Route::get('listadoSolicitudCursos', 'obtengaLaLista');
+            Route::get('marqueComoPendienteLaSolicitudDeCursos', 'marqueComoPendiente');
             Route::post('agregueLaSolicitudDeCursos', 'agregue');
         });
         Route::controller(DetalleSolicitudController::class)->group(function () {

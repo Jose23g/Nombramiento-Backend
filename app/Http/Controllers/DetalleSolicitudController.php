@@ -38,7 +38,7 @@ class DetalleSolicitudController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        $detalleSolicitudes = DetalleSolicitud::where('solicitud_curso_id', $request->id)->with(['curso.planEstudios'])->get();
+        $detalleSolicitudes = DetalleSolicitud::where('solicitud_curso_id', $request->id)->with(['curso.planEstudios'])->orderByDesc('id')->get();
 
         return response()->json($detalleSolicitudes, 200);
     }
