@@ -28,17 +28,15 @@ class DocenciaController extends Controller
                 $request->all(),
                 [
                     'anio' => 'required',
-                    'semestre' => 'required',
+                    'ciclo' => 'required',
                     'fecha_inicio' => 'required',
-                    'fecha_fin' => 'required',
-                    'nombre' => 'required',
+                    'fecha_fin' => 'required'
                 ],
                 [
                     'anio.required' => 'Es anio no puede estar vacío',
-                    'semestre.required' => 'El semestre no puede estar vacío',
+                    'ciclo.required' => 'El ciclo no puede estar vacío',
                     'fecha_inicio.required' => 'Es necesario establecer una fecha de inicio',
                     'fecha_fin.required' => 'Es necesario establecer una fecha de final',
-                    'nombre.required' => 'Es necesario un nombre',
                 ]
             );
 
@@ -46,17 +44,16 @@ class DocenciaController extends Controller
                 return response()->json(['error' => $validator->errors()], 400);
             }
 
-            $solicitud_existente = FechaSolicitud::where('anio', $request->anio)->where('semestre', $request->semestre)->first();
+            $solicitud_existente = FechaSolicitud::where('anio', $request->anio)->where('ciclo', $request->ciclo)->first();
 
 
             if ($solicitud_existente) {
-                return response()->json(['Errormessage' => 'Ya se ha establecido una fecha para año y semestre solicitado please try again'], 400);
+                return response()->json(['Errormessage' => 'Ya se ha establecido una fecha para año y ciclo solicitado please try again'], 400);
             }
 
             FechaSolicitud::create([
-                'nombre' => $request->input('nombre'),
                 'anio' => $request->input('anio'),
-                'semestre' => $request->input('semestre'),
+                'ciclo' => $request->input('ciclo'),
                 'fecha_inicio' => $request->input('fecha_inicio'),
                 'fecha_fin' => $request->input('fecha_fin'),
             ]);
