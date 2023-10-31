@@ -75,7 +75,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('listartrabajofinal', [TrabajoController::class, 'Listar_trabajosfinal_graduacion']);
         Route::post('editartrabajofinal', [TrabajoController::class, 'Editar_trabajofinal_graduacion']);
         Route::post('eliminartrabajofinal', [TrabajoController::class, 'Eliminar_trabajofinal_graduacion']);
-        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);    });
+        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);   
+        Route::post('agregarproyectoaccion', [TrabajoController::class, 'Agregar_proyecto_accion']);   
+        Route::get('listarproyectoaccion', [TrabajoController::class, 'Listar_proyectos_accion']);
+     });
 
     Route::middleware('scope:Coordinador')->group(function () {
         Route::controller(SolicitudCursoController::class)->group(function () {
