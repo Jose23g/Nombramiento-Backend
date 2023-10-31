@@ -24,9 +24,6 @@ class DetalleSolicitudController extends Controller
                 'solicitud_curso_id' => $request->solicitud_curso_id,
                 'curso_id' => $request->curso_id,
                 'grupos' => 0,
-                'horas_teoricas' => $request->horas_teoricas,
-                'horas_practicas' => $request->horas_practicas,
-                'horas_laboratorio' => $request->horas_laboratorio,
         ]);
 
         return response()->json(['Message' => 'Se ha registrado con éxito', 'detalle_solicitud_id' => $detalleSolicitud->id], 200);

@@ -32,6 +32,15 @@ class SolicitudGrupoController extends Controller
             'cupo' => $request->cupo,
             'recinto' => $request->recinto,
         ]);
+        $detalleSolicitud = $solicitudGrupo->detalleSolicitud;
+        $detalleSolicitud->update(['grupos' => $detalleSolicitud->grupos + 1]);
+        $numero = 0;
+        if (strpos($solicitudGrupo->carga->nombre, ' - ') !== false) {
+            list($fraccion, $numero) = explode(' - ', $solicitudGrupo->carga->nombre);
+        } else {
+            $numero = $solicitudGrupo->carga->nombre;
+        }
+        $detalleSolicitud->solicitudCurso->update(['carga_total' => $detalleSolicitud->solicitudCurso->carga_total + floatval($numero)]);
 
         return response()->json(['Message' => 'Se ha registrado con éxito', 'solicitud_grupo_id' => $solicitudGrupo->id], 200);
     }

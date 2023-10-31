@@ -17,6 +17,9 @@ return new class() extends Migration {
             $table->string('creditos');
             $table->string('grado_anual');
             $table->string('ciclo');
+            $table->integer('horas_teoricas')->nullable()->default(0);
+            $table->integer('horas_practicas')->nullable()->default(0);
+            $table->integer('horas_laboratorio')->nullable()->default(0);
             $table->timestamps();
         });
     }
