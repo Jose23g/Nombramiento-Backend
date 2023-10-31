@@ -72,10 +72,23 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::middleware('scope:Coordinador')->group(function () {
-        Route::get('listadoSolicitudCursos', [SolicitudCursoController::class, 'obtengaLaLista']);
-        Route::get('listadoDetalleSolicitud', [DetalleSolicitudController::class, 'obtengaLaLista']);
-        Route::get('listadoSolicitudGrupos', [SolicitudGrupoController::class, 'obtengaLaLista']);
-        Route::get('listadoHorarioGrupos', [HorariosGrupoController::class, 'obtengaLaLista']);
+        Route::controller(SolicitudCursoController::class)->group(function () {
+            Route::get('listadoSolicitudCursos', 'obtengaLaLista');
+            Route::post('agregueLaSolicitudDeCursos', 'agregue');
+        });
+        Route::controller(DetalleSolicitudController::class)->group(function () {
+            Route::get('listadoDetalleSolicitud', 'obtengaLaLista');
+            Route::post('agregueElDetalleDeSolicitud', 'agregue');
+        });
+        Route::controller(SolicitudGrupoController::class)->group(function () {
+            Route::get('listadoSolicitudGrupos', 'obtengaLaLista');
+            Route::post('agregueLaSolicitudDeGrupos', 'agregue');
+        });
+        Route::controller(HorariosGrupoController::class)->group(function () {
+            Route::get('listadoHorarioGrupos', 'obtengaLaLista');
+            Route::post('agregueElHorarioDelGrupo', 'agregue');
+        });
+
         Route::controller(CoordinadorController::class)->group(function () {
             Route::post('solicitud', 'Solicitud_de_curso');
             Route::get('ultimasolicitud', 'ultimaSolicitud');

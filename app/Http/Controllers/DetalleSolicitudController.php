@@ -8,6 +8,30 @@ use Illuminate\Support\Facades\Validator;
 
 class DetalleSolicitudController extends Controller
 {
+    public function agregue(Request $request)
+    {
+        $validator =
+            Validator::make($request->all(), [
+                'solicitud_curso_id' => 'required',
+                'curso_id' => 'required',
+            ], [
+                'required' => 'El campo :attribute es requerido.',
+            ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $detalleSolicitud = DetalleSolicitud::create([
+                'solicitud_curso_id' => $request->solicitud_curso_id,
+                'curso_id' => $request->curso_id,
+                'grupos' => 0,
+                'horas_teoricas' => $request->horas_teoricas,
+                'horas_practicas' => $request->horas_practicas,
+                'horas_laboratorio' => $request->horas_laboratorio,
+        ]);
+
+        return response()->json(['Message' => 'Se ha registrado con éxito', 'detalle_solicitud_id' => $detalleSolicitud->id], 200);
+    }
+
     public function obtengaLaLista(Request $request)
     {
         $validator =
