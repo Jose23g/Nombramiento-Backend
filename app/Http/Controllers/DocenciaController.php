@@ -275,4 +275,30 @@ class DocenciaController extends Controller
         }
         return $grupoaceptados;
     }
+
+    public function Obtener_ultima_fecha(Request $request)
+    {
+
+        try {
+
+            $ultimafecha = FechaSolicitud::orderBy('created_at', 'desc')->first();
+
+            if (!$ultimafecha) {
+
+                return response()->json(['message' => 'no hay fechas ingresadas'], 200);
+            }
+
+            return response()->json([
+                'anio' => $ultimafecha->anio,
+                'semestre' => $ultimafecha->ciclo,
+                'fecha_inicio' => $ultimafecha->fecha_inicio,
+                'fecha_fin' => $ultimafecha->fecha_fin
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+
+        }
+    }
 }

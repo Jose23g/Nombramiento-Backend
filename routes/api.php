@@ -54,6 +54,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);
     Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
     Route::get('coordinadorActual', [UsuarioController::class, 'obtengaElCoordinadorActual']);
+
     Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
         Route::post('/establecer-plazo', 'fechaRecepcion');
@@ -61,6 +62,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('vertodas', 'Listar_todas_solicitudes');
         Route::get('fechas', 'Listar_fechas_solicitudes');
         Route::post('cambiar-estado', 'cambiarEstadoSolicitud');
+        Route::get('ultimafecha', 'Obtener_ultima_fecha');
     });
 
     Route::middleware('scope:Profesor')->group(function () {
