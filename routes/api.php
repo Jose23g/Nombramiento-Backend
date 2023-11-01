@@ -12,6 +12,7 @@ use App\Http\Controllers\DocenciaController;
 use App\Http\Controllers\FechaSolicitudController;
 use App\Http\Controllers\HorariosGrupoController;
 use App\Http\Controllers\PlanEstudiosController;
+use App\Http\Controllers\ProfesorContoller;
 use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\SolicitudCursoController;
 use App\Http\Controllers\SolicitudGrupoController;
@@ -69,6 +70,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('editartrabajo', [TrabajoController::class, 'Editar_trabajo']);
         Route::post('eliminartrabajo', [TrabajoController::class, 'Eliminar_trabajo']);
         Route::post('buscartrabajo', [TrabajoController::class, 'Buscar_trabajo']);
+        Route::get('p6', [ProfesorContoller::class, 'previsualizarP6']);
     });
 
     Route::middleware('scope:Coordinador')->group(function () {
