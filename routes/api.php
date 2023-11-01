@@ -78,6 +78,19 @@ Route::middleware('auth:api')->group(function () {
         Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);   
         Route::post('agregarproyectoaccion', [TrabajoController::class, 'Agregar_proyecto_accion']);   
         Route::get('listarproyectoaccion', [TrabajoController::class, 'Listar_proyectos_accion']);
+        Route::post('editarproyectoaccion', [TrabajoController::class, 'Editar_proyectos_accion']);
+        Route::post('eliminarproyectoaccion', [TrabajoController::class, 'Eliminar_proyectos_accion']);
+        Route::post('buscarproyectoaccion', [TrabajoController::class, 'Buscar_proyectos_accion']);
+        Route::post('agregarcargoDAC', [TrabajoController::class, 'Agregar_cargo_DAC']);
+        Route::get('listarcargoDAC', [TrabajoController::class, 'Listar_cargos_DAC']);
+        Route::post('editarcargoDAC', [TrabajoController::class, 'Editar_cargo_DAC']);
+        Route::post('eliminarcargoDAC', [TrabajoController::class, 'Eliminar_cargo_DAC']);
+        Route::get('buscarcargoDAC', [TrabajoController::class, 'Buscar_cargo_DAC']);
+        Route::post('agregarotralabor', [TrabajoController::class, 'Agregar_otra_labor']);
+        Route::get('listarotraslabores', [TrabajoController::class, 'Listar_otras_labores']);
+        Route::post('editarotralabor', [TrabajoController::class, 'Editar_otra_labor']);
+        Route::post('eliminarotralabor', [TrabajoController::class, 'Eliminar_otra_labor']);
+        Route::get('buscarotralabor', [TrabajoController::class, 'Buscar_otra_labor']);
      });
 
     Route::middleware('scope:Coordinador')->group(function () {
