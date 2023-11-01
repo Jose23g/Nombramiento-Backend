@@ -118,7 +118,7 @@ class CoordinadorController extends Controller
                         ]);
                         
 
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         DB::rollback();
 
                         return response()->json(['message' => $e->getMessage()], 422);
