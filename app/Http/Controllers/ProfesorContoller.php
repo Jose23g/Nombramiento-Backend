@@ -65,9 +65,6 @@ class ProfesorContoller extends Controller
                 }
             }
         }
-
-
-
         /*  $borradorP6 = [
              "ID_Profesor" => $profesor->id,
              "Nombre" => $persona->nombre,
