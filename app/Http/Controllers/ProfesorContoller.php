@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Carga;
+use App\Models\DetalleSolicitud;
 use App\Models\Persona;
 use App\Models\Curso;
 use App\Models\PSeis;
@@ -45,67 +46,73 @@ class ProfesorContoller extends Controller
     {
         $profesor = $request->user();
         $carreras = $request->user()->carreras;
+        $provincia = $request->user()->persona->provincia->nombre;
+        $canton = $request->user()->persona->canton->nombre;
+
         $persona = Persona::where("id", $profesor->persona_id)->first();
         $telefonos = Telefono::where("persona_id", $persona->id)->first();
-        $ultimaSolicitud = [];
         $cursoInfo = [];
-        foreach ($carreras as $carrera) {
-            $ultimaSolicitud[] = $this->obtenerUltimaSolicitudPorCarrera($carrera->id, 4);
-        }
-        return response()->json($ultimaSolicitud);
 
-        foreach ($ultimaSolicitud as $solictud) {
-            if ($solictud) { // Verifica si $solictud no es null
-                foreach ($solictud->detalleSolicitudes as $detalle_solicitud) {
-                    if ($detalle_solicitud->solicitudGrupos) {
-                        foreach ($detalle_solicitud->solicitudGrupos as $grupos) {
-                            $cursoInfo[] = $this->obtenerInfoCurso($detalle_solicitud->curso_id, $grupos->carga_id);
-                        }
-                    }
+        foreach ($carreras as $carrera) {
+            $solicitudINFO[] = $this->obtenerUltimaSolicitudPorCarrera($carrera->id, 4);
+        }
+
+        foreach ($solicitudINFO as $solicitud) {
+            foreach ($solicitud as $key) {
+                // Accede a los campos de cada curso usando $key y $value
+                $curso = Curso::find($key->curso_id);
+                $carga = Carga::find($key->carga_id);
+                if ($curso) {
+                    $cursoInfo[] = (object) [
+                        'Codigo' => $curso->sigla,
+                        'nombre_del_curso' => $curso->nombre,
+                        'carga' => $carga->nombre
+                    ];
                 }
+
+
             }
         }
-        /*  $borradorP6 = [
-             "ID_Profesor" => $profesor->id,
-             "Nombre" => $persona->nombre,
-             "Cedula" => $persona->cedula,
-             "Correo" => $profesor->correo,
-             "OtroCorreo" => $profesor->otro_correo,
-             "telefonos" => (object) [
-                 $telefonos->personal,
-                 $telefonos->trabajo,
-             ],
-             "Cursos" => (object) $cursoIds,
-         ];
 
-         return response()->json($borradorP6); */
+        $borradorP6 = [
+            "ID_Profesor" => $profesor->id,
+            "Nombre" => $persona->nombre,
+            "Cedula" => $persona->cedula,
+            "Correo" => $profesor->correo,
+            "OtroCorreo" => $profesor->otro_correo,
+            "provincia" => $provincia,
+            "canton" => $canton,
+            "telefonos" => [
+                "personal" => $telefonos->personal,
+                "trabajo" => $telefonos->trabajo,
+            ],
+            "Cursos" => $cursoInfo,
+            "Actividades" => 'actividades',
+        ];
+
+        return response()->json($borradorP6);
     }
 
     public function obtenerUltimaSolicitudPorCarrera($carreraID, $profesorID)
     {
-        /*  $solicitud = SolicitudCurso::where('carrera_id', $carreraID)->where('id', 29)->latest()->with('detalleSolicitudes.solicitudGrupos')->first(); */
-        $solicitud = SolicitudCurso::where('carrera_id', $carreraID)->where('id', 29)
-            ->with([
-                'detalleSolicitudes' => function ($query) {
-                    $query->select('id', 'curso_id', 'solicitud_curso_id');
-                },
-                'detalleSolicitudes.solicitudGrupos' => function ($query) {
-                    $query->select('detalle_solicitud_id', 'profesor_id', 'carga_id');
-                    $query->where('profesor_id', 4);
-                }
-            ])
+        $solicitud = SolicitudCurso::where('carrera_id', $carreraID)
+            ->where('id', 29)
             ->latest()
-            ->first(['id', 'carrera_id']);
+            ->first('id');
 
-        return $solicitud;
-    }
+        $cursos = DetalleSolicitud::join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
+            ->where('solicitud_grupos.profesor_id', 4)
+            ->where('detalle_solicitudes.solicitud_curso_id', $solicitud->id)
+            ->select(
+                'detalle_solicitudes.solicitud_curso_id',
+                'solicitud_grupos.detalle_solicitud_id',
+                'solicitud_grupos.id',
+                'solicitud_grupos.profesor_id',
+                'detalle_solicitudes.curso_id',
+                'solicitud_grupos.carga_id',
+            )
+            ->get();
 
-    public function obtenerInfoCurso($cursoID, $cargaID)
-    {
-        $curso = Curso::find($cursoID)->select('nombre', 'sigla');
-        $carga = Carga::find($cargaID)->select('nombre');
-
-        $curso->carga = $carga;
-        return $curso;
+        return $cursos;
     }
 }
