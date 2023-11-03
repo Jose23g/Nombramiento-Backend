@@ -60,7 +60,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
         Route::post('/establecer-plazo', 'fechaRecepcion');
         Route::post('/comprobar', 'comprobarFechaRecepcion');
-        Route::get('vertodas', 'Listar_todas_solicitudes');
+        Route::get('verpendientes', 'Listar_todas_solicitudes');
         Route::get('fechas', 'Listar_fechas_solicitudes');
         Route::post('cambiar-estado', 'cambiarEstadoSolicitud');
         Route::get('ultimafecha', 'Obtener_ultima_fecha');

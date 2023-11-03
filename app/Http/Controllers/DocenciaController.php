@@ -135,23 +135,31 @@ class DocenciaController extends Controller
         $solicitudcompleta = [];
 
         try {
-            $solicitudcursos = SolicitudCurso::all();
+
+            $consutaestados = app()->make(EstadosController::class);
+
+            $categoria = $consutaestados->Estado_por_nombre('pendiente');
+
+            $solicitudcursos = SolicitudCurso::where('estado_id', $categoria)->get();
+
+           
 
             if ($solicitudcursos == null) {
                 return response()->json(['Message' => 'No hay solicitudes de cursos'], 200);
             }
 
             foreach ($solicitudcursos as $solicitud) {
-                $nombrecarrera = Carrera::where('id', $solicitud->id_carrera)->select('nombre')->first();
-                $usuario = Usuario::where('id', $solicitud->id_coordinador)->first();
-                $nombrepersona = Persona::where('id', $usuario->id_persona)->select('nombre')->first();
-                $estado = Estado::where('id', $solicitud->id_estado)->select('nombre')->first();
-                $solicitud->fecha = Carbon::parse($solicitud->fecha)->format('Y-m-d');
+                $nombrecarrera = Carrera::where('id', $solicitud->carrera_id)->select('nombre')->first();
+                $usuario = Usuario::where('id', $solicitud->coordinador_id)->first();
+                $nombrepersona = Persona::where('id', $usuario->persona_id)->select('nombre')->first();
+                $estado = Estado::where('id', $solicitud->estado_id)->select('nombre')->first();
+                $semestre =  FechaSolicitud::where('id', $solicitud->fecha_solicitud_id)->first();
+                $fecha = Carbon::parse($solicitud->created_at)->format('Y-m-d');
 
-                $solicitudarreglo = [
+                $solicitudarreglo = (object) [
                     'id' => $solicitud->id,
-                    'fecha' => $solicitud->fecha,
-                    'semestre' => $solicitud->semestre,
+                    'fecha' => $fecha,
+                    'semestre' => $semestre->ciclo,
                     'carrera' => $nombrecarrera->nombre,
                     'coordinador' => $nombrepersona->nombre,
                     'estado' => $estado->nombre
