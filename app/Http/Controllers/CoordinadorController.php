@@ -4,10 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Curso;
 use App\Models\DetalleSolicitud;
-use App\Models\Dias;
 use App\Models\Estado;
-use App\Models\FechaSolicitud;
-use App\Models\Horario;
 use App\Models\HorariosGrupo;
 use App\Models\Persona;
 use App\Models\SolicitudCurso;
@@ -118,7 +115,7 @@ class CoordinadorController extends Controller
                         ]);
                         
 
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         DB::rollback();
 
                         return response()->json(['message' => $e->getMessage()], 422);
