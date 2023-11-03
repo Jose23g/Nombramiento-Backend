@@ -15,9 +15,6 @@ return new class() extends Migration {
             $table->unsignedBigInteger('solicitud_curso_id');
             $table->unsignedBigInteger('curso_id');
             $table->string('grupos');
-            $table->string('horas_teoricas')->nullable();
-            $table->string('horas_practicas')->nullable();
-            $table->string('horas_laboratorio')->nullable();
             $table->foreign('solicitud_curso_id')->references('id')->on('solicitud_cursos');
             $table->foreign('curso_id')->references('id')->on('cursos');
             $table->timestamps();
