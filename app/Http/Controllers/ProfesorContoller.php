@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfesorContoller extends Controller
 {
+    protected $trabajoController;
+
+    public function __construct(TrabajoController $trabajoController){
+        $this->trabajoController = $trabajoController;
+    }
+
     public function generarP6(Request $request)
     {
         $profesorID = $request->user()->id;
@@ -52,6 +58,7 @@ class ProfesorContoller extends Controller
         $persona = Persona::where("id", $profesor->persona_id)->first();
         $telefonos = Telefono::where("persona_id", $persona->id)->first();
         $cursoInfo = [];
+        $actividades = $this->trabajoController->Disparador($profesor->id);
 
         foreach ($carreras as $carrera) {
             $solicitudINFO[] = $this->obtenerUltimaSolicitudPorCarrera($carrera->id, 4);
@@ -87,7 +94,7 @@ class ProfesorContoller extends Controller
                 "trabajo" => $telefonos->trabajo,
             ],
             "Cursos" => $cursoInfo,
-            "Actividades" => 'actividades',
+            "Actividades" => $actividades,
         ];
 
         return response()->json($borradorP6);

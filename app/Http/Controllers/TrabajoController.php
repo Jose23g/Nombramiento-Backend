@@ -1153,20 +1153,19 @@ class TrabajoController extends Controller
     }
 
     // METODO PARA OBTENER TODAS LAS OTRAS ACTIVIDADES DE UN USUARIO PARA P6
-    public function Disparador(Request $request)
+    public function Disparador( $usuarioID)
     {
-        $usuario = $request->user();
-
+       
         try{
             $fechaparametro = Carbon::now()->format('Y-m-d');
 
-            $actividadesTFG = $this->Cargar_actividad_categoria('trabajo_final_graduacion', $usuario->id, $fechaparametro);
+            $actividadesTFG = $this->Cargar_actividad_categoria('trabajo_final_graduacion', $usuarioID, $fechaparametro);
     
-            $actividadesPIAC = $this->Cargar_actividad_categoria('proyecto_investigacion_accion_social', $usuario->id, $fechaparametro);
+            $actividadesPIAC = $this->Cargar_actividad_categoria('proyecto_investigacion_accion_social', $usuarioID, $fechaparametro);
     
-            $actividadesDAC = $this->Cargar_actividad_categoria('cargo_dac', $usuario->id, $fechaparametro);
+            $actividadesDAC = $this->Cargar_actividad_categoria('cargo_dac', $usuarioID, $fechaparametro);
     
-            $actividadesOTRA = $this->Cargar_actividad_categoria('otra_labor', $usuario->id, $fechaparametro);
+            $actividadesOTRA = $this->Cargar_actividad_categoria('otra_labor', $usuarioID, $fechaparametro);
 
             $listaactividades = (object) [
                 'TFG' => $actividadesTFG,
@@ -1179,7 +1178,7 @@ class TrabajoController extends Controller
  
         }catch(Exception $e){
 
-            return response()->json(['error'=> $e->getMessage()],422);
+            return response()->json(['error'=> $e->getMessage()], 422);
 
         }
 
