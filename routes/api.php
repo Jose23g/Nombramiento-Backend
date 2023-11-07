@@ -76,12 +76,12 @@ Route::middleware('auth:api')->group(function () {
         Route::get('listartrabajofinal', [TrabajoController::class, 'Listar_trabajosfinal_graduacion']);
         Route::post('editartrabajofinal', [TrabajoController::class, 'Editar_trabajofinal_graduacion']);
         Route::post('eliminartrabajofinal', [TrabajoController::class, 'Eliminar_trabajofinal_graduacion']);
-        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);        
+        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);
         Route::get('listartrabajofinal', [TrabajoController::class, 'Listar_trabajosfinal_graduacion']);
         Route::post('editartrabajofinal', [TrabajoController::class, 'Editar_trabajofinal_graduacion']);
         Route::post('eliminartrabajofinal', [TrabajoController::class, 'Eliminar_trabajofinal_graduacion']);
-        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);   
-        Route::post('agregarproyectoaccion', [TrabajoController::class, 'Agregar_proyecto_accion']);   
+        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);
+        Route::post('agregarproyectoaccion', [TrabajoController::class, 'Agregar_proyecto_accion']);
         Route::get('listarproyectoaccion', [TrabajoController::class, 'Listar_proyectos_accion']);
         Route::post('editarproyectoaccion', [TrabajoController::class, 'Editar_proyectos_accion']);
         Route::post('eliminarproyectoaccion', [TrabajoController::class, 'Eliminar_proyectos_accion']);
@@ -104,18 +104,22 @@ Route::middleware('auth:api')->group(function () {
             Route::get('listadoSolicitudCursos', 'obtengaLaLista');
             Route::get('marqueComoPendienteLaSolicitudDeCursos', 'marqueComoPendiente');
             Route::post('agregueLaSolicitudDeCursos', 'agregue');
+            Route::delete('elimineLaSolicitudDeCursos', 'elimineLaSolicitud');
         });
         Route::controller(DetalleSolicitudController::class)->group(function () {
             Route::get('listadoDetalleSolicitud', 'obtengaLaLista');
             Route::post('agregueElDetalleDeSolicitud', 'agregue');
+            Route::delete('elimineElDetalleDeSolicitud', 'elimineElDetalle');
         });
         Route::controller(SolicitudGrupoController::class)->group(function () {
             Route::get('listadoSolicitudGrupos', 'obtengaLaLista');
             Route::post('agregueLaSolicitudDeGrupos', 'agregue');
+            Route::delete('elimineLaSolicitudDeGrupos', 'elimineLaSolicitud');
         });
         Route::controller(HorariosGrupoController::class)->group(function () {
             Route::get('listadoHorarioGrupos', 'obtengaLaLista');
             Route::post('agregueElHorarioDelGrupo', 'agregue');
+            Route::delete('elimineElHorarioDeGrupo', 'elimineElHorario');
         });
 
         Route::controller(CoordinadorController::class)->group(function () {
