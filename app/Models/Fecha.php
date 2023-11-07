@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FechaSolicitud extends Model
+class Fecha extends Model
 {
     use HasFactory;
-    protected $table = 'fecha_solicitudes';
+    protected $table = 'fechas';
     protected $guarded = [];
 
     public function solicitudCursos()

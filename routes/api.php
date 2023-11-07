@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\BancoController;
 use App\Http\Controllers\CantonController;
 use App\Http\Controllers\CargaController;
@@ -9,7 +10,7 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\DetalleSolicitudController;
 use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\DocenciaController;
-use App\Http\Controllers\FechaSolicitudController;
+use App\Http\Controllers\FechaController;
 use App\Http\Controllers\HorariosGrupoController;
 use App\Http\Controllers\PlanEstudiosController;
 use App\Http\Controllers\ProfesorContoller;
@@ -67,35 +68,40 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::middleware('scope:Profesor')->group(function () {
-        Route::post('trabajo', [TrabajoController::class, 'Agregar_trabajo']);
-        Route::get('listartrabajoshorario', [TrabajoController::class, 'Obtener_listado_trabajos_Persona']);
-        Route::post('editartrabajo', [TrabajoController::class, 'Editar_trabajo']);
-        Route::post('eliminartrabajo', [TrabajoController::class, 'Eliminar_trabajo']);
-        Route::post('buscartrabajo', [TrabajoController::class, 'Buscar_trabajo']);
-        Route::post('agregartrabajofinal', [TrabajoController::class, 'Agregar_trabajofinal_graduacion']);
-        Route::get('listartrabajofinal', [TrabajoController::class, 'Listar_trabajosfinal_graduacion']);
-        Route::post('editartrabajofinal', [TrabajoController::class, 'Editar_trabajofinal_graduacion']);
-        Route::post('eliminartrabajofinal', [TrabajoController::class, 'Eliminar_trabajofinal_graduacion']);
-        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);
-        Route::get('listartrabajofinal', [TrabajoController::class, 'Listar_trabajosfinal_graduacion']);
-        Route::post('editartrabajofinal', [TrabajoController::class, 'Editar_trabajofinal_graduacion']);
-        Route::post('eliminartrabajofinal', [TrabajoController::class, 'Eliminar_trabajofinal_graduacion']);
-        Route::post('buscartrabajofinal', [TrabajoController::class, 'Buscar_trabajofinal_graduacion']);
-        Route::post('agregarproyectoaccion', [TrabajoController::class, 'Agregar_proyecto_accion']);
-        Route::get('listarproyectoaccion', [TrabajoController::class, 'Listar_proyectos_accion']);
-        Route::post('editarproyectoaccion', [TrabajoController::class, 'Editar_proyectos_accion']);
-        Route::post('eliminarproyectoaccion', [TrabajoController::class, 'Eliminar_proyectos_accion']);
-        Route::post('buscarproyectoaccion', [TrabajoController::class, 'Buscar_proyectos_accion']);
-        Route::post('agregarcargoDAC', [TrabajoController::class, 'Agregar_cargo_DAC']);
-        Route::get('listarcargoDAC', [TrabajoController::class, 'Listar_cargos_DAC']);
-        Route::post('editarcargoDAC', [TrabajoController::class, 'Editar_cargo_DAC']);
-        Route::post('eliminarcargoDAC', [TrabajoController::class, 'Eliminar_cargo_DAC']);
-        Route::get('buscarcargoDAC', [TrabajoController::class, 'Buscar_cargo_DAC']);
-        Route::post('agregarotralabor', [TrabajoController::class, 'Agregar_otra_labor']);
-        Route::get('listarotraslabores', [TrabajoController::class, 'Listar_otras_labores']);
-        Route::post('editarotralabor', [TrabajoController::class, 'Editar_otra_labor']);
-        Route::post('eliminarotralabor', [TrabajoController::class, 'Eliminar_otra_labor']);
-        Route::get('buscarotralabor', [TrabajoController::class, 'Buscar_otra_labor']);
+        Route::controller(TrabajoController::class)->group(function () {
+            Route::post('trabajo', 'agregue');
+            Route::get('listartrabajoshorario', 'obtengaElListadoPorPersona');
+            Route::post('editartrabajo', 'modifique');
+            Route::post('eliminartrabajo', 'elimine');
+            Route::post('buscartrabajo', 'obtengaPorId');
+        });
+        Route::controller(ActividadController::class)->group(function () {
+            Route::post('agregartrabajofinal', 'Agregar_trabajofinal_graduacion');
+            Route::get('listartrabajofinal', 'Listar_trabajosfinal_graduacion');
+            Route::post('editartrabajofinal', 'Editar_trabajofinal_graduacion');
+            Route::post('eliminartrabajofinal', 'Eliminar_trabajofinal_graduacion');
+            Route::post('buscartrabajofinal', 'Buscar_trabajofinal_graduacion');
+            Route::get('listartrabajofinal', 'Listar_trabajosfinal_graduacion');
+            Route::post('editartrabajofinal', 'Editar_trabajofinal_graduacion');
+            Route::post('eliminartrabajofinal', 'Eliminar_trabajofinal_graduacion');
+            Route::post('buscartrabajofinal', 'Buscar_trabajofinal_graduacion');
+            Route::post('agregarproyectoaccion', 'Agregar_proyecto_accion');
+            Route::get('listarproyectoaccion', 'Listar_proyectos_accion');
+            Route::post('editarproyectoaccion', 'Editar_proyectos_accion');
+            Route::post('eliminarproyectoaccion', 'Eliminar_proyectos_accion');
+            Route::post('buscarproyectoaccion', 'Buscar_proyectos_accion');
+            Route::post('agregarcargoDAC', 'Agregar_cargo_DAC');
+            Route::get('listarcargoDAC', 'Listar_cargos_DAC');
+            Route::post('editarcargoDAC', 'Editar_cargo_DAC');
+            Route::post('eliminarcargoDAC', 'Eliminar_cargo_DAC');
+            Route::get('buscarcargoDAC', 'Buscar_cargo_DAC');
+            Route::post('agregarotralabor', 'Agregar_otra_labor');
+            Route::get('listarotraslabores', 'Listar_otras_labores');
+            Route::post('editarotralabor', 'Editar_otra_labor');
+            Route::post('eliminarotralabor', 'Eliminar_otra_labor');
+            Route::get('buscarotralabor', 'Buscar_otra_labor');
+        });
+
         Route::get('p6', [ProfesorContoller::class, 'previsualizarP6']);
     });
 
@@ -134,6 +140,6 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
-Route::get('listadoDeFechas', [FechaSolicitudController::class, 'obtengaLaListaDeFechas']);
+Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']);
 
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);

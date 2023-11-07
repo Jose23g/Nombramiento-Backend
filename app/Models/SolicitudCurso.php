@@ -33,7 +33,7 @@ class SolicitudCurso extends Model
 
     public function fechaSolicitud()
     {
-        return $this->belongsTo(FechaSolicitud::class, 'fecha_solicitud_id', 'id');
+        return $this->belongsTo(Fecha::class, 'fecha_solicitud_id', 'id');
     }
 
     public function coordinador()
