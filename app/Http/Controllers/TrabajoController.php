@@ -242,7 +242,7 @@ class TrabajoController extends Controller
         }
 
         try {
-            $trabajo = Trabajo::with('jornada')->find($request->id);
+            $trabajo = Trabajo::find($request->id);
             $horariotrabajo = HorariosTrabajo::where('trabajo_id', $trabajo->id)->get();
             $horario = [];
             foreach ($horariotrabajo as $dia) {
