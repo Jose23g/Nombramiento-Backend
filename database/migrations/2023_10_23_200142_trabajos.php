@@ -15,10 +15,12 @@ return new class() extends Migration {
             $table->unsignedBigInteger('jornada_id');
             $table->unsignedBigInteger('usuario_id');
             $table->unsignedBigInteger('estado_id');
+            $table->unsignedBigInteger('fecha_id')->nullable();
+            $table->unsignedBigInteger('tipo_id')->nullable();
             $table->string('lugar_trabajo');
             $table->string('cargo');
-            $table->dateTime('fecha_inicio')->nullable();
-            $table->dateTime('fecha_fin')->nullable();
+            $table->foreign('fecha_id')->references('id')->on('fechas');
+            $table->foreign('tipo_id')->references('id')->on('tipo');
             $table->foreign('jornada_id')->references('id')->on('jornadas');
             $table->foreign('usuario_id')->references('id')->on('usuarios');
             $table->foreign('estado_id')->references('id')->on('estados');

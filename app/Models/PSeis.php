@@ -25,4 +25,9 @@ class PSeis extends Model
     {
         return $this->belongsTo(SolicitudGrupo::class, 'solicitud_grupo_id', 'id');
     }
+
+    public function trabajos()
+    {
+        return $this->belongsToMany(Trabajo::class, 'trabajos_p_seis', 'p_seis_id', 'trabajo_id');
+    }
 }

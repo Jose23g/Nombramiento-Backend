@@ -30,4 +30,14 @@ class Trabajo extends Model
     {
         return $this->hasMany(HorariosTrabajo::class, 'trabajo_id', 'id');
     }
+
+    public function pSeis()
+    {
+        return $this->belongsToMany(PSeis::class, 'trabajos_p_seis', 'trabajo_id', 'p_seis_id');
+    }
+
+    public function declaracionesJuradas()
+    {
+        return $this->belongsToMany(DeclaracionJurada::class, 'trabajos_declaraciones', 'trabajo_id', 'declaracion_jurada_id');
+    }
 }
