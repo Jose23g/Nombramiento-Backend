@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AprobacionSolicitudCurso;
 use App\Models\Curso;
 use App\Models\DetalleSolicitud;
 use App\Models\Estado;
@@ -18,7 +19,7 @@ class CoordinadorController extends Controller
 {
     public function Solicitud_de_curso(Request $request)
     {
-        
+
         $validator = Validator::make(
             $request->all(),
             [
@@ -79,10 +80,10 @@ class CoordinadorController extends Controller
                 'estado_id' => 2,
             ]);
 
-            
+
 
             foreach ($request->detalle_solicitud as $detalle) {
-               
+
                 try {
                     $nuevodetalle = DetalleSolicitud::create([
                         'grupos' => $detalle['grupos'],
@@ -93,14 +94,14 @@ class CoordinadorController extends Controller
                         'curso_id' => $detalle['curso_id'],
                     ]);
 
-                    
+
                 } catch (\Exception $e) {
                     DB::rollback();
 
                     return response()->json(['message' => $e->getMessage()], 422);
                 }
                 foreach ($detalle['solicitud_grupo'] as $solicitud_grupo) {
-          // creamos el grupo
+                    // creamos el grupo
                     try {
                         $nuevogrupo = SolicitudGrupo::create([
                             'profesor_id' => $solicitud_grupo['profesor_id'],
@@ -113,14 +114,14 @@ class CoordinadorController extends Controller
                             'recinto' => $solicitud_grupo['recinto'],
                             'detalle_solicitud_id' => $nuevodetalle->id,
                         ]);
-                        
+
 
                     } catch (\Exception $e) {
                         DB::rollback();
 
                         return response()->json(['message' => $e->getMessage()], 422);
                     }
-                   
+
                     foreach ($solicitud_grupo['horario'] as $dias) {
                         // verificamos los dias que vienen para un  grupo y lo agregamos en la base de datos
                         try {
@@ -130,7 +131,7 @@ class CoordinadorController extends Controller
                                 'hora_inicio' => $dias['hora_inicio'],
                                 'hora_fin' => $dias['hora_fin'],
                             ]);
-                            
+
                         } catch (\Exception $e) {
                             DB::rollback();
 
@@ -194,7 +195,7 @@ class CoordinadorController extends Controller
 
         $detallesrequest = $request->detalle_solicitud;
         $cursos_solicitud_anterior = Detallesolicitud::where('solicitud_curso_id', $request->id_solicitud)->get();
-     
+
         try {
             if ($detallesrequest) {
                 $historialcambiosnuevosdetalles = [];
@@ -244,9 +245,9 @@ class CoordinadorController extends Controller
                             // puedo generar un error general o uno especifico
                             return response()->json(['message' => $validator2->errors()], 400);
                         } else {
-                            
+
                             $nuevos[] = $detallessolicitud; // quiere decir que el detalle es nuevo.
-                            
+
                         }
                     } else {
                         $validarcursoexistente = Validator::make(
@@ -291,7 +292,7 @@ class CoordinadorController extends Controller
                             return response()->json(['message' => $validarcursoexistente->errors()], 400);
                         } else {
                             $detallexistente[] = $detallessolicitud; // quiere decir que el detalle es nuevo.
-                            
+
                         }
                     }
                 }
@@ -326,10 +327,10 @@ class CoordinadorController extends Controller
                             $grupos_cruso_anterior = SolicitudGrupo::where('detalle_solicitud_id', $cursoanterior->id)->get();
                             $historialcambiosdetalle = [];
                             // se procede a verificar la existencia de un detalle que coincideda con el anterior de la base de datos
-                            $detallenuevo = current(array_filter($nuevalistacursos, fn ($detalle) => $detalle['id'] == $cursoanterior->id));
+                            $detallenuevo = current(array_filter($nuevalistacursos, fn($detalle) => $detalle['id'] == $cursoanterior->id));
                             // quiere decir debido a que este detalle esta dentro de la bd y dentro de la nueva lista entonces vamos a compararlos a ver que pedo
                             if ($detallenuevo) {
-                                
+
                                 //actualizamos los datos de ser cambiados del detalle actual en la base de datos acorbde a lo que viene
                                 $detalleactualizar = Detallesolicitud::find($cursoanterior->id);
                                 $detalleactualizar->grupos = $detallenuevo['grupos'];
@@ -351,7 +352,7 @@ class CoordinadorController extends Controller
 
                                 if ($gruposnuevos) {
                                     try {
-                                        
+
                                         $nuevogrupo = $this->Añadir_grupo($cursoanterior->id, $gruposnuevos); // añadimos a los grupos nuevos del detalle
                                         // Ingresar al registro de acciones
                                         $historialcambiosdetalle[] = $nuevogrupo;
@@ -374,7 +375,7 @@ class CoordinadorController extends Controller
                                         }
                                     } else {
                                         // como si viene el grupo se procede a editar en base a lo que viene de la bd
-                                        $grupoaeditar = current(array_filter($grupoexistente, fn ($grupoe) => $grupoe['id'] == $grupo->id)); // busco el grupo a editar en el request
+                                        $grupoaeditar = current(array_filter($grupoexistente, fn($grupoe) => $grupoe['id'] == $grupo->id)); // busco el grupo a editar en el request
 
                                         if ($grupoaeditar) { // if solo para validarsh
                                             try {
@@ -389,8 +390,8 @@ class CoordinadorController extends Controller
                             }
 
                             $cambioshechosaldetalle = [
-                               'curso' => $cursodetalle->nombre,
-                               'cambios realizados' => $historialcambiosdetalle,
+                                'curso' => $cursodetalle->nombre,
+                                'cambios realizados' => $historialcambiosdetalle,
                             ];
                             // agrego los cambios del detalle al historial general
                             $historialcambiosdetallesexistentes[] = $cambioshechosaldetalle;
@@ -425,10 +426,12 @@ class CoordinadorController extends Controller
             }
 
             // retorno de estado del metodo
-            return response()->json(['la solicitud ha sido procesada',
-             'Cursos agregados' => $historialcambiosnuevosdetalles,
-             'Cursos actualizados' => $historialcambiosdetallesexistentes,
-             'Cursos eliminados' => $historialcambiosdetalleseliminados], 200);
+            return response()->json([
+                'la solicitud ha sido procesada',
+                'Cursos agregados' => $historialcambiosnuevosdetalles,
+                'Cursos actualizados' => $historialcambiosdetallesexistentes,
+                'Cursos eliminados' => $historialcambiosdetalleseliminados
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
@@ -437,11 +440,11 @@ class CoordinadorController extends Controller
     public function Ingresar_nuevos_detalle($listadetallesnueva, $id_solicitud)
     {
         try {
-            
+
             $detallesagregrados = [];
 
             foreach ($listadetallesnueva as $deta) {
-           
+
                 //creamos el nuevo detalle segun los nuevos detalles del request
                 $nuevodetallesolicitud = DetalleSolicitud::create([
                     'grupos' => $deta['grupos'],
@@ -454,7 +457,7 @@ class CoordinadorController extends Controller
                 $nombrecurso = Curso::where('id', $nuevodetallesolicitud->curso_id)->first();
                 // ahora recorremos el arreglo de los grupos del detalle
                 foreach ($deta['solicitud_grupo'] as $lineanuevogrupo) {
-                   
+
                     //creamos el grupo
                     $nuevogrupo = SolicitudGrupo::create([
                         'profesor_id' => $lineanuevogrupo['profesor_id'],
@@ -478,8 +481,8 @@ class CoordinadorController extends Controller
                 }
                 $detallesagregrados[] = $nombrecurso->nombre;
             }
-           
-            
+
+
 
             return [' Se agregaron los cursos ' => $detallesagregrados];
         } catch (\Exception $e) {
@@ -500,7 +503,7 @@ class CoordinadorController extends Controller
 
                         foreach ($grupos as $grupo) {
                             // eliminamos los dias y luego el grupo asociado
-                            HorariosGrupo::where('solicitud_grupo_id',$grupo->id)->delete();
+                            HorariosGrupo::where('solicitud_grupo_id', $grupo->id)->delete();
                             SolicitudGrupo::where('id', $grupo->id)->delete();
                             // una vez eliminado el grupo eliminamos los dias y el horario asignado al grupo
                         }
@@ -517,7 +520,7 @@ class CoordinadorController extends Controller
                     try {
                         $grupoeliminar = SolicitudGrupo::Where('id', $id_detalle)->first();
                         SolicitudGrupo::Where('id', $id_detalle)->delete();
-                        HorariosGrupo::where('solicitud_grupo_id',$id_detalle)->delete();
+                        HorariosGrupo::where('solicitud_grupo_id', $id_detalle)->delete();
 
                         return [' se ha eliminado el grupo ' => $grupoeliminar->grupo];
                     } catch (\Exception $e) {
@@ -541,7 +544,7 @@ class CoordinadorController extends Controller
             $nombrecurso = Curso::where('id', $idcurso->curso_id)->first();
 
             foreach ($grupo as $nuevogrupo) {
-                
+
                 $nuevogrupo = SolicitudGrupo::create([
                     'profesor_id' => $nuevogrupo['profesor_id'],
                     'grupo' => $nuevogrupo['grupo'],
@@ -554,7 +557,7 @@ class CoordinadorController extends Controller
                     'detalle_solicitud_id' => $id_detalle,
                 ]);
 
-            // ahora agregamos el nuevo horario
+                // ahora agregamos el nuevo horario
                 foreach ($nuevogrupo['horario'] as $dias) {
 
                     $nuevodia = HorariosGrupo::create([
@@ -575,7 +578,7 @@ class CoordinadorController extends Controller
 
     public function Actualizar_grupo($idgrupobd, $gruporequest)
     {
-   
+
         try {
             // fragmento para editar un grupo
             $grupoeditar = SolicitudGrupo::find($idgrupobd);
@@ -587,9 +590,9 @@ class CoordinadorController extends Controller
             $grupoeditar->tutoria = $gruporequest['tutoria'];
             $grupoeditar->horas = $gruporequest['horas'];
             $grupoeditar->recinto = $gruporequest['recinto'];
-            
+
             //vamos a editar el horario eliminando los dias que hay y agregando los nuevos sin alterar el id del horario
-            HorariosGrupo::where('solicitud_grupo_id',$idgrupobd)->delete();
+            HorariosGrupo::where('solicitud_grupo_id', $idgrupobd)->delete();
 
             // recorremos los nuevos dias de su grupo
             foreach ($gruporequest['horario'] as $dias) {
@@ -607,5 +610,34 @@ class CoordinadorController extends Controller
         } catch (\Exception $e) {
             throw $e;
         }
+    }
+
+    public function obtenerProfesoresdeUltimaSolicitud(Request $request)
+    {
+        try {
+            $carreras = $request->user()->carreras;
+            $solicitudes = [];
+            foreach ($carreras as $carrera) {
+                $solicitudes = $this->obtenerSolicitud($carrera->id);
+
+            }
+
+        } catch (\Exception $e) {
+
+        }
+    }
+
+    public function obtenerSolicitud($carreraID)
+    {
+        $solicitudID = AprobacionSolicitudCurso::where('id_carrera', $carreraID)->latest()->first('solicitud_curso_id');
+        return $solicitudID;
+
+    }
+
+    public function obtenerprofesores($solicitudID){
+
+        $profesores = DetalleSolicitud::join('solicitud_grupos','detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
+        ->where('solicitud_curso_id', $solicitudID)
+        -
     }
 }

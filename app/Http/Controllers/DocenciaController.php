@@ -224,6 +224,7 @@ class DocenciaController extends Controller
         $solicitudAprobada = AprobacionSolicitudCurso::create([
             'id_solicitud' => $solicitud->id,
             'id_encargado' => $idEncargado,
+            'id_carrera' => $solicitud->id_carrera,
 
         ]);
         $cursosaceptados = $this->aprobarUnCursoDeUnaSolicitud($solicitudAprobada, $solicitud);

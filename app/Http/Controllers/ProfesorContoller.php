@@ -103,7 +103,6 @@ class ProfesorContoller extends Controller
     public function obtenerUltimaSolicitudPorCarrera($carreraID, $profesorID)
     {
         $solicitud = SolicitudCurso::where('carrera_id', $carreraID)
-            ->where('id', 29)
             ->latest()
             ->first('id');
 
