@@ -202,7 +202,7 @@ class DocenciaController extends Controller
 
             $result = [];
             if ($estadoNombre == 'Aceptado') {
-                $solicitudCurso->id_estado = $estado->id;
+                $solicitudCurso->estado_id = $estado->id;
                 $solicitudCurso->save();
                 $this->aprobarUnaSolicitud($solicitudCurso, $request->user()->id, $result);
 
@@ -222,9 +222,9 @@ class DocenciaController extends Controller
     public function aprobarUnaSolicitud($solicitud, $idEncargado, &$result)
     {
         $solicitudAprobada = AprobacionSolicitudCurso::create([
-            'id_solicitud' => $solicitud->id,
-            'id_encargado' => $idEncargado,
-            'id_carrera' => $solicitud->carrera_id,
+            'solicitud_curso_id' => $solicitud->id,
+            'encargado_id' => $idEncargado,
+            'carrera_id' => $solicitud->carrera_id,
 
         ]);
         $cursosaceptados = $this->aprobarUnCursoDeUnaSolicitud($solicitudAprobada, $solicitud);
@@ -238,21 +238,21 @@ class DocenciaController extends Controller
     public function aprobarUnCursoDeUnaSolicitud($solcitudAprobada, $solicitud)
     {
         $cursoaceptados = [];
-        $detalleCurso = DetalleSolicitud::where('id_solicitud', $solicitud->id)->get();
+        $detalleCurso = DetalleSolicitud::where('solicitud_curso_id', $solicitud->id)->get();
 
         //para un curso
-        foreach ($detalleCurso as $curso) {
-            $cursoaceptado = DetalleAprobacionCurso::create([
-                'id_solicitud' => $solcitudAprobada->id,
+        foreach ($detalleCurso as $solicitudDetalle) {
+            $detalleAprobado = DetalleAprobacionCurso::create([
+                'solicitud_aprobada_id' => $solcitudAprobada->id,
                 //Id de la solicitud aprobada
-                'id_detalle' => $curso->id,
-                //Id de los cursos que estan en la solicitud
+                'detalle_solicitud_id' => $solicitudDetalle->id,
+                //Id del detalle que se aprueba
 
             ]);
 
-            $grupoaceptados = $this->aprobarGruposParaUnaSolicitud($cursoaceptado, $curso);
+            $grupoaceptados = $this->aprobarGruposParaUnaSolicitud($detalleAprobado, $solicitudDetalle);
             $cursoaceptados[] = [
-                'cursoaceptado' => $cursoaceptado,
+                'cursoaceptado' => $detalleAprobado,
                 'grupoaceptado' => $grupoaceptados,
             ];
         }
@@ -260,19 +260,19 @@ class DocenciaController extends Controller
     }
 
     //Sirve para aprobar los grupos dentro de un curso para una solicitud
-    public function aprobarGruposParaUnaSolicitud($cursoaceptado, $curso)
+    public function aprobarGruposParaUnaSolicitud($detalleAprobado, $detalleSolicitud)
     {
         $grupoaceptados = [];
-        $cursogrupo = SolicitudGrupo::where('id_detalle', $curso->id)->get();
+        $cursogrupo = SolicitudGrupo::where('detalle_solicitud_id', $detalleSolicitud->id)->get();
         foreach ($cursogrupo as $grupo) {
             $grupoAceptado = GrupoAprobado::create([
-                'id_detalle' => $cursoaceptado->id,
+                'detalle_aprobado_id' => $detalleAprobado->id,
                 //id del curso que aceptaron
-                'id_solicitud' => $grupo->id,
+                'solicitud_grupo_id' => $grupo->id,
                 //id del grupo que estan en la solicitud
             ]);
             $grupoaceptados[] = ['grupoaceptado' => $grupoAceptado];
-            $grupoaceptados = array_merge($grupoaceptados, $this->aprobarGruposParaUnaSolicitud($grupoAceptado, $grupo));
+           // $grupoaceptados = array_merge($grupoaceptados, $this->aprobarGruposParaUnaSolicitud($grupoAceptado, $grupo));
         }
         return $grupoaceptados;
     }

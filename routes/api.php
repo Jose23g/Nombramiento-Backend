@@ -121,7 +121,7 @@ Route::middleware('auth:api')->group(function () {
         Route::controller(CoordinadorController::class)->group(function () {
             Route::post('solicitud', 'Solicitud_de_curso');
             Route::get('ultimasolicitud', 'ultimaSolicitud');
-            Route::get('sol-profesores', 'obtenerProfesoresdeUltimaSolicitud');
+            Route::get('solicitud-profesores', 'obtenerProfesoresdeUltimaSolicitud');
         });
         Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
         Route::controller(CursoController::class)->group(function () {

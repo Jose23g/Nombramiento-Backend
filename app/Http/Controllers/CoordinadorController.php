@@ -71,7 +71,7 @@ class CoordinadorController extends Controller
             // }
 
             $usuario = $request->user();
-
+            
             $nuevasolicitud = SolicitudCurso::create([
                 'fecha_solicitud_id' => $request->fecha_id,
                 'carga_total' => $request->carga_total,
@@ -616,25 +616,38 @@ class CoordinadorController extends Controller
     {
         try {
             $carreras = $request->user()->carreras;
-            $solicitudes = [];
             $profesores = [];
+            
             foreach ($carreras as $carrera) {
-                $solicitudes = $this->obtenerSolicitud($carrera->id);
+                $solicitudes = $this->obtenerUltimaSolicitudAprobada($carrera->id);
+                
+                foreach ($solicitudes as $solicitudID) {
+                    
+                    //return response()->json($solicitudID->solicitud_curso_id,200);
+                   $profesores [] = $this->obtenerprofesores($solicitudID->solicitud_curso_id);
+                }
             }
-
-            foreach ($solicitudes as $solicitudID) {
-                $profesores = $this->obtenerProfesoresde($solicitudID);
-            }
-            return $profesores;
+           //$profesores = array_unique($profesores);
+    
+            return response()->json($profesores, 200);
+    
         } catch (\Exception $e) {
+    
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    
 
-    public function obtenerSolicitud($carreraID)
+    public function obtenerUltimaSolicitudAprobada($carreraID)
     {
-        $solicitudID = AprobacionSolicitudCurso::where('id_carrera', $carreraID)->latest()->first('solicitud_curso_id');
-        return $solicitudID;
+        $solicitudID = AprobacionSolicitudCurso::where('carrera_id', $carreraID)->latest()->get('solicitud_curso_id');
+       // $solicitudID = SolicitudCurso::where('carrera_id', $carreraID)->latest()->first('id');
+
+       
+       if($solicitudID){
+           return $solicitudID;
+       }
+       return throw new \Exception('No se ha aprobado una solicitud aun');
 
     }
 
@@ -644,11 +657,11 @@ class CoordinadorController extends Controller
         $resultados = SolicitudGrupo::join('detalle_solicitudes as ds', 'solicitud_grupos.detalle_solicitud_id', '=', 'ds.id')
             ->join('usuarios as us', 'solicitud_grupos.profesor_id', '=', 'us.id')
             ->join('personas as pe', 'us.persona_id', '=', 'pe.id')
-            ->where('ds.solicitud_curso_id', 1)
+            ->where('ds.solicitud_curso_id', $solicitudID)
             ->select('profesor_id', 'pe.nombre')
             ->distinct()
             ->get();
 
-        return response()->json($resultados);
+        return $resultados;
     }
 }
