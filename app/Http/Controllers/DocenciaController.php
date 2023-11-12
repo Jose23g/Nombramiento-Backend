@@ -218,13 +218,13 @@ class DocenciaController extends Controller
         }
     }
 
-    //Cuando se acepta una solicitud se asocia a un encargado y a un registro de aceptacion
+    //Cuando se acepta una solicitud se asocia a un encargado, a un registro de aceptacion y una carrrera.
     public function aprobarUnaSolicitud($solicitud, $idEncargado, &$result)
     {
         $solicitudAprobada = AprobacionSolicitudCurso::create([
             'id_solicitud' => $solicitud->id,
             'id_encargado' => $idEncargado,
-            'id_carrera' => $solicitud->id_carrera,
+            'id_carrera' => $solicitud->carrera_id,
 
         ]);
         $cursosaceptados = $this->aprobarUnCursoDeUnaSolicitud($solicitudAprobada, $solicitud);

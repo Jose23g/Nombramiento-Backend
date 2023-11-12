@@ -617,13 +617,17 @@ class CoordinadorController extends Controller
         try {
             $carreras = $request->user()->carreras;
             $solicitudes = [];
+            $profesores = [];
             foreach ($carreras as $carrera) {
                 $solicitudes = $this->obtenerSolicitud($carrera->id);
-
             }
 
+            foreach ($solicitudes as $solicitudID) {
+                $profesores = $this->obtenerProfesoresde($solicitudID);
+            }
+            return $profesores;
         } catch (\Exception $e) {
-
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -634,10 +638,17 @@ class CoordinadorController extends Controller
 
     }
 
-    public function obtenerprofesores($solicitudID){
+    public function obtenerprofesores($solicitudID)
+    {
 
-        $profesores = DetalleSolicitud::join('solicitud_grupos','detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
-        ->where('solicitud_curso_id', $solicitudID)
-        -
+        $resultados = SolicitudGrupo::join('detalle_solicitudes as ds', 'solicitud_grupos.detalle_solicitud_id', '=', 'ds.id')
+            ->join('usuarios as us', 'solicitud_grupos.profesor_id', '=', 'us.id')
+            ->join('personas as pe', 'us.persona_id', '=', 'pe.id')
+            ->where('ds.solicitud_curso_id', 1)
+            ->select('profesor_id', 'pe.nombre')
+            ->distinct()
+            ->get();
+
+        return response()->json($resultados);
     }
 }
