@@ -8,32 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 class DetalleSolicitud extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'detalle_solicitudes';
+    protected $guarded = [];
 
-    protected $fillable = [
-        'ciclo',
-        'grupos',
-        'recinto',
-        'carga',
-         'id_solicitud',
-         'id_curso',
-    ];
-
-    // Relación muchos a uno con SolicitudCurso
-    public function solicitudCurso()
-    {
-        return $this->belongsTo(SolicitudCurso::class, 'id_solicitud');
-    }
-
-    public function solicitudGrupo()
-    {
-        return $this->hasMany(SolicitudGrupo::class, 'id_detalle');
-    }
-
-    // Relación muchos a uno con Curso
     public function curso()
     {
-        return $this->belongsTo(Curso::class, 'id_curso');
+        return $this->belongsTo(Curso::class, 'curso_id', 'id');
+    }
+
+    public function solicitudCurso()
+    {
+        return $this->belongsTo(SolicitudCurso::class, 'solicitud_curso_id', 'id');
+    }
+
+    public function detalleAprobacionCursos()
+    {
+        return $this->hasMany(DetalleAprobacionCurso::class, 'detalle_solicitud_id', 'id');
+    }
+
+    public function solicitudGrupos()
+    {
+        return $this->hasMany(SolicitudGrupo::class, 'detalle_solicitud_id', 'id');
     }
 }

@@ -8,28 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 class Carrera extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'carreras';
+    protected $guarded = [];
 
-    protected $fillable = [
-      'nombre',
-    ];
-    // Relación uno a muchos con PlanEstudio
-    public function planesEstudio()
+    public function usuarios()
     {
-        return $this->hasMany(PlanEstudios::class, 'id_carrera');
+        return $this->belongsToMany(Usuario::class, 'usuario_carreras', 'carrera_id', 'usuario_id');
     }
-    // Relación uno a muchos con SolicitudCurso
-    public function solicitudesCarrera()
+
+    public function usuarioCarreras()
     {
-        return $this->hasMany(SolicitudCurso::class, 'id_carrera');
+        return $this->hasMany(UsuarioCarrera::class, 'carrera_id', 'id');
     }
-    public function coordinadores()
+
+    public function planEstudios()
     {
-        return $this->hasMany(UsuarioCarrera::class, 'id_carrera');
+        return $this->hasMany(PlanEstudios::class, 'carrera_id', 'id');
     }
-    public function carreraUsuarios()
+
+    public function solicitudCursos()
     {
-        return $this->hasManyThrough(Usuario::class, UsuarioCarrera::class, 'id_carrera', 'id', 'id', 'id_coordinador');
+        return $this->hasMany(SolicitudCurso::class, 'carrera_id', 'id');
     }
 }

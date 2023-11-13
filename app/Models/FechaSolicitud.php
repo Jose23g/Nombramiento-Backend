@@ -8,14 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class FechaSolicitud extends Model
 {
     use HasFactory;
+    protected $table = 'fecha_solicitudes';
     protected $guarded = [];
-    protected $table = 'fechas_solicitudes';
 
-    protected $fillable = [
-        'nombre',
-        'anio',
-        'semestre',
-        'fecha_inicio',
-        'fecha_fin',
-    ];
+    public function solicitudCursos()
+    {
+        return $this->hasMany(SolicitudCurso::class, 'fecha_solicitud_id', 'id');
+    }
 }

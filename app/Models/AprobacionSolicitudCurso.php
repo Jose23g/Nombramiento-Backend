@@ -8,26 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class AprobacionSolicitudCurso extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'aprobacion_solicitud_cursos';
-    protected $fillable = [
-        'id_solicitud',
-        'id_encargado',
-    ];
+    protected $guarded = [];
 
-    // Relación muchos a uno con SolicitudCurso
     public function solicitudCurso()
     {
-        return $this->belongsTo(SolicitudCurso::class, 'id_solicitud');
+        return $this->belongsTo(SolicitudCurso::class, 'solicitud_curso_id', 'id');
     }
-    // Relación muchos a uno con Usuario (Encargado)
+
     public function encargado()
     {
-        return $this->belongsTo(Usuario::class, 'id_encargado');
+        return $this->belongsTo(Usuario::class, 'encargado_id', 'id');
     }
-    // Relación uno a muchos con DetalleAprobacionCurso
-    public function detallesAprobacionCurso()
+
+    public function detalleAprobacionCursos()
     {
-        return $this->hasMany(DetalleAprobacionCurso::class, 'id_aprobacion');
+        return $this->hasMany(DetalleAprobacionCurso::class, 'curso_aprobado_id', 'id');
     }
 }

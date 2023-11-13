@@ -7,16 +7,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class Estado extends Model
 {
-  protected $table = 'estados';  
-  
-  protected $fillable = [
-        'nombre',
-    ];
-    
     use HasFactory;
-    
-    public function solicitudesCursos()
+    protected $table = 'estados';
+    protected $guarded = [];
+
+    public function actividades()
     {
-        return $this->hasMany(SolicitudCurso::class, 'id_estado');
+        return $this->hasMany(Actividades::class, 'estado_id', 'id');
+    }
+
+    public function trabajos()
+    {
+        return $this->hasMany(Trabajo::class, 'estado_id', 'id');
+    }
+
+    public function usuarios()
+    {
+        return $this->hasMany(Usuario::class, 'estado_id', 'id');
+    }
+
+    public function solicitudCursos()
+    {
+        return $this->hasMany(SolicitudCurso::class, 'estado_id', 'id');
     }
 }

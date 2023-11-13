@@ -8,18 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Telefono extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'telefonos';
-    
-    protected $fillable = [
-        'id_persona',
-        'personal',
-        'trabajo',
-         'otro'
-    ];
+    protected $guarded = [];
+
     public function persona()
     {
-        return $this->belongsTo(Persona::class, 'id_persona');
+        return $this->belongsTo(Persona::class, 'persona_id', 'id');
     }
-
 }

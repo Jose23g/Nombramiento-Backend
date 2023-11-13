@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Jornada extends Model
 {
     use HasFactory;
+    protected $table = 'jornadas';
+    protected $guarded = [];
+
+    public function trabajos()
+    {
+        return $this->hasMany(Trabajo::class, 'jornada_id', 'id');
+    }
 }

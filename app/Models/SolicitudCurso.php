@@ -8,47 +8,36 @@ use Illuminate\Database\Eloquent\Model;
 class SolicitudCurso extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'solicitud_cursos';
+    protected $guarded = [];
 
-    protected $fillable = [
-        'anio',
-        'semestre',
-        'id_coordinador',
-        'id_carrera',
-        'id_estado',
-        'fecha',
-        'observacion'
-    ];
-
-
-    // Relación muchos a uno con Usuario (Coordinador)
-    public function coordinador()
+    public function aprobacionSolicitudCursos()
     {
-        return $this->belongsTo(Usuario::class, 'id_coordinador');
+        return $this->hasMany(AprobacionSolicitudCurso::class, 'solicitud_curso_id', 'id');
     }
-    // Relación muchos a uno con Carrera
+
     public function carrera()
     {
-        return $this->belongsTo(Carrera::class, 'id_carrera');
-    }
-    // Relación uno a muchos con DetalleSolicitud
-    public function detallesSolicitud()
-    {
-        return $this->hasMany(DetalleSolicitud::class, 'id_solicitud');
-    }
-    // Relación uno a uno con AprobacionSolicitudCurso
-    public function aprobacionSolicitudCurso()
-    {
-        return $this->hasOne(AprobacionSolicitudCurso::class, 'id_solicitud');
-    }
-    public function estado()
-    {
-        return $this->belongsTo(Estado::class, 'id_estado');
+        return $this->belongsTo(Carrera::class, 'carrera_id', 'id');
     }
 
-    public function usuario()
+    public function detalleSolicitudes()
     {
-        return $this->belongsTo(Usuario::class, 'id_coordinador');
+        return $this->hasMany(DetalleSolicitud::class, 'solicitud_curso_id', 'id');
+    }
+
+    public function estado()
+    {
+        return $this->belongsTo(Estado::class, 'estado_id', 'id');
+    }
+
+    public function fechaSolicitud()
+    {
+        return $this->belongsTo(FechaSolicitud::class, 'fecha_solicitud_id', 'id');
+    }
+
+    public function coordinador()
+    {
+        return $this->belongsTo(Usuario::class, 'coordinador_id', 'id');
     }
 }

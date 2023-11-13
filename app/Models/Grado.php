@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Grado extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'grados';
-    // Relación uno a muchos con PlanEstudio
-    public function planesEstudio()
+    protected $guarded = [];
+
+    public function planEstudios()
     {
-        return $this->hasMany(PlanEstudio::class, 'id_grado');
+        return $this->hasMany(PlanEstudios::class, 'grado_id', 'id');
     }
 }

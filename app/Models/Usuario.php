@@ -22,14 +22,7 @@ class Usuario extends Authenticatable
     protected $table = 'usuarios';
     protected $password = 'contrasena';
 
-    protected $fillable = [
-        'usuario',
-        'contrasena',
-        'id_persona',
-        'id_rol',
-        'correo',
-        'imagen',
-    ];
+    protected $guarded = [];
 
     protected $hidden = [
         'contrasena',
@@ -45,28 +38,53 @@ class Usuario extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function rol()
+    public function aprobacionSolicitudCursos()
     {
-        return $this->belongsTo(Rol::class, 'id_rol');
-    }
-
-    public function persona()
-    {
-        return $this->belongsTo(Persona::class, 'id_persona');
+        return $this->hasMany(AprobacionSolicitudCurso::class, 'encargado_id', 'id');
     }
 
     public function carreras()
     {
-        return $this->hasMany(UsuarioCarrera::class, 'id_coordinador');
+        return $this->belongsToMany(Carrera::class, 'usuario_carreras', 'usuario_id', 'carrera_id');
     }
 
     public function usuarioCarreras()
     {
-        return $this->hasManyThrough(Carrera::class, UsuarioCarrera::class, 'id_coordinador', 'id', 'id', 'id_carrera');
+        return $this->hasMany(UsuarioCarrera::class, 'usuario_id', 'id');
     }
 
-    public function solicitudesCurso()
+    public function solicitudCursos()
     {
-        return $this->hasMany(SolicitudCurso::class, 'id_coordinador');
+        return $this->hasMany(SolicitudCurso::class, 'coordinador_id', 'id');
+    }
+
+    public function solicitudGrupos()
+    {
+        return $this->hasMany(SolicitudGrupo::class, 'profesor_id', 'id');
+    }
+
+    public function pSeis()
+    {
+        return $this->hasMany(PSeis::class, 'profesor_id', 'id');
+    }
+
+    public function trabajos()
+    {
+        return $this->hasMany(Trabajo::class, 'usuario_id', 'id');
+    }
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class, 'persona_id', 'id');
+    }
+
+    public function estado()
+    {
+        return $this->belongsTo(Estado::class, 'estado_id', 'id');
+    }
+
+    public function rol()
+    {
+        return $this->belongsTo(Rol::class, 'rol_id', 'id');
     }
 }

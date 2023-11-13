@@ -8,25 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 class PlanEstudios extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'plan_estudios';
-    // Relación muchos a uno con Carrera
+    protected $guarded = [];
+
     public function carrera()
     {
-        return $this->belongsTo(Carrera::class, 'id_carrera');
+        return $this->belongsTo(Carrera::class, 'carrera_id', 'id');
     }
-    // Relación muchos a uno con Grado
+
+    public function cursos()
+    {
+        return $this->belongsToMany(Curso::class, 'curso_plan', 'plan_estudios_id', 'curso_id');
+    }
+
+    public function cursoPlanes()
+    {
+        return $this->hasMany(CursoPlan::class, 'plan_estudios_id', 'id');
+    }
+
     public function grado()
     {
-        return $this->belongsTo(Grado::class, 'id_grado');
-    }
-    // Relación uno a muchos con CursoPlan
-    public function planesCurso()
-    {
-        return $this->hasMany(CursoPlan::class, 'id_plan');
-    }
-    public function planCursos()
-    {
-        return $this->hasManyThrough(Curso::class, CursoPlan::class, 'id_plan', 'id', 'id', 'id_curso');
+        return $this->belongsTo(Grado::class, 'grado_id', 'id');
     }
 }

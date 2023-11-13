@@ -8,22 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Dias extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'dias';
-    
-    protected $fillable = [
-        'entrada',
-        'salida',
-        'id_dia',
-        'id_horario'
-    ];
-    public function horarios()
+    protected $guarded = [];
+
+    public function horarioGrupos()
     {
-        return $this->hasMany(Horario::class, 'id_dias');
+        return $this->hasMany(HorariosGrupo::class, 'dia_id', 'id');
     }
-    // Relación muchos a uno con Dia
-    public function dia()
+
+    public function horarioTrabajo()
     {
-        return $this->belongsTo(Dia::class, 'id_dia');
+        return $this->hasMany(HorariosTrabajo::class, 'dia_id', 'id');
     }
 }

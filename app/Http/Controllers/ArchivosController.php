@@ -2,72 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Usuario;
-use App\Models\Archivos;
-use Exception;
-use Illuminate\Http\Request;
 
 class ArchivosController extends Controller
 {
-    public function guardarimagen($id_usuario, $imagenperfil)
+    public function guardarimagen($usuarioId, $imagenPerfil)
     {
-
-        $usuario = Usuario::find($id_usuario);
+        $usuario = Usuario::find($usuarioId);
 
         if (!$usuario) {
             return response()->json(['Error' => 'Usuario no encontrado'], 400);
         }
         try {
-
-            if ($imagenperfil) {
-                $usuario->imagen = $imagenperfil;
+            if ($imagenPerfil) {
+                $usuario->imagen = $imagenPerfil;
                 $usuario->save();
-
             } else {
                 return response()->json(['Error' => 'Revise el contenido o el formato de la imagen'], 400);
             }
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-
     }
 
-    public function guardardocumento($id_persona, $documento)
+    public function guardardocumento($personaId, $documento)
     {
-
-        $persona = Persona::find($id_persona);
+        $persona = Persona::find($personaId);
 
         if (!$persona) {
             return response()->json(['Error' => 'Persona no encontrado'], 400);
         }
         try {
-            
             if ($documento) {
                 try {
-                    $nombreArchivo = $persona->nombre . '_DocumentosAsociados'; // Nombre del archivo
-                    $pdfBase64 = $documento; 
-                
-                    $nuevoarchivo = Archivos::create([
+                    $nombreArchivo = $persona->nombre.'_DocumentosAsociados'; // Nombre del archivo
+                    Archivos::create([
                         'nombre' => $nombreArchivo,
-                        'file' => $pdfBase64,
-                        'id_persona' => $persona->id,
+                        'file' => $documento,
+                        'persona_id' => $persona->id,
                     ]);
-                    //dd($pdfBase64);
-                    
-                } catch (Exception $e) {
-                    throw new Exception($e->getMessage());
+                    // dd($pdfBase64);
+                } catch (\Exception $e) {
+                    throw new \Exception($e->getMessage());
                 }
-
-
             } else {
                 return response()->json(['Error' => 'Revise el contenido o el formato del pdf'], 400);
             }
-
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
         }
     }
-
 }

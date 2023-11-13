@@ -8,16 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Rol extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $table = 'roles';
-
-    protected $fillable = [
-        'nombre'
-    ];
+    protected $guarded = [];
 
     public function usuarios()
     {
-        return $this->hasMany(Usuario::class, 'id_rol');
+        return $this->hasMany(Usuario::class, 'rol_id', 'id');
     }
-
 }
