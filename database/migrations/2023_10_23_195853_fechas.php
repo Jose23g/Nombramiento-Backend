@@ -10,12 +10,14 @@ return new class() extends Migration {
      */
     public function up(): void
     {
-        Schema::create('fecha_solicitudes', function (Blueprint $table) {
+        Schema::create('fechas', function (Blueprint $table) {
             $table->id();
-            $table->year('anio');
-            $table->string('ciclo');
+            $table->unsignedBigInteger('tipo_id')->nullable();
+            $table->year('anio')->nullable();
+            $table->string('ciclo')->nullable();
             $table->dateTime('fecha_inicio');
             $table->dateTime('fecha_fin');
+            $table->foreign('tipo_id')->references('id')->on('tipos');
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class() extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('fecha_solicitudes');
+        Schema::dropIfExists('fechas');
     }
 };

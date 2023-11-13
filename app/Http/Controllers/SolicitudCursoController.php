@@ -56,4 +56,20 @@ class SolicitudCursoController extends Controller
 
         return response()->json(['Message' => 'Solicitud completada'], 200);
     }
+
+    public function elimineLaSolicitud(Request $request)
+    {
+        $validator =
+            Validator::make($request->all(), [
+                'id' => 'required',
+            ], [
+                'required' => 'El campo :attribute es requerido.',
+            ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        SolicitudCurso::find($request->id)->delete();
+
+        return response()->json(['Message' => 'Solicitud eliminada'], 200);
+    }
 }

@@ -15,7 +15,7 @@ return new class() extends Migration {
             $table->unsignedBigInteger('p_seis_id');
             $table->unsignedBigInteger('carga_id');
             $table->unsignedBigInteger('estado_id');
-            $table->string('categoria');
+            $table->unsignedBigInteger('categoria_id');
             $table->dateTime('fecha_inicio');
             $table->dateTime('fecha_fin');
             $table->string('tipo');
@@ -29,6 +29,7 @@ return new class() extends Migration {
             $table->foreign('p_seis_id')->references('id')->on('p_seis');
             $table->foreign('carga_id')->references('id')->on('cargas');
             $table->foreign('estado_id')->references('id')->on('estados');
+            $table->foreign('categoria_id')->references('id')->on('categorias');
             $table->timestamps();
         });
     }

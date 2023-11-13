@@ -12,34 +12,34 @@ class EstadosController extends Controller
         switch ($nombre) {
 
             case 'activo':
-                $estado = Estado::where('nombre', 'like', 'activo')->first();
+                $estado = Estado::where('nombre', 'like', $nombre)->first();
                 return $estado->id;
 
                 break;
 
             case 'inactivo':
-                $estado  = Estado::where('nombre', 'like', 'inactivo')->first();
+                $estado  = Estado::where('nombre', 'like', $nombre)->first();
                 return $estado ->id;
                 break;
 
             case 'pendiente':
-                $estado = Estado::where('nombre', 'like', 'inactivo')->first();
+                $estado = Estado::where('nombre', 'like', $nombre)->first();
                 return $estado->id;
                 break;
 
             case 'aprobado':
-                $estado = Estado::where('nombre', 'like', 'inactivo')->first();
+                $estado = Estado::where('nombre', 'like', $nombre)->first();
                 return $estado->id;
                 break;
 
             case 'rechazado':
-                $estado = Estado::where('nombre', 'like', 'inactivo')->first();
+                $estado = Estado::where('nombre', 'like', $nombre)->first();
                 return $estado->id;
 
                 break;
 
             case 'incompleta':
-                $estado = Estado::where('nombre', 'like', 'inactivo')->first();
+                $estado = Estado::where('nombre', 'like', $nombre)->first();
                 return $estado->id;
                 break;
 

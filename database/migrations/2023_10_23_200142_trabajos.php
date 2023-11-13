@@ -17,6 +17,8 @@ return new class() extends Migration {
             $table->unsignedBigInteger('estado_id');
             $table->string('lugar_trabajo');
             $table->string('cargo');
+            $table->dateTime('fecha_inicio')->nullable();
+            $table->dateTime('fecha_fin')->nullable();
             $table->foreign('jornada_id')->references('id')->on('jornadas');
             $table->foreign('usuario_id')->references('id')->on('usuarios');
             $table->foreign('estado_id')->references('id')->on('estados');

@@ -22,9 +22,12 @@ class HorariosGrupoController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        foreach ($request->all() as $horario) {
-            HorariosGrupo::create($horario);
-        }
+        $horarios = collect($request->all())->map(function ($horario) {
+            $horarioNuevo = HorariosGrupo::create($horario);
+
+            return $horarioNuevo;
+        });
+        $horarios->first()->solicitudGrupo->detalleSolicitud->solicitudCurso->update(['estado_id' => 7]);
 
         return response()->json(['Message' => 'Se ha registrado con éxito'], 200);
     }
@@ -41,5 +44,23 @@ class HorariosGrupoController extends Controller
         $horariosGrupo = HorariosGrupo::where('solicitud_grupo_id', $request->id)->with(['dia'])->get();
 
         return response()->json($horariosGrupo, 200);
+    }
+
+    public function elimineElHorario(Request $request)
+    {
+        $validator =
+            Validator::make($request->all(), [
+                'id' => 'required',
+            ], [
+                'required' => 'El campo :attribute es requerido.',
+            ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $horario = HorariosGrupo::find($request->id);
+        $horario->solicitudGrupo->detalleSolicitud->solicitudCurso->update(['estado_id' => 7]);
+        $horario->delete();
+
+        return response()->json(['Message' => 'Horario eliminado'], 200);
     }
 }

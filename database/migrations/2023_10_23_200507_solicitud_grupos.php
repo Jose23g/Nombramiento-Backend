@@ -15,6 +15,7 @@ return new class() extends Migration {
             $table->unsignedBigInteger('profesor_id');
             $table->unsignedBigInteger('detalle_solicitud_id');
             $table->unsignedBigInteger('carga_id');
+            $table->unsignedBigInteger('fecha_id')->nullable();
             $table->string('grupo');
             $table->string('cupo');
             $table->string('individual_colegiado')->nullable();
@@ -24,6 +25,7 @@ return new class() extends Migration {
             $table->foreign('profesor_id')->references('id')->on('usuarios');
             $table->foreign('detalle_solicitud_id')->references('id')->on('detalle_solicitudes');
             $table->foreign('carga_id')->references('id')->on('cargas');
+            $table->foreign('fecha_id')->references('id')->on('fechas');
             $table->timestamps();
         });
     }
