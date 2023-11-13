@@ -76,29 +76,18 @@ Route::middleware('auth:api')->group(function () {
             Route::post('buscartrabajo', 'obtengaPorId');
         });
         Route::controller(ActividadController::class)->group(function () {
+
             Route::post('agregartrabajofinal', 'Agregar_trabajofinal_graduacion');
             Route::get('listartrabajofinal', 'Listar_trabajosfinal_graduacion');
-            Route::post('editartrabajofinal', 'Editar_trabajofinal_graduacion');
-            Route::post('eliminartrabajofinal', 'Eliminar_trabajofinal_graduacion');
-            Route::post('buscartrabajofinal', 'Buscar_trabajofinal_graduacion');
-            Route::get('listartrabajofinal', 'Listar_trabajosfinal_graduacion');
-            Route::post('editartrabajofinal', 'Editar_trabajofinal_graduacion');
-            Route::post('eliminartrabajofinal', 'Eliminar_trabajofinal_graduacion');
             Route::post('buscartrabajofinal', 'Buscar_trabajofinal_graduacion');
             Route::post('agregarproyectoaccion', 'Agregar_proyecto_accion');
             Route::get('listarproyectoaccion', 'Listar_proyectos_accion');
-            Route::post('editarproyectoaccion', 'Editar_proyectos_accion');
-            Route::post('eliminarproyectoaccion', 'Eliminar_proyectos_accion');
             Route::post('buscarproyectoaccion', 'Buscar_proyectos_accion');
             Route::post('agregarcargoDAC', 'Agregar_cargo_DAC');
             Route::get('listarcargoDAC', 'Listar_cargos_DAC');
-            Route::post('editarcargoDAC', 'Editar_cargo_DAC');
-            Route::post('eliminarcargoDAC', 'Eliminar_cargo_DAC');
             Route::get('buscarcargoDAC', 'Buscar_cargo_DAC');
             Route::post('agregarotralabor', 'Agregar_otra_labor');
             Route::get('listarotraslabores', 'Listar_otras_labores');
-            Route::post('editarotralabor', 'Editar_otra_labor');
-            Route::post('eliminarotralabor', 'Eliminar_otra_labor');
             Route::get('buscarotralabor', 'Buscar_otra_labor');
         });
 
