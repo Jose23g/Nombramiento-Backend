@@ -740,8 +740,9 @@ class CoordinadorController extends Controller
                     'personal' => $telefonos->personal,
                     'trabajo' => $telefonos->trabajo,
                 ],
-                'cursos' => $cursos,
+                'cursos' => (object) $cursos,
             ];
+
 
             return response()->json($borradorP6, 200);
         } catch (\Exception $e) {
