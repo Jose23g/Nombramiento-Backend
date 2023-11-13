@@ -122,6 +122,7 @@ Route::middleware('auth:api')->group(function () {
             Route::post('solicitud', 'Solicitud_de_curso');
             Route::get('ultimasolicitud', 'ultimaSolicitud');
             Route::get('solicitud-profesores', 'obtenerProfesoresdeUltimaSolicitud');
+            Route::get('ver-p6', 'previsualizarP6');
         });
         Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
         Route::controller(CursoController::class)->group(function () {

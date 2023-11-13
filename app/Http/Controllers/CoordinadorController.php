@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\AprobacionSolicitudCurso;
+use App\Models\Carga;
 use App\Models\Curso;
 use App\Models\DetalleSolicitud;
 use App\Models\Estado;
 use App\Models\HorariosGrupo;
 use App\Models\Persona;
+use App\Models\PSeis;
 use App\Models\SolicitudCurso;
 use App\Models\SolicitudGrupo;
+use App\Models\Telefono;
+use App\Models\Usuario;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +21,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CoordinadorController extends Controller
 {
+
     public function Solicitud_de_curso(Request $request)
     {
 
@@ -71,7 +76,7 @@ class CoordinadorController extends Controller
             // }
 
             $usuario = $request->user();
-            
+
             $nuevasolicitud = SolicitudCurso::create([
                 'fecha_solicitud_id' => $request->fecha_id,
                 'carga_total' => $request->carga_total,
@@ -617,37 +622,36 @@ class CoordinadorController extends Controller
         try {
             $carreras = $request->user()->carreras;
             $profesores = [];
-            
+
             foreach ($carreras as $carrera) {
                 $solicitudes = $this->obtenerUltimaSolicitudAprobada($carrera->id);
-                
+
                 foreach ($solicitudes as $solicitudID) {
-                    
+
                     //return response()->json($solicitudID->solicitud_curso_id,200);
-                   $profesores [] = $this->obtenerprofesores($solicitudID->solicitud_curso_id);
+                    $profesores[] = $this->obtenerprofesores($solicitudID->solicitud_curso_id);
                 }
             }
-           //$profesores = array_unique($profesores);
-    
+            //$profesores = array_unique($profesores);
+
             return response()->json($profesores, 200);
-    
+
         } catch (\Exception $e) {
-    
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-    
 
     public function obtenerUltimaSolicitudAprobada($carreraID)
     {
         $solicitudID = AprobacionSolicitudCurso::where('carrera_id', $carreraID)->latest()->get('solicitud_curso_id');
-       // $solicitudID = SolicitudCurso::where('carrera_id', $carreraID)->latest()->first('id');
+        // $solicitudID = SolicitudCurso::where('carrera_id', $carreraID)->latest()->first('id');
 
-       
-       if($solicitudID){
-           return $solicitudID;
-       }
-       return throw new \Exception('No se ha aprobado una solicitud aun');
+
+        if ($solicitudID) {
+            return $solicitudID;
+        }
+        return throw new \Exception('No se ha aprobado una solicitud aun');
 
     }
 
@@ -658,10 +662,106 @@ class CoordinadorController extends Controller
             ->join('usuarios as us', 'solicitud_grupos.profesor_id', '=', 'us.id')
             ->join('personas as pe', 'us.persona_id', '=', 'pe.id')
             ->where('ds.solicitud_curso_id', $solicitudID)
-            ->select('profesor_id', 'pe.nombre')
+            ->select('profesor_id', 'pe.nombre', 'ds.solicitud_curso_id')
             ->distinct()
             ->get();
 
         return $resultados;
+    }
+
+    public function generarP6(Request $request)
+    {
+        $validaciones = Validator::make(
+            [
+                'cargo_categoria' => 'required',
+                'profesor_id' => 'required',
+                'vig_desde' => 'required',
+                'vig_hasta' => 'required',
+                'jornada' => 'required',
+            ],
+            [
+                'cargo_categoria.required' => "Es necesario ingresar el cargo o categoria al que está asignado",
+                'vig_desde.required' => "No se puede generar el borrador sin haber establecido el inicio de la vigencia",
+                'vig_hasta.required' => "No se puede generar el borrador sin haber establecido el final de la vigencia",
+                'jornada.required' => "Es necesario ingresar la jornada",
+            ]
+        );
+        if ($validaciones->fails()) {
+            return response()->json(['errormessage' => $validaciones->errors()], 422);
+        }
+
+        $p6 = PSeis::create([
+            'profesor_id' => $request->input('profesor_id'),
+            'jornada_id' => $request->input('jornada_id'),
+            'fecha_inicio' => $request->input('vig_desde'),
+            'fecha_fin' => $request->input('vig_hasta'),
+            'cargo_categoria' => $request->input('cargo_categoria'),
+        ]);
+
+        return response()->json('P6 generada', 200);
+    }
+
+    public function previsualizarP6(Request $request)
+    {
+        try {
+
+
+            $profesor_user = Usuario::find($request->input('profesor_id'));
+            $profesor = Usuario::find($request->input('profesor_id'))->persona;
+            $provincia = Usuario::find($request->input('profesor_id'))->persona->provincia->nombre;
+            $canton = Usuario::find($request->input('profesor_id'))->persona->canton->nombre;
+            $telefonos = Telefono::where('persona_id', $profesor_user->id)->first();
+            $cursosID = $this->obtenerCursosdelProfesor($request->input('solicitud_id'), $profesor_user->id);
+            $cursos = [];
+            foreach ($cursosID as $key) {
+                $cursoInfo = Curso::find($key->curso_id);
+                $carga = Carga::find($key->carga_id);
+
+                if ($cursoInfo) {
+                    $cursos[] = [
+                        'curso_id' => $cursoInfo->id,
+                        'codigo' => $cursoInfo->sigla,
+                        'nombre_del_curso' => $cursoInfo->nombre,
+                        'carga' => $carga->nombre,
+                    ];
+                }
+            }
+
+            $borradorP6 = [
+                'profesor_id' => $profesor_user->id,
+                'nombre' => $profesor->nombre,
+                'cedula' => $profesor->cedula,
+                'correo' => $profesor_user->correo,
+                'otroCorreo' => $profesor->otro_correo,
+                'provincia' => $provincia,
+                'canton' => $canton,
+                'telefonos' => [
+                    'personal' => $telefonos->personal,
+                    'trabajo' => $telefonos->trabajo,
+                ],
+                'cursos' => $cursos,
+            ];
+
+            return response()->json($borradorP6, 200);
+        } catch (\Exception $e) {
+            return response()->json(['errormessage' => $e->getMessage()], 500);
+        }
+    }
+
+    public function obtenerCursosdelProfesor($solicitudID, $profesorID)
+    {
+        $cursos = DetalleSolicitud::join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
+            ->where('solicitud_grupos.profesor_id', $profesorID)
+            ->where('detalle_solicitudes.solicitud_curso_id', $solicitudID)
+            ->select(
+                'detalle_solicitudes.solicitud_curso_id',
+                'solicitud_grupos.detalle_solicitud_id',
+                'solicitud_grupos.id',
+                'solicitud_grupos.profesor_id',
+                'detalle_solicitudes.curso_id',
+                'solicitud_grupos.carga_id',
+            )
+            ->get();
+        return $cursos;
     }
 }
