@@ -633,7 +633,8 @@ class CoordinadorController extends Controller
                 }
             }
             //$profesores = array_unique($profesores);
-
+            $profesores = collect($profesores);
+            $profesores = $profesores->collapse();
             return response()->json($profesores, 200);
 
         } catch (\Exception $e) {
