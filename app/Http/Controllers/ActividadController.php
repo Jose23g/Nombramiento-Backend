@@ -6,6 +6,7 @@ use App\Models\Actividad;
 use App\Models\Carga;
 use App\Models\Estado;
 use App\Models\Usuario;
+use App\Models\Categoria;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,8 @@ class ActividadController extends Controller
     public function Agregar_trabajofinal_graduacion(Request $request)
     {
         $Validator = Validator::make($request->all(), [
+            'p_seis_id' => 'required',
+            'usuario_id' => 'required',
             'tipo' => 'required',
             'estudiante' => 'required',
             'modalidad' => 'required',
@@ -24,19 +27,21 @@ class ActividadController extends Controller
             'postgrado' => 'required',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date',
-            'carga_id' => 'required|exists:cargas,id',
+            'carga' => 'required',
         ]);
+
 
         if ($Validator->fails()) {
             return response()->json(['error' => $Validator->errors()]);
         }
         try {
-            $usuario = $request->user();
 
-            $carga = Carga::find($request->carga_id);
-
+            $carga = Carga::where('nombre', 'LIKE', '%' . $request->carga . '%')->first();
+            $categoria = Categoria::where('nombre', 'trabajos_finales')->first();
+            dd($request->p_seis_id);
             $nuevaactividad = Actividad::create([
-                'categoria' => 'trabajo_final_graduacion',
+                'categoria_id' => $categoria->id,
+                'p_seis_id' => $request->p_seis_id,
                 'tipo' => $request->tipo,
                 'estudiante' => $request->estudiante,
                 'modalidad' => $request->modalidad,
@@ -44,8 +49,8 @@ class ActividadController extends Controller
                 'postgrado' => $request->postgrado,
                 'fecha_inicio' => $request->fecha_inicio,
                 'fecha_fin' => $request->fecha_fin,
-                'carga_id' => $request->carga_id,
-                'usuario_id' => $usuario->id,
+                'carga_id' => $carga->id,
+                'usuario_id' => $request->usuario_id,
                 'estado_id' => $this->obtenerestado('activo'),
             ]);
 
@@ -54,9 +59,10 @@ class ActividadController extends Controller
                 'tipo' => $nuevaactividad->tipo,
                 'estudiante' => $nuevaactividad->estudiante,
                 'modalidad' => $nuevaactividad->modalidad,
-                'vigencia' => $nuevaactividad->fecha_inicio.' / '.$nuevaactividad->fecha_fin,
+                'vigencia' => $nuevaactividad->fecha_inicio . ' / ' . $nuevaactividad->fecha_fin,
                 'carga' => $carga->nombre,
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
@@ -85,7 +91,7 @@ class ActividadController extends Controller
                     'modalidad' => $actividad['modalidad'],
                     'grado' => $actividad['grado'],
                     'postgrado' => $actividad['postgrado'],
-                    'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                    'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                     'carga' => $carga->nombre,
                 ];
                 $listaactividades[] = $lineaactividad;
@@ -138,13 +144,16 @@ class ActividadController extends Controller
     public function Agregar_proyecto_accion(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'p_seis_id' => 'required',
+            'usuario_id' => 'required',
             'numero' => 'required',
             'nombre' => 'required',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date',
-            'carga_id' => 'required| exists:cargas,id',
+            'carga' => 'required',
         ]);
 
+       
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 422);
         }
@@ -152,16 +161,17 @@ class ActividadController extends Controller
         DB::beginTransaction();
 
         try {
-            $usuario = $request->user();
-
+            
+            $carga = Carga::where('nombre', 'LIKE', '%' . $request->carga . '%')->first();
+            $categoria = Categoria::where('nombre', 'proyectos')->first();
             $nuevoproyectoaccion = Actividad::create([
-                'categoria' => 'proyecto_investigacion_accion_social',
+                'categoria_id' => $categoria->id,
                 'nombre' => $request->nombre,
                 'numero_oficio' => $request->numero,
                 'fecha_inicio' => $request->fecha_inicio,
                 'fecha_fin' => $request->fecha_fin,
-                'carga_id' => $request->carga_id,
-                'usuario_id' => $usuario->id,
+                'carga_id' => $carga->id,
+                'usuario_id' => $request->usuario_id,
                 'estado_id' => $this->obtenerestado('activo'),
             ]);
 
@@ -173,7 +183,7 @@ class ActividadController extends Controller
                 'message' => 'Se ha ingresado Proyecto de Investigacion/Accion',
                 'no' => $nuevoproyectoaccion->numero_oficio,
                 'nombre' => $nuevoproyectoaccion->nombre,
-                'vigencia' => $nuevoproyectoaccion->fecha_inicio.' / '.$nuevoproyectoaccion->fecha_fin,
+                'vigencia' => $nuevoproyectoaccion->fecha_inicio . ' / ' . $nuevoproyectoaccion->fecha_fin,
                 'carga' => $carga->nombre,
             ], 200);
         } catch (\Exception $e) {
@@ -224,7 +234,7 @@ class ActividadController extends Controller
                     'id' => $actividad['id'],
                     'numero' => $actividad['numero_oficio'],
                     'nombre' => $actividad['nombre'],
-                    'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                    'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                     'carga' => $carga->nombre,
                 ];
                 $listaactividades[] = $lineaactividad;
@@ -274,11 +284,13 @@ class ActividadController extends Controller
     public function Agregar_cargo_DAC(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'usuario_id' => 'required',
+            'p_seis_id' => 'required',
             'cargo_comision' => 'required',
             'numero_oficio' => 'required',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date',
-            'carga_id' => 'required|exists:actividades,id',
+            'carga' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -288,28 +300,31 @@ class ActividadController extends Controller
         DB::beginTransaction();
 
         try {
-            $usuario = $request->user();
+           
+            $carga = Carga::where('nombre', 'LIKE', '%' . $request->carga . '%')->first();
+            $categoria = Categoria::where('nombre', 'cargo_docente')->first();
 
             $nuevaactividad = Actividad::create([
-                'categoria' => 'cargo_dac',
+                'usuario_id' => $request->usuario_id,
+                'categoria_id' => $categoria->id,
                 'numero_oficio' => $request->numero_oficio,
                 'cargo_comision' => $request->cargo_comision,
                 'fecha_inicio' => $request->fecha_inicio,
                 'fecha_fin' => $request->fecha_fin,
                 'carga_id' => $request->carga_id,
                 'estado_id' => $this->obtenerestado('activo'),
-                'usuario_id' => $usuario->id,
+                
             ]);
 
             DB::commit();
 
-            $carga = Carga::find($request->carga_id);
+            
 
             return response()->json([
                 'message' => 'se ha agregado el cargo DAC',
                 'numero_oficio' => $nuevaactividad->numero_oficio,
                 'cargo_comision' => $nuevaactividad->cargo_comision,
-                'vigencia' => $nuevaactividad->fecha_inicio.' / '.$nuevaactividad->fecha_fin,
+                'vigencia' => $nuevaactividad->fecha_inicio . ' / ' . $nuevaactividad->fecha_fin,
                 'carga' => $carga->nombre,
             ], 200);
         } catch (\Exception $e) {
@@ -340,7 +355,7 @@ class ActividadController extends Controller
                     'id' => $actividad['id'],
                     'numero_oficio' => $actividad['numero_oficio'],
                     'cargo_comision' => $actividad['cargo_comision'],
-                    'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                    'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                     'carga' => $carga->nombre,
                 ];
                 $listaactividades[] = $lineaactividad;
@@ -390,11 +405,13 @@ class ActividadController extends Controller
     public function Agregar_otra_labor(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'usuario_id' => 'required',
+            'p_seis_id' => 'required',
             'numero' => 'required',
             'nombre' => 'required',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date',
-            'carga_id' => 'required|exists:actividades,id',
+            'carga' => 'required|exists:actividades,id',
         ]);
 
         if ($validator->fails()) {
@@ -404,17 +421,19 @@ class ActividadController extends Controller
         DB::beginTransaction();
 
         try {
-            $usuario = $request->user();
+            $carga = Carga::where('nombre', 'LIKE', '%' . $request->carga . '%')->first();
+            $categoria = Categoria::where('nombre', 'otro')->first();
 
             $nuevaactividad = Actividad::create([
-                'categoria' => 'otra_labor',
+                'categoria_id' => $categoria->id,
+                'p_seis_id' => $request->p_seis_id,
                 'numero_oficio' => $request->numero,
                 'nombre' => $request->nombre,
                 'fecha_inicio' => $request->fecha_inicio,
                 'fecha_fin' => $request->fecha_fin,
-                'carga_id' => $request->carga_id,
+                'carga_id' => $carga->id,
                 'estado_id' => $this->obtenerestado('activo'),
-                'usuario_id' => $usuario->id,
+                'usuario_id' => $request->usuario_id,
             ]);
 
             DB::commit();
@@ -425,7 +444,7 @@ class ActividadController extends Controller
                 'message' => 'se ha agregado otra labor',
                 'numero' => $nuevaactividad->numero_oficio,
                 'nombre' => $nuevaactividad->nombre,
-                'vigencia' => $nuevaactividad->fecha_inicio.' / '.$nuevaactividad->fecha_fin,
+                'vigencia' => $nuevaactividad->fecha_inicio . ' / ' . $nuevaactividad->fecha_fin,
                 'carga' => $carga->nombre,
             ], 200);
         } catch (\Exception $e) {
@@ -456,7 +475,7 @@ class ActividadController extends Controller
                     'id' => $actividad['id'],
                     'numero' => $actividad['numero_oficio'],
                     'nombre' => $actividad['nombre'],
-                    'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                    'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                     'carga' => $carga->nombre,
                 ];
 
@@ -553,7 +572,7 @@ class ActividadController extends Controller
                             'modalidad' => $actividad['modalidad'],
                             'grado' => $actividad['grado'],
                             'postgrado' => $actividad['postgrado'],
-                            'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                             'carga' => $carga->nombre,
                         ];
 
@@ -572,7 +591,7 @@ class ActividadController extends Controller
                             'id' => $actividad['id'],
                             'numero' => $actividad['numero_oficio'],
                             'nombre' => $actividad['nombre'],
-                            'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                             'carga' => $carga->nombre,
                         ];
 
@@ -590,7 +609,7 @@ class ActividadController extends Controller
                             'id' => $actividad['id'],
                             'numero_oficio' => $actividad['numero_oficio'],
                             'cargo_comision' => $actividad['cargo_comision'],
-                            'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                             'carga' => $carga->nombre,
                         ];
 
@@ -608,7 +627,7 @@ class ActividadController extends Controller
                             'id' => $actividad['id'],
                             'numero' => $actividad['numero_oficio'],
                             'nombre' => $actividad['nombre'],
-                            'vigencia' => $actividad['fecha_inicio'].'/'.$actividad['fecha_fin'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
                             'carga' => $carga->nombre,
                         ];
 
