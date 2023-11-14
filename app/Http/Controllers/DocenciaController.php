@@ -233,13 +233,15 @@ class DocenciaController extends Controller
         $cursoaceptados = [];
         $detalleCurso = DetalleSolicitud::where('solicitud_curso_id', $solicitud->id)->get();
 
-        // para un curso
-        foreach ($detalleCurso as $curso) {
-            $cursoaceptado = DetalleAprobacionCurso::create([
-                'curso_aprobado_id' => $solcitudAprobada->id,
-                // Id de la solicitud aprobada
-                'detalle_solicitud_id' => $curso->id,
-                // Id de los cursos que estan en la solicitud
+
+        //para un curso
+        foreach ($detalleCurso as $solicitudDetalle) {
+            $detalleAprobado = DetalleAprobacionCurso::create([
+                'solicitud_aprobada_id' => $solcitudAprobada->id,
+                //Id de la solicitud aprobada
+                'detalle_solicitud_id' => $solicitudDetalle->id,
+                //Id del detalle que se aprueba
+
             ]);
 
             $grupoaceptados = $this->aprobarGruposParaUnaSolicitud($detalleAprobado, $solicitudDetalle);
@@ -256,13 +258,14 @@ class DocenciaController extends Controller
     public function aprobarGruposParaUnaSolicitud($detalleAprobado, $detalleSolicitud)
     {
         $grupoaceptados = [];
-        $cursogrupo = SolicitudGrupo::where('detalle_solicitud_id', $curso->id)->get();
+        $cursogrupo = SolicitudGrupo::where('detalle_solicitud_id', $detalleSolicitud->id)->get();
         foreach ($cursogrupo as $grupo) {
             $grupoAceptado = GrupoAprobado::create([
-                'detalle_aprobado_id' => $cursoaceptado->id,
-                // id del curso que aceptaron
+
+                'detalle_aprobado_id' => $detalleAprobado->id,
+                //id del curso que aceptaron
                 'solicitud_grupo_id' => $grupo->id,
-                // id del grupo que estan en la solicitud
+                //id del grupo que estan en la solicitud
             ]);
             $grupoaceptados[] = ['grupoaceptado' => $grupoAceptado];
             // $grupoaceptados = array_merge($grupoaceptados, $this->aprobarGruposParaUnaSolicitud($grupoAceptado, $grupo));

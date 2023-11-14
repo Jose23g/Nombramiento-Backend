@@ -713,13 +713,14 @@ class CoordinadorController extends Controller
             $canton = Usuario::find($request->input('profesor_id'))->persona->canton->nombre;
             $telefonos = Telefono::where('persona_id', $profesor_user->id)->first();
             $cursosID = $this->obtenerCursosdelProfesor($request->input('solicitud_id'), $profesor_user->id);
-            $cursos = [];
+            $cursosInf = [];
+
             foreach ($cursosID as $key) {
                 $cursoInfo = Curso::find($key->curso_id);
                 $carga = Carga::find($key->carga_id);
 
                 if ($cursoInfo) {
-                    $cursos[] = [
+                    $cursosInf[] = [
                         'curso_id' => $cursoInfo->id,
                         'codigo' => $cursoInfo->sigla,
                         'nombre_del_curso' => $cursoInfo->nombre,
@@ -728,6 +729,7 @@ class CoordinadorController extends Controller
                 }
             }
 
+           
             $borradorP6 = [
                 'profesor_id' => $profesor_user->id,
                 'nombre' => $profesor->nombre,
@@ -740,11 +742,11 @@ class CoordinadorController extends Controller
                     'personal' => $telefonos->personal,
                     'trabajo' => $telefonos->trabajo,
                 ],
-                'cursos' => (object) $cursos,
+                'cursos' => $cursosInf,
             ];
-
-
+           
             return response()->json($borradorP6, 200);
+
         } catch (\Exception $e) {
             return response()->json(['errormessage' => $e->getMessage()], 500);
         }
