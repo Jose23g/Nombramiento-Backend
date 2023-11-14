@@ -136,5 +136,4 @@ Route::middleware('auth:api')->group(function () {
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
 Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']);
-Route::post('prueba', [SolicitudCursoController::class, 'cambieElEstadoDeUnaSolicitud']);
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
