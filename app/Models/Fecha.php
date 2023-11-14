@@ -13,6 +13,16 @@ class Fecha extends Model
 
     public function solicitudCursos()
     {
-        return $this->hasMany(SolicitudCurso::class, 'fecha_solicitud_id', 'id');
+        return $this->hasMany(SolicitudCurso::class, 'fecha_id', 'id');
+    }
+
+    public function trabajos()
+    {
+        return $this->hasMany(Trabajo::class, 'fecha_id', 'id');
+    }
+
+    public function permanencias()
+    {
+        return $this->hasMany(Permanencia::class, 'fecha_id', 'id');
     }
 }

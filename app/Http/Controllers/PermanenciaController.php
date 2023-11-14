@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class TrabajoPSeisController extends Controller
+class PermanenciaController extends Controller
 {
     //
 }

@@ -20,4 +20,13 @@ class FechaController extends Controller
 
         return $fechas;
     }
+    public function agregueParaUnTrabajoInterno($request)
+    {
+        $fecha = Fecha::create([
+            'tipo_id' => 4,
+            'fecha_inicio' => $request['fecha_inicio'],
+            'fecha_fin' => $request['fecha_fin'],
+        ]);
+        return $fecha;
+    }
 }

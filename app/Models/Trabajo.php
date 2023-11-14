@@ -40,4 +40,9 @@ class Trabajo extends Model
     {
         return $this->belongsToMany(DeclaracionJurada::class, 'trabajos_declaraciones', 'trabajo_id', 'declaracion_jurada_id');
     }
+
+    public function fecha()
+    {
+        return $this->belongsTo(Fecha::class, 'fecha_id', 'id');
+    }
 }

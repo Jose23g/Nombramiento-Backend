@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -15,8 +16,8 @@ return new class() extends Migration {
             $table->unsignedBigInteger('solicitud_curso_id');
             $table->unsignedBigInteger('curso_id');
             $table->string('grupos');
-            $table->foreign('solicitud_curso_id')->references('id')->on('solicitud_cursos');
-            $table->foreign('curso_id')->references('id')->on('cursos');
+            $table->foreign('solicitud_curso_id')->references('id')->on('solicitud_cursos')->onDelete('cascade');
+            $table->foreign('curso_id')->references('id')->on('cursos')->onDelete('cascade');
             $table->timestamps();
         });
     }

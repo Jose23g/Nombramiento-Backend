@@ -97,12 +97,12 @@ class UsuarioController extends Controller
 
             // Crear el usuario a partir de los datos de persona
             $nuevoUsuario = Usuario::create([
-            'rol_id' => 1,
-            'persona_id' => $nuevaPersona->id,
-            'estado_id' => 5,
-            'correo' => $request->correo,
-            'otro_correo' => $request->otro_correo,
-            'contrasena' => Hash::make($request->contrasena),
+                'rol_id' => 1,
+                'persona_id' => $nuevaPersona->id,
+                'estado_id' => 5,
+                'correo' => $request->correo,
+                'otro_correo' => $request->otro_correo,
+                'contrasena' => Hash::make($request->contrasena),
             ]);
             DB::commit();
 
@@ -199,9 +199,9 @@ class UsuarioController extends Controller
     public function validartoken(Request $request)
     {
         /*    $usuario = $request->user();
-         if($usuario!== null){
-           return response()->json(['status' => 'true', 'scope' => $usuario->getScopes() ],200);
-         } */
+        if($usuario!== null){
+        return response()->json(['status' => 'true', 'scope' => $usuario->getScopes() ],200);
+        } */
 
         $user = Auth::user(); // Obtiene el usuario autenticado
         $scopes = $request->user()->token()->scopes; // Obtiene los scopes del token del usuario
@@ -217,5 +217,15 @@ class UsuarioController extends Controller
         $persona = $request->user()->persona;
 
         return ['coordinador_id' => $request->user()->id, 'nombre' => $persona->nombre, 'carrera_id' => $carrera->id, 'carrera_nombre' => $carrera->nombre];
+    }
+    public function obtengaElProfesorActual(Request $request)
+    {
+        $usuario = $request->user();
+        $persona = $usuario->persona;
+        $telefono = $persona->telefono;
+        if ($telefono) {
+            return ['profesor_id' => $request->user()->id, 'nombre' => $persona->nombre, 'cedula' => $persona->cedula, 'correos' => ['personal' => $usuario->correo, 'trabajo' => $usuario->otro_correo], 'telefonos' => ['personal' => $telefono->personal, 'trabajo' => $telefono->trabajo]];
+        }
+        return ['profesor_id' => $request->user()->id, 'nombre' => $persona->nombre, 'cedula' => $persona->cedula, 'correos' => ['personal' => $usuario->correo, 'trabajo' => $usuario->otro_correo], 'telefonos' => ['personal' => null, 'trabajo' => null]];
     }
 }

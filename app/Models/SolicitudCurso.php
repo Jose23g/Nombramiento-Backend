@@ -31,9 +31,9 @@ class SolicitudCurso extends Model
         return $this->belongsTo(Estado::class, 'estado_id', 'id');
     }
 
-    public function fechaSolicitud()
+    public function fecha()
     {
-        return $this->belongsTo(Fecha::class, 'fecha_solicitud_id', 'id');
+        return $this->belongsTo(Fecha::class, 'fecha_id', 'id');
     }
 
     public function coordinador()

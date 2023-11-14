@@ -9,11 +9,88 @@ use App\Models\Persona;
 use App\Models\Trabajo;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class TrabajoController extends Controller
 {
+    public function obtengaElListadoDeTrabajosExternos(Request $request)
+    {
+        $trabajos = $request->user()->trabajos()->with(['fecha', 'horarioTrabajos.dia'])->where('tipo_id', 3)->where('estado_id', 5)->get();
+
+        return $trabajos->filter(function ($trabajo) {
+            $fechaFin = Carbon::parse($trabajo->fecha->fecha_fin);
+            $fechaInicio = Carbon::parse($trabajo->fecha->fecha_inicio);
+            $fechaActual = Carbon::now();
+
+            return $fechaActual->between($fechaInicio, $fechaFin);
+        });
+    }
+    public function obtengaElListadoDeTrabajosInternos(Request $request)
+    {
+        $listadoDeTrabajos = $request->user()->trabajos()->with(['fecha', 'horarioTrabajos.dia'])->where('tipo_id', 2)->where('estado_id', 5)->get();
+        $trabajos = $listadoDeTrabajos->filter(function ($trabajo) {
+            $fechaFin = Carbon::parse($trabajo->fecha->fecha_fin)->subMonth(4);
+            $fechaActual = Carbon::now();
+
+            return $fechaActual < $fechaFin;
+        });
+        if (!$trabajos) {
+            $trabajos = $listadoDeTrabajos->filter(function ($trabajo) {
+                $fechaFin = Carbon::parse($trabajo->fecha->fecha_fin);
+                $fechaActual = Carbon::now();
+
+                return $fechaActual->subYear(1) < $fechaFin;
+            });
+        }
+        return $trabajos;
+    }
+    public function agregueUnTrabajoInterno(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'lugar_trabajo' => 'required',
+                'cargo_categoria' => 'required',
+                'jornada' => 'required',
+                'fecha_inicio' => 'required',
+                'fecha_fin' => 'required',
+                'horarios' => 'required|array|min:1',
+                'horarios.*.dia_id' => 'required|exists:dias,id',
+                'horarios.*.hora_inicio' => 'required',
+                'horarios.*.hora_fin' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        DB::beginTransaction();
+        try {
+            $fecha = app(FechaController::class)->agregueParaUnTrabajoInterno(['fecha_inicio' => $request->fecha_inicio, 'fecha_fin' => $request->fecha_fin]);
+            if ($fecha) {
+                $trabajo = Trabajo::create([
+                    'lugar_trabajo' => $request->lugar_trabajo,
+                    'cargo_categoria' => $request->cargo_categoria,
+                    'jornada' => $request->jornada,
+                    'usuario_id' => $request->user()->id,
+                    'tipo_id' => 2,
+                    'estado_id' => 5,
+                    'fecha_id' => $fecha->id,
+                ]);
+                if ($trabajo) {
+                    app(HorariosTrabajoController::class)->agregue(['trabajo_id' => $trabajo->id, 'horarios' => $request->horarios]);
+                }
+            }
+            DB::commit();
+            return response()->json(['Message' => 'Se ha registrado con éxito'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+    }
     public function agregue(Request $request)
     {
         $validator = Validator::make(

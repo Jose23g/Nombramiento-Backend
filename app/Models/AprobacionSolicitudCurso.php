@@ -25,4 +25,9 @@ class AprobacionSolicitudCurso extends Model
     {
         return $this->hasMany(DetalleAprobacionCurso::class, 'curso_aprobado_id', 'id');
     }
+
+    public function pSeis()
+    {
+        return $this->belongsToMany(PSeis::class, 'p_seis_cursos_aprobados', 'curso_aprobado_id', 'p_seis_id');
+    }
 }

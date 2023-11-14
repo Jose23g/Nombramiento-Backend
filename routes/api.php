@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "api" middleware group. Make something great!
 |
-*/
+ */
 // Ruta de prueba protegida por autenticación Passport
 
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
@@ -56,6 +56,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);
     Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
     Route::get('coordinadorActual', [UsuarioController::class, 'obtengaElCoordinadorActual']);
+    Route::get('profesorActual', [UsuarioController::class, 'obtengaElProfesorActual']);
 
     Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
@@ -69,7 +70,10 @@ Route::middleware('auth:api')->group(function () {
 
     Route::middleware('scope:Profesor')->group(function () {
         Route::controller(TrabajoController::class)->group(function () {
+            Route::get('listadoDeTrabajosExternos', 'obtengaElListadoDeTrabajosExternos');
+            Route::get('listadoDeTrabajosInternos', 'obtengaElListadoDeTrabajosInternos');
             Route::post('trabajo', 'agregue');
+            Route::post('agregueUnTrabajoInterno', 'agregueUnTrabajoInterno');
             Route::get('listartrabajoshorario', 'obtengaElListadoPorPersona');
             Route::post('editartrabajo', 'modifique');
             Route::post('eliminartrabajo', 'elimine');
@@ -132,5 +136,5 @@ Route::middleware('auth:api')->group(function () {
 
 Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
 Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']);
-
+Route::post('prueba', [SolicitudCursoController::class, 'cambieElEstadoDeUnaSolicitud']);
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);

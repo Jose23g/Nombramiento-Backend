@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -15,9 +16,9 @@ return new class() extends Migration {
             $table->unsignedBigInteger('tipo_id')->nullable();
             $table->year('anio')->nullable();
             $table->string('ciclo')->nullable();
-            $table->dateTime('fecha_inicio');
-            $table->dateTime('fecha_fin');
-            $table->foreign('tipo_id')->references('id')->on('tipos');
+            $table->date('fecha_inicio');
+            $table->date('fecha_fin');
+            $table->foreign('tipo_id')->references('id')->on('tipos')->onDelete('cascade');
             $table->timestamps();
         });
     }

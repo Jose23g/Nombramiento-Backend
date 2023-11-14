@@ -11,12 +11,12 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('detalle_aprobacion_cursos', function (Blueprint $table) {
+        Schema::create('p_seis_cursos_aprobados', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('p_seis_id');
             $table->unsignedBigInteger('curso_aprobado_id');
-            $table->unsignedBigInteger('detalle_solicitud_id');
+            $table->foreign('p_seis_id')->references('id')->on('p_seis')->onDelete('cascade');
             $table->foreign('curso_aprobado_id')->references('id')->on('aprobacion_solicitud_cursos')->onDelete('cascade');
-            $table->foreign('detalle_solicitud_id')->references('id')->on('detalle_solicitudes')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('detalle_aprobacion_cursos');
+        Schema::dropIfExists('p_seis_cursos_aprobados');
     }
 };

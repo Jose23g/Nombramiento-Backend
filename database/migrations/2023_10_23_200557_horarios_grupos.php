@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -14,10 +15,10 @@ return new class() extends Migration {
             $table->id();
             $table->unsignedBigInteger('dia_id');
             $table->unsignedBigInteger('solicitud_grupo_id');
-            $table->string('hora_inicio');
-            $table->string('hora_fin');
+            $table->time('hora_inicio');
+            $table->time('hora_fin');
             $table->foreign('dia_id')->references('id')->on('dias');
-            $table->foreign('solicitud_grupo_id')->references('id')->on('solicitud_grupos');
+            $table->foreign('solicitud_grupo_id')->references('id')->on('solicitud_grupos')->onDelete('cascade');
             $table->timestamps();
         });
     }

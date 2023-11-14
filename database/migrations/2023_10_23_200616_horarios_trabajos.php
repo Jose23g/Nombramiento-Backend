@@ -14,8 +14,8 @@ return new class() extends Migration {
             $table->id();
             $table->unsignedBigInteger('dia_id');
             $table->unsignedBigInteger('trabajo_id');
-            $table->string('hora_inicio');
-            $table->string('hora_fin');
+            $table->time('hora_inicio');
+            $table->time('hora_fin');
             $table->foreign('dia_id')->references('id')->on('dias');
             $table->foreign('trabajo_id')->references('id')->on('trabajos');
             $table->timestamps();
