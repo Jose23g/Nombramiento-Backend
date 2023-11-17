@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Curso;
 use App\Models\PlanEstudios;
+use App\Models\CursoPlan;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -48,6 +49,12 @@ class CursoController extends Controller
                 'horas_teoricas' => $validatedData['horas_teoricas']
             ]);
 
+            if($nuevocurso){
+                $relacioncursoplan = CursoPlan::create([
+                    'curso_id' => $nuevocurso->id,
+                    'plan_estudios_id' => $request->plan_estudios_id
+                ]);
+            }
             return response()->json(['message' => 'Se ha registrado el curso con exito el curso' . $nuevocurso->nombre], 200);
 
         } catch (Exception $e) {
