@@ -78,6 +78,7 @@ class CursoController extends Controller
                     'sigla' => $curso->sigla,
                     'nombre' => $curso->nombre,
                     'creditos' => $curso->creditos,
+                    'ciclos' => $curso->ciclo,
                     'grado_anual' => $curso->grado_anual,
                     'horas_teoricas' => $curso->horas_teoricas,
                     'horas_practicas' => $curso->horas_practicas,
