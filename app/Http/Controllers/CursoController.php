@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\PlanEstudios;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -32,8 +33,8 @@ class CursoController extends Controller
             return response()->json(['message' => $validator->errors()], 422);
         }
         $validatedData = $validator->validated();
-        
-        try{
+
+        try {
             $nuevocurso = Curso::create([
                 'sigla' => $validatedData['sigla'],
                 'nombre' => $validatedData['nombre'],
@@ -47,12 +48,44 @@ class CursoController extends Controller
                 'horas_teoricas' => $validatedData['horas_teoricas']
             ]);
 
-            return response()->json(['message' => 'Se ha registrado el curso con exito el curso' .$nuevocurso->nombre], 200);
+            return response()->json(['message' => 'Se ha registrado el curso con exito el curso' . $nuevocurso->nombre], 200);
 
-        }catch(Exception $e){
+        } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 422);
         }
-        
+
+    }
+
+    public function cursosCarrera(Request $request)
+    {
+
+        $carrera = $request->user()->carreras->first();
+        $planes = PlanEstudios::where('carrera_id', $carrera->id)->get();
+        $listadecursos = [];
+
+        foreach ($planes as $plan) {
+            $planbuscado = PlanEstudios::find($plan->id);
+
+            $cursos = $planbuscado->cursos;
+
+            foreach($cursos as $curso){
+
+    
+                $listadecursos[] = (object)[
+                    'id'=>  $curso->id,
+                    'plan_estudios' => $planbuscado->anio . ' - ' . $planbuscado->grado->nombre,
+                    'sigla' => $curso->sigla,
+                    'nombre' => $curso->nombre,
+                    'creditos' => $curso->creditos,
+                    'grado_anual' => $curso->grado_anual,
+                    'horas_teoricas' => $curso->horas_teoricas,
+                    'horas_practicas' => $curso->horas_practicas,
+                    'horas_laboratorio' => $curso->horas_laboratorio
+                ];
+            }
+            
+        }
+        return response()->json($listadecursos);
     }
 }
