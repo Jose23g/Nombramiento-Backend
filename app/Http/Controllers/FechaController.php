@@ -29,4 +29,11 @@ class FechaController extends Controller
         ]);
         return $fecha;
     }
+    public function modifique($request)
+    {
+        Fecha::find($request['id'])->update([
+            'fecha_inicio' => $request['fecha_inicio'],
+            'fecha_fin' => $request['fecha_fin'],
+        ]);
+    }
 }

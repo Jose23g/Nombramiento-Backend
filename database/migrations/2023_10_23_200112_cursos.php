@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class() extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -20,6 +21,9 @@ return new class() extends Migration {
             $table->integer('horas_teoricas')->nullable()->default(0);
             $table->integer('horas_practicas')->nullable()->default(0);
             $table->integer('horas_laboratorio')->nullable()->default(0);
+            $table->string('individual_colegiado')->nullable();
+            $table->string('tutoria')->nullable();
+            $table->string('horas')->nullable();
             $table->timestamps();
         });
     }

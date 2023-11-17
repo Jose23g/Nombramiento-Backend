@@ -11,23 +11,31 @@ class HorariosGrupoController extends Controller
     public function agregue(Request $request)
     {
         $validator =
-                Validator::make($request->all(), [
-                    '*.dia_id' => 'required',
-                    '*.solicitud_grupo_id' => 'required',
-                    '*.hora_inicio' => 'required',
-                    '*.hora_fin' => 'required',
-                ], [
-                    'required' => 'El campo :attribute es requerido.',
-                ]);
+        Validator::make($request->all(), [
+            '*.dia_id' => 'required',
+            '*.solicitud_grupo_id' => 'required',
+            '*.hora_inicio' => 'required',
+            '*.hora_fin' => 'required',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        $horarios = collect($request->all())->map(function ($horario) {
-            $horarioNuevo = HorariosGrupo::create($horario);
+        DB::beginTransaction();
+        try {
+            $horarios = collect($request->all())->map(function ($horario) {
+                $horarioNuevo = HorariosGrupo::create($horario);
 
-            return $horarioNuevo;
-        });
-        $horarios->first()->solicitudGrupo->detalleSolicitud->solicitudCurso->update(['estado_id' => 7]);
+                return $horarioNuevo;
+            });
+            $horarios->first()->solicitudGrupo->detalleSolicitud->solicitudCurso->update(['estado_id' => 7]);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return response()->json(['Message' => 'Se ha registrado con éxito'], 200);
     }
@@ -35,9 +43,9 @@ class HorariosGrupoController extends Controller
     public function obtengaLaLista(Request $request)
     {
         $validator =
-            Validator::make($request->all(), ['id' => 'required'], [
-                'required' => 'El campo :attribute es requerido.',
-            ]);
+        Validator::make($request->all(), ['id' => 'required'], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
@@ -49,11 +57,11 @@ class HorariosGrupoController extends Controller
     public function elimineElHorario(Request $request)
     {
         $validator =
-            Validator::make($request->all(), [
-                'id' => 'required',
-            ], [
-                'required' => 'El campo :attribute es requerido.',
-            ]);
+        Validator::make($request->all(), [
+            'id' => 'required',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }

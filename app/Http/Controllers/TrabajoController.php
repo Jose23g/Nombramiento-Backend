@@ -19,13 +19,13 @@ class TrabajoController extends Controller
     {
         $trabajos = $request->user()->trabajos()->with(['fecha', 'horarioTrabajos.dia'])->where('tipo_id', 3)->where('estado_id', 5)->get();
 
-        return $trabajos->filter(function ($trabajo) {
+        return response()->json($trabajos->filter(function ($trabajo) {
             $fechaFin = Carbon::parse($trabajo->fecha->fecha_fin);
             $fechaInicio = Carbon::parse($trabajo->fecha->fecha_inicio);
             $fechaActual = Carbon::now();
 
             return $fechaActual->between($fechaInicio, $fechaFin);
-        });
+        })->values()->toArray());
     }
     public function obtengaElListadoDeTrabajosInternos(Request $request)
     {
@@ -36,15 +36,16 @@ class TrabajoController extends Controller
 
             return $fechaActual < $fechaFin;
         });
-        if (!$trabajos) {
+        if ($trabajos->isEmpty()) {
             $trabajos = $listadoDeTrabajos->filter(function ($trabajo) {
                 $fechaFin = Carbon::parse($trabajo->fecha->fecha_fin);
-                $fechaActual = Carbon::now();
+                $fechaInicio = Carbon::parse($trabajo->fecha->fecha_inicio);
+                $fechaActual = Carbon::parse('2023-05-27');
 
-                return $fechaActual->subYear(1) < $fechaFin;
+                return $fechaActual->subYear()->isBetween($fechaInicio->subMonth(5), $fechaFin->subMonth(4));
             });
         }
-        return $trabajos;
+        return response()->json($trabajos->values()->toArray());
     }
     public function agregueUnTrabajoInterno(Request $request)
     {
@@ -56,10 +57,10 @@ class TrabajoController extends Controller
                 'jornada' => 'required',
                 'fecha_inicio' => 'required',
                 'fecha_fin' => 'required',
-                'horarios' => 'required|array|min:1',
-                'horarios.*.dia_id' => 'required|exists:dias,id',
-                'horarios.*.hora_inicio' => 'required',
-                'horarios.*.hora_fin' => 'required',
+                'horario_trabajos' => 'required|array|min:1',
+                'horario_trabajos.*.dia_id' => 'required|exists:dias,id',
+                'horario_trabajos.*.hora_inicio' => 'required',
+                'horario_trabajos.*.hora_fin' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -79,7 +80,7 @@ class TrabajoController extends Controller
                     'fecha_id' => $fecha->id,
                 ]);
                 if ($trabajo) {
-                    app(HorariosTrabajoController::class)->agregue(['trabajo_id' => $trabajo->id, 'horarios' => $request->horarios]);
+                    app(HorariosTrabajoController::class)->agregue(['trabajo_id' => $trabajo->id, 'horarios' => $request->horario_trabajos]);
                 }
             }
             DB::commit();
@@ -90,6 +91,59 @@ class TrabajoController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
+    }
+    public function modifiqueUnTrabajoInterno(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required',
+                'lugar_trabajo' => 'required',
+                'cargo_categoria' => 'required',
+                'jornada' => 'required',
+                'fecha_id' => 'required|exists:fechas,id',
+                'fecha_inicio' => 'required',
+                'fecha_fin' => 'required',
+                'horario_trabajos' => 'required|array|min:1',
+                'horario_trabajos.*.dia_id' => 'required|exists:dias,id',
+                'horario_trabajos.*.hora_inicio' => 'required',
+                'horario_trabajos.*.hora_fin' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        DB::beginTransaction();
+        try {
+            app(FechaController::class)->modifique(['id' => $request->fecha_id, 'fecha_inicio' => $request->fecha_inicio, 'fecha_fin' => $request->fecha_fin]);
+            Trabajo::find($request->id)->update([
+                'lugar_trabajo' => $request->lugar_trabajo,
+                'cargo_categoria' => $request->cargo_categoria,
+                'jornada' => $request->jornada,
+            ]);
+            app(HorariosTrabajoController::class)->agregue(['trabajo_id' => $request->id, 'horarios' => $request->horario_trabajos]);
+            DB::commit();
+            return response()->json(['Message' => 'Se ha registrado con éxito'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+    }
+    public function elimineUnTrabajoInterno(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $trabajo = Trabajo::find($request->id)->delete();
+        return response()->json(['message' => 'Se ha eliminado exitosamente', 'trabajo' => $trabajo], 200);
     }
     public function agregue(Request $request)
     {
@@ -346,6 +400,615 @@ class TrabajoController extends Controller
             ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    public function Eliminar_proyectos_accion(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $trabajoeliminar = Actividad::find($request->id);
+            if ($trabajoeliminar->categoria !== "proyecto_investigacion_accion_social") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+            // luego se elimna de manera total
+            $trabajoeliminar->estado_id = $this->obtenerestado('inactivo');
+            $trabajoeliminar->save();
+
+            $carga = Carga::find($trabajoeliminar->carga_id);
+
+            return response()->json([
+                'message' => 'se ha eliminado con exito el proyecto I/A',
+                'id' => $trabajoeliminar->id,
+                'numero' => $trabajoeliminar->numero_oficio,
+                'nombre' => $trabajoeliminar->nombre,
+                'carga' => $carga->nombre,
+                'vigencia' => $trabajoeliminar->fecha_inicio . '/' . $trabajoeliminar->fecha_fin,
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+
+        }
+
+    }
+    public function Buscar_proyectos_accion(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $actividadbuscada = Actividad::find($request->id);
+
+            if ($actividadbuscada->categoria !== "proyecto_investigacion_accion_social") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+
+            $carga = Carga::find($actividadbuscada->carga_id);
+            return response()->json([
+                'message' => ' El proyecto I/A  consultado es',
+                'id' => $actividadbuscada->id,
+                'numero' => $actividadbuscada->numero_oficio,
+                'nombre' => $actividadbuscada->nombre,
+                'carga' => $carga->nombre,
+                'fecha_inicio' => $actividadbuscada->fecha_inicio,
+                'fecha_fin' => $actividadbuscada->fecha_fin,
+
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $validator->errors()], 422);
+
+        }
+    }
+
+    // Cargos docente, administrativos, comisiones
+    public function Agregar_cargo_DAC(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'cargo_comision' => 'required',
+            'numero_oficio' => 'required',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date',
+            'carga_id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response(['error' => $validator->errors()]);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $usuario = $request->user();
+
+            $nuevaactividad = Actividad::create([
+                'categoria' => 'cargo_dac',
+                'numero_oficio' => $request->numero_oficio,
+                'cargo_comision' => $request->cargo_comision,
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_fin' => $request->fecha_fin,
+                'carga_id' => $request->carga_id,
+                'estado_id' => $this->obtenerestado('activo'),
+                'usuario_id' => $usuario->id,
+            ]);
+
+            DB::commit();
+
+            $carga = Carga::find($request->carga_id);
+
+            return response()->json([
+                'message' => 'se ha agregado el cargo DAC',
+                'numero_oficio' => $nuevaactividad->numero_oficio,
+                'cargo_comision' => $nuevaactividad->cargo_comision,
+                'vigencia' => $nuevaactividad->fecha_inicio . ' / ' . $nuevaactividad->fecha_fin,
+                'carga' => $carga->nombre,
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+    }
+    public function Listar_cargos_DAC(Request $request)
+    {
+        $usuario = $request->user();
+
+        try {
+            $estado = $this->obtenerestado('activo');
+            $cargosdac = Actividad::where('usuario_id', $usuario->id)->where('categoria', 'cargo_dac')->where('estado_id', $estado)->get();
+
+            if ($cargosdac->isEmpty()) {
+
+                return response()->json(['message' => 'no se encuentran cargos DAC'], 200);
+            }
+
+            $listaactividades = [];
+
+            foreach ($cargosdac as $actividad) {
+
+                $carga = Carga::find($actividad['carga_id']);
+
+                $lineaactividad = (object) [
+                    'id' => $actividad['id'],
+                    'numero_oficio' => $actividad['numero_oficio'],
+                    'cargo_comision' => $actividad['cargo_comision'],
+                    'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
+                    'carga' => $carga->nombre,
+                ];
+                $listaactividades[] = $lineaactividad;
+            }
+
+            return response()->json(['DAC' => $listaactividades], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+    public function Editar_cargo_DAC(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+            'numero_oficio' => 'required',
+            'cargo_comision' => 'required',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+            $actividadeditar = Actividad::find($request->id);
+
+            if ($actividadeditar->categoria !== "cargo_dac") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+
+            $actividadeditar->numero_oficio = $request->numero_oficio;
+            $actividadeditar->cargo_comision = $request->cargo_comision;
+            $actividadeditar->fecha_inicio = $request->fecha_inicio;
+            $actividadeditar->fecha_fin = $request->fecha_fin;
+            $actividadeditar->save();
+
+            $carga = Carga::find($actividadeditar->carga_id);
+
+            return response()->json([
+                'message' => 'se ha editado el cargo DAC',
+                'id' => $actividadeditar->id,
+                'numero_oficio' => $actividadeditar->numero_oficio,
+                'cargo_comision' => $actividadeditar->cargo_comision,
+                'vigencia' => $actividadeditar->fecha_inicio . '/' . $actividadeditar->fecha_fin,
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+    public function Eliminar_cargo_DAC(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+            $actividadeliminar = Actividad::find($request->id);
+            if ($actividadeliminar->categoria !== "cargo_dac") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+
+            $actividadeliminar->estado_id = $this->obtenerestado('inactivo');
+            $actividadeliminar->save();
+
+            $carga = Carga::find($actividadeliminar->carga_id);
+
+            return response()->json([
+                'message' => 'se ha eliminado con exito el proyecto de accion social',
+                'id' => $actividadeliminar->id,
+                'numero_oficio' => $actividadeliminar->numero_oficio,
+                'cargo_comision' => $actividadeliminar->cargo_comision,
+                'vigencia' => $actividadeliminar->fecha_inicio . '/' . $actividadeliminar->fecha_fin,
+                'carga' => $carga->nombre,
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+    public function Buscar_cargo_DAC(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $actividadbuscada = Actividad::find($request->id);
+
+            if ($actividadbuscada->categoria !== "cargo_dac") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+
+            $carga = Carga::find($actividadbuscada->carga_id);
+
+            return response()->json([
+                'message' => ' El proyecto DAC consultado es',
+                'id' => $actividadbuscada->id,
+                'numero_oficio' => $actividadbuscada->numero_oficio,
+                'cargo_comision' => $actividadbuscada->cargo_comision,
+                'carga' => $carga->nombre,
+                'fecha_inicio' => $actividadbuscada->fecha_inicio,
+                'fecha_fin' => $actividadbuscada->fecha_fin,
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $validator->errors()], 422);
+
+        }
+    }
+
+    // METODO PARA otras labores no contempladas
+
+    public function Agregar_otra_labor(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'numero' => 'required',
+            'nombre' => 'required',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date',
+            'carga_id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response(['error' => $validator->errors()]);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $usuario = $request->user();
+
+            $nuevaactividad = Actividad::create([
+                'categoria' => 'otra_labor',
+                'numero_oficio' => $request->numero,
+                'nombre' => $request->nombre,
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_fin' => $request->fecha_fin,
+                'carga_id' => $request->carga_id,
+                'estado_id' => $this->obtenerestado('activo'),
+                'usuario_id' => $usuario->id,
+            ]);
+
+            DB::commit();
+
+            $carga = Carga::find($request->carga_id);
+
+            return response()->json([
+                'message' => 'se ha agregado otra labor',
+                'numero' => $nuevaactividad->numero_oficio,
+                'nombre' => $nuevaactividad->nombre,
+                'vigencia' => $nuevaactividad->fecha_inicio . ' / ' . $nuevaactividad->fecha_fin,
+                'carga' => $carga->nombre,
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+    }
+    public function Listar_otras_labores(Request $request)
+    {
+        $usuario = $request->user();
+
+        try {
+            $estado = $this->obtenerestado('activo');
+            $otraslabores = Actividad::where('usuario_id', $usuario->id)->where('categoria', 'otra_labor')->where('estado_id', $estado)->get();
+
+            if ($otraslabores->isEmpty()) {
+
+                return response()->json(['message' => 'no se encuentran otras labores'], 200);
+            }
+
+            $listaactividades = [];
+
+            foreach ($otraslabores as $actividad) {
+
+                $carga = Carga::find($actividad['carga_id']);
+
+                $lineaactividad = (object) [
+                    'id' => $actividad['id'],
+                    'numero' => $actividad['numero_oficio'],
+                    'nombre' => $actividad['nombre'],
+                    'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
+                    'carga' => $carga->nombre,
+                ];
+
+                $listaactividades[] = $lineaactividad;
+            }
+
+            return response()->json(['OTL' => $listaactividades], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+    public function Editar_otra_labor(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+            'numero' => 'required',
+            'nombre' => 'required',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+            $actividadeditar = Actividad::find($request->id);
+
+            if ($actividadeditar->categoria !== "otra_labor") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+
+            $actividadeditar->numero_oficio = $request->numero;
+            $actividadeditar->nombre = $request->nombre;
+            $actividadeditar->fecha_inicio = $request->fecha_inicio;
+            $actividadeditar->fecha_fin = $request->fecha_fin;
+            $actividadeditar->save();
+            $carga = Carga::find($actividadeditar->carga_id);
+
+            return response()->json([
+                'message' => 'se ha editado con exito otra labor',
+                'id' => $actividadeditar->id,
+                'numero' => $actividadeditar->numero_oficio,
+                'nombre' => $actividadeditar->nombre,
+                'vigencia' => $actividadeditar->fecha_inicio . '/' . $actividadeditar->fecha_fin,
+                'carga' => $carga->nombre,
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+    public function Eliminar_otra_labor(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $trabajoeliminar = Actividad::find($request->id);
+
+            if ($trabajoeliminar->categoria !== "otra_labor") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+
+            // luego se elimna de manera total
+            $trabajoeliminar->estado_id = $this->obtenerestado('inactivo');
+            $trabajoeliminar->save();
+
+            $carga = Carga::find($trabajoeliminar->carga_id);
+
+            return response()->json([
+                'message' => 'se ha eliminado con exito el proyecto I/A',
+                'id' => $trabajoeliminar->id,
+                'numero' => $trabajoeliminar->numero_oficio,
+                'nombre' => $trabajoeliminar->nombre,
+                'carga' => $carga->nombre,
+                'vigencia' => $trabajoeliminar->fecha_inicio . '/' . $trabajoeliminar->fecha_fin,
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+
+        }
+    }
+    public function Buscar_otra_labor(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:actividades,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $actividadbuscada = Actividad::find($request->id);
+
+            if ($actividadbuscada->categoria !== "otra_labor") {
+                return response()->json(['error' => 'metodo no valido'], 422);
+            }
+
+            $carga = Carga::find($actividadbuscada->carga_id);
+
+            return response()->json([
+                'message' => ' otra labor consultada es',
+                'id' => $actividadbuscada->id,
+                'numero' => $actividadbuscada->numero_oficio,
+                'nombre' => $actividadbuscada->nombre,
+                'carga' => $carga->nombre,
+                'fecha_inicio' => $actividadbuscada->fecha_inicio,
+                'fecha_fin' => $actividadbuscada->fecha_fin,
+
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $validator->errors()], 422);
+
+        }
+    }
+
+    // METODO PARA OBTENER TODAS LAS OTRAS ACTIVIDADES DE UN USUARIO PARA P6
+    public function Disparador($usuarioID)
+    {
+
+        try {
+            $fechaparametro = Carbon::now()->format('Y-m-d');
+
+            $actividadesTFG = $this->Cargar_actividad_categoria('trabajo_final_graduacion', $usuarioID, $fechaparametro);
+
+            $actividadesPIAC = $this->Cargar_actividad_categoria('proyecto_investigacion_accion_social', $usuarioID, $fechaparametro);
+
+            $actividadesDAC = $this->Cargar_actividad_categoria('cargo_dac', $usuarioID, $fechaparametro);
+
+            $actividadesOTRA = $this->Cargar_actividad_categoria('otra_labor', $usuarioID, $fechaparametro);
+
+            $listaactividades = (object) [
+                'TFG' => $actividadesTFG,
+                'PIAC' => $actividadesPIAC,
+                'DAC' => $actividadesDAC,
+                'OTRA' => $actividadesOTRA,
+            ];
+
+            return $listaactividades;
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 422);
+
+        }
+
+    }
+
+    public function Cargar_actividad_categoria($categoria, $id_usuario, $fechaparametro)
+    {
+
+        $actividadenvigencia = Actividad::where('fecha_inicio', '<=', $fechaparametro)
+            ->where('fecha_fin', '>=', $fechaparametro)->where('categoria', $categoria)
+            ->where('usuario_id', $id_usuario)->where('estado_id', $this->obtenerestado('activo'))
+            ->get();
+
+        if (!$actividadenvigencia->isEmpty()) {
+
+            $listadoactividad = [];
+
+            switch ($categoria) {
+
+                case "trabajo_final_graduacion":
+
+                    foreach ($actividadenvigencia as $actividad) {
+
+                        $carga = Carga::find($actividad['carga_id']);
+
+                        $lineaactividad = (object) [
+                            'id' => $actividad['id'],
+                            'tipo' => $actividad['tipo'],
+                            'estudiante' => $actividad['estudiante'],
+                            'modalidad' => $actividad['modalidad'],
+                            'grado' => $actividad['grado'],
+                            'postgrado' => $actividad['postgrado'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
+                            'carga' => $carga->nombre,
+                        ];
+
+                        $listadoactividad[] = $lineaactividad;
+                    }
+
+                    return $listadoactividad;
+
+                    break;
+
+                case "proyecto_investigacion_accion_social":
+
+                    foreach ($actividadenvigencia as $actividad) {
+
+                        $carga = Carga::find($actividad['carga_id']);
+
+                        $lineaactividad = (object) [
+                            'id' => $actividad['id'],
+                            'numero' => $actividad['numero_oficio'],
+                            'nombre' => $actividad['nombre'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
+                            'carga' => $carga->nombre,
+                        ];
+
+                        $listadoactividad[] = $lineaactividad;
+                    }
+                    return $listadoactividad;
+
+                    break;
+
+                case "cargo_dac":
+
+                    foreach ($actividadenvigencia as $actividad) {
+                        $carga = Carga::find($actividad['carga_id']);
+                        $lineaactividad = (object) [
+                            'id' => $actividad['id'],
+                            'numero_oficio' => $actividad['numero_oficio'],
+                            'cargo_comision' => $actividad['cargo_comision'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
+                            'carga' => $carga->nombre,
+                        ];
+
+                        $listadoactividad[] = $lineaactividad;
+                    }
+                    return $listadoactividad;
+                    break;
+
+                case "otra_labor":
+                    foreach ($actividadenvigencia as $actividad) {
+                        $carga = Carga::find($actividad['carga_id']);
+
+                        $lineaactividad = (object) [
+                            'id' => $actividad['id'],
+                            'numero' => $actividad['numero_oficio'],
+                            'nombre' => $actividad['nombre'],
+                            'vigencia' => $actividad['fecha_inicio'] . '/' . $actividad['fecha_fin'],
+                            'carga' => $carga->nombre,
+                        ];
+
+                        $listadoactividad[] = $lineaactividad;
+                    }
+                    return $listadoactividad;
+
+                    break;
+
+                default:
+            }
+        } else {
+            return null;
         }
     }
 

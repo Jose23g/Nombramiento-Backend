@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\HorariosTrabajo;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class HorariosTrabajoController extends Controller
 {
@@ -48,7 +50,6 @@ class HorariosTrabajoController extends Controller
             return response()->json(['message' => $validator->errors()], 422);
         }
         $horario = HorariosTrabajo::find($request->id);
-        $horario->solicitudGrupo->detalleSolicitud->solicitudCurso->update(['estado_id' => 7]);
         $horario->delete();
 
         return response()->json(['Message' => 'Horario eliminado'], 200);

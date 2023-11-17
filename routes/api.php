@@ -12,6 +12,7 @@ use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\DocenciaController;
 use App\Http\Controllers\FechaController;
 use App\Http\Controllers\HorariosGrupoController;
+use App\Http\Controllers\HorariosTrabajoController;
 use App\Http\Controllers\PlanEstudiosController;
 use App\Http\Controllers\ProfesorContoller;
 use App\Http\Controllers\ProvinciaController;
@@ -74,10 +75,17 @@ Route::middleware('auth:api')->group(function () {
             Route::get('listadoDeTrabajosInternos', 'obtengaElListadoDeTrabajosInternos');
             Route::post('trabajo', 'agregue');
             Route::post('agregueUnTrabajoInterno', 'agregueUnTrabajoInterno');
+            Route::post('modifiqueUnTrabajoInterno', 'modifiqueUnTrabajoInterno');
+            Route::delete('elimineUnTrabajoInterno', 'elimineUnTrabajoInterno');
             Route::get('listartrabajoshorario', 'obtengaElListadoPorPersona');
             Route::post('editartrabajo', 'modifique');
             Route::post('eliminartrabajo', 'elimine');
             Route::post('buscartrabajo', 'obtengaPorId');
+        });
+        Route::controller(HorariosTrabajoController::class)->group(function () {
+            Route::get('listadoHorarioTrabajos', 'obtengaLaLista');
+            Route::post('agregueElHorarioDelTrabajo', 'agregue');
+            Route::delete('elimineElHorarioDeTrabajo', 'elimineElHorario');
         });
         Route::controller(ActividadController::class)->group(function () {
 
@@ -134,6 +142,7 @@ Route::middleware('auth:api')->group(function () {
     });
 });
 
-Route::get('bancos', [BancoController::class, 'obtengaLaLista']);
+Route::get('listadoDeBancos', [BancoController::class, 'obtengaLaLista']);
+Route::get('obtengaElBanco', [BancoController::class, 'obtengaPorId']);
 Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']);
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
