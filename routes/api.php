@@ -7,6 +7,7 @@ use App\Http\Controllers\CargaController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\CoordinadorController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\DeclaracionJuradaController;
 use App\Http\Controllers\DetalleSolicitudController;
 use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\DocenciaController;
@@ -101,6 +102,10 @@ Route::middleware('auth:api')->group(function () {
             Route::post('agregarotralabor', 'Agregar_otra_labor');
             Route::get('listarotraslabores', 'Listar_otras_labores');
             Route::get('buscarotralabor', 'Buscar_otra_labor');
+        });
+        Route::controller(DeclaracionJuradaController::class)->group(function () {
+            Route::post('agregueLaDeclaracion', 'agregue');
+            Route::get('muestreLaDeclaracion', 'obtengaLaUltimaDeclaracion');
         });
 
         Route::get('p6', [ProfesorContoller::class, 'previsualizarP6']);

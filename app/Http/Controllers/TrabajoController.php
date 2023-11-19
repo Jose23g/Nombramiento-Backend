@@ -45,7 +45,14 @@ class TrabajoController extends Controller
                 return $fechaActual->subYear()->isBetween($fechaInicio->subMonth(5), $fechaFin->subMonth(4));
             });
         }
-        return response()->json($trabajos->values()->toArray());
+        $total_horas = 0;
+        $trabajosConElTotalDeHoras = new \stdClass();
+        $trabajosConElTotalDeHoras->trabajos = $trabajos->values()->map(function ($trabajo) use (&$total_horas) {
+            $total_horas += app(SolicitudGrupoController::class)->obtengaElValor($trabajo->jornada);
+            return $trabajo;
+        });
+        $trabajosConElTotalDeHoras->total_horas = $total_horas * 40;
+        return response()->json($trabajosConElTotalDeHoras);
     }
     public function agregueUnTrabajoInterno(Request $request)
     {

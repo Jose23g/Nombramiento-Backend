@@ -87,4 +87,8 @@ class Usuario extends Authenticatable
     {
         return $this->belongsTo(Rol::class, 'rol_id', 'id');
     }
+    public function declaraciones()
+    {
+        return $this->hasMany(DeclaracionJurada::class, 'usuario_id', 'id');
+    }
 }
