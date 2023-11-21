@@ -28,6 +28,7 @@ class AuthServiceProvider extends ServiceProvider
             'Coordinador' => 'Tiene acceso intermedio en la aplicacion',
             'Profesor' => 'Tiene acceso limitado a la aplicacion',
             'Docencia' => 'Tiene acceso limitado a la aplicacion',
+            'Director_de_Departamento' => 'Tiene acceso limitado a la aplicacion',
         ]);
 
         Passport::setDefaultScope(

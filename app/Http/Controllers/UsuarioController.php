@@ -24,6 +24,7 @@ class UsuarioController extends Controller
             ]);
 
             $usuario = Usuario::with(['rol', 'persona', 'carreras'])->where('correo', $request->input('correo'))->first();
+           
 
             if (!$usuario) {
                 return response()->json(['Error' => 'Credenciales incorrectas'], 401);
