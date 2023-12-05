@@ -118,6 +118,7 @@ Route::middleware('auth:api')->group(function () {
             Route::get('marqueComoPendienteLaSolicitudDeCursos', 'marqueComoPendiente');
             Route::post('agregueLaSolicitudDeCursos', 'agregue');
             Route::delete('elimineLaSolicitudDeCursos', 'elimineLaSolicitud');
+            Route::post('agregarcurso', [TrabajoController::class, 'agregue']);
         });
         Route::controller(DetalleSolicitudController::class)->group(function () {
             Route::get('listadoDetalleSolicitud', 'obtengaLaLista');

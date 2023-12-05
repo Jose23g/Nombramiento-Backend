@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Carga;
 use App\Models\Dias;
+use App\Models\Fecha;
 use App\Models\HorariosTrabajo;
 use App\Models\Jornada;
 use App\Models\Persona;
@@ -138,9 +140,8 @@ class TrabajoController extends Controller
                 'jornada_id' => 'required| exists:jornadas,id',
                 'horario' => 'required|array|min:1',
                 'horario.*.dia_id' => 'required|exists:dias,id',
-                'horario.*.horas' => 'required|array|min:1',
-                'horario.*.horas.*.hora_inicio' => 'required',
-                'horario.*.horas.*.hora_fin' => 'required',
+                'horario.*.desde' => 'required',
+                'horario.*.hasta' => 'required',
             ]
         );
 
@@ -152,15 +153,26 @@ class TrabajoController extends Controller
         try {
             // recuperamos el usuario al que se le agregara el trabajo
             $usuario = $request->user();
+            $jornada = Carga::find($request->jornada);
             // creamos el trabajo
             try {
+
+                $nuevafecha =  Fecha::create([
+                    'tipo_id' => 5,
+                    'fecha_inicio' => $request->fecha_inicio,
+                    'fecha_fin' => $request->fecha_fin,
+                ]);
+
                 $nuevotrabajo = Trabajo::create([
-                    'jornada_id' => $request->jornada_id,
+                    'jornada' => $jornada->nombre,
                     'usuario_id' => $usuario->id,
                     'estado_id' => 5,
+                    'tipo_id' => 5,
                     'lugar_trabajo' => $request->lugar_trabajo,
-                    'cargo' => $request->cargo,
+                    'cargo_categoria' => $request->cargo,
+                    'fecha_id' => $nuevafecha->id
                 ]);
+
             } catch (\Exception $e) {
                 DB::rollBack();
 
@@ -168,22 +180,22 @@ class TrabajoController extends Controller
             }
             // una vez creado el trabajo procedemos a añadir los dias
             foreach ($request['horario'] as $dia) { // recorremos los dias que vienen del horario
-                // recorremos las horas para agergar las horas que tiene el trabajo por dia
-                foreach ($dia['horas'] as $horas) {
-                    // creamos el el dia en referencia al horario trabajo
-                    try {
-                        $diatrabajo = HorariosTrabajo::create([
-                            'dia_id' => $dia['dia_id'],
-                            'hora_inicio' => $horas['hora_inicio'],
-                            'hora_fin' => $horas['hora_fin'],
-                            'trabajo_id' => $nuevotrabajo->id,
-                        ]);
-                    } catch (\Exception $e) {
-                        DB::rollBack();
+                try {
+                    $dia = Dias::where('nombre', $dia['dia_id'])->first();
+                   
+                    $diatrabajo = HorariosTrabajo::create([
+                        'dia_id' => $dia['dia_id'],
+                        'hora_inicio' => $dia['desde'],
+                        'hora_fin' => $dia['hasta'],
+                        'trabajo_id' => $nuevotrabajo->id,
+                    ]);
 
-                        return response()->json(['message' => $e->getMessage()], 422);
-                    }
+                } catch (\Exception $e) {
+                    DB::rollBack();
+
+                    return response()->json(['message' => $e->getMessage()], 422);
                 }
+
             }
             DB::commit();
             $perso = $this->Obtener_usuario_personaid($usuario->id);
@@ -193,9 +205,9 @@ class TrabajoController extends Controller
                 'message' => 'Se ha agregado el trabajo de manera exitosa',
                 'persona' => $perso,
                 'lugar' => $nuevotrabajo->lugar_trabajo,
-                'cargo' => $nuevotrabajo->cargo,
-                'jornada' => $jornada->sigla_jornada,
+                'cargo' => $nuevotrabajo->cargo
             ], 200);
+            
         } catch (\Exception $e) {
             DB::rollBack();
 
