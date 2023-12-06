@@ -137,9 +137,9 @@ class TrabajoController extends Controller
             [
                 'lugar_trabajo' => 'required',
                 'cargo' => 'required',
-                'jornada_id' => 'required| exists:jornadas,id',
+                'jornada' => 'required',
                 'horario' => 'required|array|min:1',
-                'horario.*.dia_id' => 'required|exists:dias,id',
+                'horario.*.dia_id' => 'required',
                 'horario.*.desde' => 'required',
                 'horario.*.hasta' => 'required',
             ]
@@ -148,7 +148,7 @@ class TrabajoController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-
+        
         DB::beginTransaction();
         try {
             // recuperamos el usuario al que se le agregara el trabajo
@@ -178,13 +178,13 @@ class TrabajoController extends Controller
 
                 return response()->json(['message' => $e->getMessage()], 422);
             }
-            // una vez creado el trabajo procedemos a añadir los dias
+           
             foreach ($request['horario'] as $dia) { // recorremos los dias que vienen del horario
                 try {
-                    $dia = Dias::where('nombre', $dia['dia_id'])->first();
-                   
+                    $id_dia = Dias::where('nombre', $dia['dia_id'])->first();
+                
                     $diatrabajo = HorariosTrabajo::create([
-                        'dia_id' => $dia['dia_id'],
+                        'dia_id' => $id_dia->id,
                         'hora_inicio' => $dia['desde'],
                         'hora_fin' => $dia['hasta'],
                         'trabajo_id' => $nuevotrabajo->id,
@@ -199,7 +199,6 @@ class TrabajoController extends Controller
             }
             DB::commit();
             $perso = $this->Obtener_usuario_personaid($usuario->id);
-            $jornada = Jornada::find($request->jornada_id);
 
             return response()->json([
                 'message' => 'Se ha agregado el trabajo de manera exitosa',

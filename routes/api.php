@@ -59,7 +59,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
     Route::get('coordinadorActual', [UsuarioController::class, 'obtengaElCoordinadorActual']);
     Route::get('profesorActual', [UsuarioController::class, 'obtengaElProfesorActual']);
-    Route::post('addtrabajo', [TrabajoController::class, 'agregue']);
 
     Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
@@ -119,7 +118,7 @@ Route::middleware('auth:api')->group(function () {
             Route::get('marqueComoPendienteLaSolicitudDeCursos', 'marqueComoPendiente');
             Route::post('agregueLaSolicitudDeCursos', 'agregue');
             Route::delete('elimineLaSolicitudDeCursos', 'elimineLaSolicitud');
-            Route::post('agregarcurso', [TrabajoController::class, 'agregue']);
+            Route::post('addtrabajo', [TrabajoController::class, 'agregue']);
         });
         Route::controller(DetalleSolicitudController::class)->group(function () {
             Route::get('listadoDetalleSolicitud', 'obtengaLaLista');
