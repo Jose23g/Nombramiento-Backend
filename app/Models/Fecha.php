@@ -25,4 +25,8 @@ class Fecha extends Model
     {
         return $this->hasMany(Permanencia::class, 'fecha_id', 'id');
     }
+
+    public function tipos(){
+        return $this->hasMany(Tipos::class, 'tipo_id', 'id');
+    }
 }

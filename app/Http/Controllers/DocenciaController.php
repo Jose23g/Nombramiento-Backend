@@ -12,6 +12,7 @@ use App\Models\GrupoAprobado;
 use App\Models\Persona;
 use App\Models\SolicitudCurso;
 use App\Models\SolicitudGrupo;
+use App\Models\Tipos;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -290,6 +291,71 @@ class DocenciaController extends Controller
                 'fecha_fin' => $ultimafecha->fecha_fin,
             ], 200);
         } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    //Sirve para que docencia pueda esteblecer la vigencia de las p6
+    public function establecer_TNombramiento_vigenciaP6(Request $request)
+    {
+        try {
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'anio' => 'required',
+                    'ciclo' => 'required',
+                    'fecha_inicio' => 'required', //-->desde
+                    'fecha_fin' => 'required', //-->hasta
+                    'tipo' => 'required', //-->Nombre del tipo de nombramiento
+                ],
+                [
+                    'anio.required' => 'Es necesario añadir el año',
+                    'ciclo.required' => 'Es necesario definir para que ciclo',
+                    'fecha_inicio.required' => 'Es necesario la fecha de inicio',
+                    'fecha_fin.required' => 'Es necesario establecer la fecha limite',
+                    'tipo.required' => 'Es necesario para definir una fecha al tipo de nombramiento'
+                ]
+            );
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 400);
+            }
+            $tipo = Tipos::where("nombre", $request->tipo)->first();
+
+            //En caso de que el registro <<Tipo Nombramiento>> no exista se crea
+            if (!$tipo) {
+                $tipo = Tipos::Create([
+                    'nombre' => $request->tipo,
+                ]);
+            }
+
+            $fecha = Fecha::where('tipo_id', $tipo->id)->where('anio', $request->anio)->where('ciclo', $request->ciclo)->first();
+
+            if ($fecha) {
+                return response()->json(['error' => 'Ya se han establecido fechas para el tipo de nombramiento '. $tipo->nombre.' para el año ' . $fecha->anio . ', ciclo ' . $fecha->ciclo . ' que van desde ' . $fecha->fecha_inicio . ', hasta ' . $fecha->fecha_fin], 400);
+            }
+
+            $fecha = Fecha::Create([
+                'tipo_id' => $tipo->id,
+                'anio' => $request->anio,
+                'ciclo' => $request->ciclo,
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_fin' => $request->fecha_fin,
+            ]);
+            return response()->json(['Se ha establecido fechas para el tipo de nombramiento '. $tipo->nombre.' para el año ' . $fecha->anio . ', ciclo ' . $fecha->ciclo . ' que van desde ' . $fecha->fecha_inicio . ', hasta ' . $fecha->fecha_fin], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+    public function obtener_TNombramiento_vigenciaP6(Request $request){
+        try{
+            $anio = Carbon::now()->year;
+            $fecha= Tipos::join('fechas' , 'tipos.id', '=', 'fechas.tipo_id')
+            ->whereIn('tipos.nombre',['Continuidad','Interino'])
+            ->where('fechas.anio', $anio)->select(['tipos.nombre','anio','ciclo', 'fecha_inicio', 'fecha_fin'])->get();
+
+            return response()->json($fecha);
+        }catch (\Exception $e){
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }

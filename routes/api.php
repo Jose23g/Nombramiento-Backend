@@ -68,6 +68,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('fechas', 'Listar_fechas_solicitudes');
         Route::post('cambiar-estado', 'cambiarEstadoSolicitud');
         Route::get('ultimafecha', 'Obtener_ultima_fecha');
+        Route::post('crear-vigencia-p6', 'establecer_TNombramiento_vigenciaP6');
+        Route::get('vigencia-p6', 'obtener_TNombramiento_vigenciaP6');
     });
 
     Route::middleware('scope:Profesor')->group(function () {
