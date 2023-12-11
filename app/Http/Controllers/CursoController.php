@@ -24,7 +24,8 @@ class CursoController extends Controller
             'individual_colegiado' => 'required',
             'tutoria' => 'required',
             'horas_practicas' => 'required',
-            'horas_laboratorio' => 'required'
+            'horas_laboratorio' => 'required',
+            'planes' => 'required',
 
         ], [
             'required' => 'El campo :attribute es requerido.',
@@ -50,10 +51,13 @@ class CursoController extends Controller
             ]);
 
             if($nuevocurso){
-                $relacioncursoplan = CursoPlan::create([
-                    'curso_id' => $nuevocurso->id,
-                    'plan_estudios_id' => $request->plan_estudios_id
-                ]);
+              
+                foreach( $request->planes as $plan ){
+                    $relacioncursoplan = CursoPlan::create([
+                        'curso_id' => $nuevocurso->id,
+                        'plan_estudios_id' => $plan->id
+                    ]);
+                }
             }
             return response()->json(['message' => 'Se ha registrado el curso con exito el curso' . $nuevocurso->nombre], 200);
 
