@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Usuario;
+use Illuminate\Http\Request;
 
 class ArchivosController extends Controller
 {
+    public function obtenga(Request $request)
+    {
+        return response()->json($request->user()->archivo);
+    }
     public function guardarimagen($usuarioId, $imagenPerfil)
     {
         $usuario = Usuario::find($usuarioId);
@@ -37,7 +42,7 @@ class ArchivosController extends Controller
         try {
             if ($documento) {
                 try {
-                    $nombreArchivo = $persona->nombre.'_DocumentosAsociados'; // Nombre del archivo
+                    $nombreArchivo = $persona->nombre . '_DocumentosAsociados'; // Nombre del archivo
                     Archivos::create([
                         'nombre' => $nombreArchivo,
                         'file' => $documento,

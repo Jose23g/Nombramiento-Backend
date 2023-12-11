@@ -13,9 +13,9 @@ class Persona extends Model
     protected $guarded = [];
     public $timestamps = false;
 
-    public function archivos()
+    public function archivo()
     {
-        return $this->hasMany(Archivos::class, 'persona_id', 'id');
+        return $this->hasOne(Archivos::class, 'persona_id', 'id');
     }
 
     public function telefono()

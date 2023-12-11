@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActividadController;
+use App\Http\Controllers\ArchivosController;
 use App\Http\Controllers\BancoController;
 use App\Http\Controllers\CantonController;
 use App\Http\Controllers\CargaController;
@@ -53,6 +54,7 @@ Route::middleware('auth:api')->prefix('usuario')->controller(UsuarioController::
 });
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('obtengaElArchivo', [ArchivosController::class, 'obtenga']);
     Route::get('listadoDeProfesores', [CarreraController::class, 'obtengaLaListaDeProfesoresPorCarrera']);
     Route::get('listadoDePlanEstudios', [CarreraController::class, 'obtengaLaListaDePlanEstudiosPorCarrera']);
     Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);

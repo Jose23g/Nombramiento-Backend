@@ -13,7 +13,7 @@ return new class() extends Migration
     {
         Schema::create('archivos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('persona_id');
+            $table->unsignedBigInteger('persona_id')->unique();
             $table->string('nombre');
             $table->binary('archivo');
             $table->foreign('persona_id')->references('id')->on('personas')->onDelete('cascade');
