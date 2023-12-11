@@ -14,7 +14,6 @@ class CursoController extends Controller
     public function agregueUnCurso(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'plan_estudios_id' => 'required|exists:plan_estudios,id',
             'sigla' => 'required|unique:cursos,sigla',
             'nombre' => 'required',
             'creditos' => 'required',
