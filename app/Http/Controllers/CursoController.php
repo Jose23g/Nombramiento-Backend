@@ -54,7 +54,7 @@ class CursoController extends Controller
                 foreach( $request->planes as $plan ){
                     $relacioncursoplan = CursoPlan::create([
                         'curso_id' => $nuevocurso->id,
-                        'plan_estudios_id' => $plan->id
+                        'plan_estudios_id' => $plan['id']
                     ]);
                 }
             }
