@@ -725,7 +725,7 @@ class CoordinadorController extends Controller
                         'codigo' => $cursoInfo->sigla,
                         'nombre_del_curso' => $cursoInfo->nombre,
                         'carga' => $carga->nombre,
-                        'grupo_id' => $key
+                        'solicitud_grupo_id' => $key->id
                     ];
                 }
             }
