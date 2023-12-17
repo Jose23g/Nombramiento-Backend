@@ -10,6 +10,7 @@ use App\Models\Estado;
 use App\Models\HorariosGrupo;
 use App\Models\Persona;
 use App\Models\PSeis;
+use App\Models\Rol;
 use App\Models\SolicitudCurso;
 use App\Models\SolicitudGrupo;
 use App\Models\Telefono;
@@ -730,7 +731,7 @@ class CoordinadorController extends Controller
                 }
             }
 
-           
+
             $borradorP6 = [
                 'profesor_id' => $profesor_user->id,
                 'nombre' => $profesor->nombre,
@@ -745,7 +746,7 @@ class CoordinadorController extends Controller
                 ],
                 'cursos' => $cursosInf,
             ];
-           
+
             return response()->json($borradorP6, 200);
 
         } catch (\Exception $e) {
@@ -768,5 +769,17 @@ class CoordinadorController extends Controller
             )
             ->get();
         return $cursos;
+    }
+
+    public function listaProf(Request $request)
+    {
+        $usuarios = Usuario::where('rol_id', '1')->select('persona_id')->get();
+
+        foreach ($usuarios as $usuario) {
+            $persona = Persona::where('id', $usuario->persona_id)->select('nombre', 'id')->first();
+            $profesores[] = $persona;
+
+        }
+        return response()->json($profesores);
     }
 }

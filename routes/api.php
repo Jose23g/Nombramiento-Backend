@@ -111,7 +111,6 @@ Route::middleware('auth:api')->group(function () {
             Route::post('agregueLaDeclaracion', 'agregue');
             Route::get('muestreLaDeclaracion', 'obtengaLaUltimaDeclaracion');
         });
-
         Route::get('p6', [ProfesorContoller::class, 'previsualizarP6']);
     });
 
@@ -139,11 +138,11 @@ Route::middleware('auth:api')->group(function () {
             Route::post('agregueElHorarioDelGrupo', 'agregue');
             Route::delete('elimineElHorarioDeGrupo', 'elimineElHorario');
         });
-
         Route::controller(CoordinadorController::class)->group(function () {
             Route::post('solicitud', 'Solicitud_de_curso');
             Route::get('ultimasolicitud', 'ultimaSolicitud');
             Route::get('solicitud-profesores', 'obtenerProfesoresdeUltimaSolicitud');
+            Route::get('listaProfesores', 'listaProf');
             Route::get('ver-p6', 'previsualizarP6');
         });
         Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
