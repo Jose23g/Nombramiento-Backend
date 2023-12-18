@@ -15,6 +15,7 @@ use App\Models\SolicitudCurso;
 use App\Models\SolicitudGrupo;
 use App\Models\Telefono;
 use App\Models\Usuario;
+use App\Models\UsuarioCarrera;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -780,14 +781,30 @@ class CoordinadorController extends Controller
         return response()->json($usuarios);
     }
 
-    /*  public function incorporar_a_carrera(Request $request)
-     {
-         try {
-             $validaciones = Validator::make([
-                 'usuario_id' => $request->
-             ]);
-         } catch (\Exception $e) {
-             return response()->json($e->getMessage(), 400);
-         }
-     } */
+    public function incorporar_a_carrera(Request $request)
+    {
+        try {
+            $validaciones = Validator::make([
+                'usuario_id' => 'required',
+                'carrera_id' => 'required',
+            ],
+                [
+                    'usuario_id.required' => 'No se puede incorporar sin el usuario_id',
+                    'carrera_id.required' => 'No se puede asignar el usuario sin el carrera_id',
+                ]);
+
+            if ($validaciones->fails()) {
+                return response()->json(['errorMessage' => $validaciones->errors()], 400);
+            }
+
+            UsuarioCarrera::create([
+                'usuario_id' => $request->input('usuario_id'),
+                'carrera_id' => $request->input('carrera_id'),
+            ]);
+
+            return response()->json('Usuario asignado a la carrera', 200);
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage(), 400);
+        }
+    }
 }

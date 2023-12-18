@@ -24,7 +24,7 @@ class UsuarioController extends Controller
             ]);
 
             $usuario = Usuario::with(['rol', 'persona', 'carreras'])->where('correo', $request->input('correo'))->first();
-           
+
 
             if (!$usuario) {
                 return response()->json(['Error' => 'Credenciales incorrectas'], 401);
@@ -230,11 +230,17 @@ class UsuarioController extends Controller
         return ['profesor_id' => $request->user()->id, 'nombre' => $persona->nombre, 'cedula' => $persona->cedula, 'correos' => ['personal' => $usuario->correo, 'trabajo' => $usuario->otro_correo], 'telefonos' => ['personal' => null, 'trabajo' => null]];
     }
 
-    public function misCarreras(Request $request){
+    public function misCarreras(Request $request)
+    {
         $usuario = $request->user();
-        $carreras = $usuario->carreras;
+        $carreras = $usuario->carreras->map(function ($carrera) {
+            return [
+                'id' => $carrera->id,
+                'nombre' => $carrera->nombre,
+            ];
+        });
 
-        if(!$carreras){
+        if (!$carreras) {
             return response()->json('Usuario sin carrera asignada', 400);
         }
 
