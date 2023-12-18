@@ -18,6 +18,7 @@ use App\Http\Controllers\HorariosTrabajoController;
 use App\Http\Controllers\PlanEstudiosController;
 use App\Http\Controllers\ProfesorContoller;
 use App\Http\Controllers\ProvinciaController;
+use App\Http\Controllers\PSeisController;
 use App\Http\Controllers\SolicitudCursoController;
 use App\Http\Controllers\SolicitudGrupoController;
 use App\Http\Controllers\TrabajoController;
@@ -150,9 +151,11 @@ Route::middleware('auth:api')->group(function () {
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
         });
+
+        Route::post('crearp6', [PSeisController::class, 'crearP6']);
     });
 });
-
+Route::post('prueba', [PSeisController::class, 'Obtener_datos_solicitud']);
 Route::get('listadoDeBancos', [BancoController::class, 'obtengaLaLista']);
 Route::get('obtengaElBanco', [BancoController::class, 'obtengaPorId']);
 Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']);
