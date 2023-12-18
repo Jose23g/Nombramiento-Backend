@@ -229,4 +229,15 @@ class UsuarioController extends Controller
         }
         return ['profesor_id' => $request->user()->id, 'nombre' => $persona->nombre, 'cedula' => $persona->cedula, 'correos' => ['personal' => $usuario->correo, 'trabajo' => $usuario->otro_correo], 'telefonos' => ['personal' => null, 'trabajo' => null]];
     }
+
+    public function misCarreras(Request $request){
+        $usuario = $request->user();
+        $carreras = $usuario->carreras;
+
+        if(!$carreras){
+            return response()->json('Usuario sin carrera asignada', 400);
+        }
+
+        return response()->json($carreras, 200);
+    }
 }

@@ -61,6 +61,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('listadoDeCargas', [CargaController::class, 'obtengaLaListaDeCargas']);
     Route::get('coordinadorActual', [UsuarioController::class, 'obtengaElCoordinadorActual']);
     Route::get('profesorActual', [UsuarioController::class, 'obtengaElProfesorActual']);
+    Route::get('miscarreras', [UsuarioController::class, 'misCarreras']);
 
     Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');

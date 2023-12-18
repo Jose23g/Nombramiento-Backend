@@ -773,13 +773,21 @@ class CoordinadorController extends Controller
 
     public function listaProf(Request $request)
     {
-        $usuarios = Usuario::where('rol_id', '1')->select('persona_id')->get();
+        $usuarios = Usuario::join('personas', 'usuarios.persona_id', '=', 'personas.id')
+            ->where('rol_id', '1')
+            ->select('personas.nombre', 'usuarios.id', 'usuarios.persona_id')->get();
 
-        foreach ($usuarios as $usuario) {
-            $persona = Persona::where('id', $usuario->persona_id)->select('nombre', 'id')->first();
-            $profesores[] = $persona;
-
-        }
-        return response()->json($profesores);
+        return response()->json($usuarios);
     }
+
+    /*  public function incorporar_a_carrera(Request $request)
+     {
+         try {
+             $validaciones = Validator::make([
+                 'usuario_id' => $request->
+             ]);
+         } catch (\Exception $e) {
+             return response()->json($e->getMessage(), 400);
+         }
+     } */
 }
