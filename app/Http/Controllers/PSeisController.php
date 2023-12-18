@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Actividad;
+use App\Models\AprobacionSolicitudCurso;
 use App\Models\Carga;
 use App\Models\Categoria;
 use App\Models\Estado;
 use App\Models\PSeis;
 use App\Models\PSeisCursosAprobados;
+use App\Models\SolicitudCurso;
 use Exception;
 use Illuminate\Http\Request;
 use Validator;
@@ -88,9 +90,12 @@ class PSeisController extends Controller
     public function Agregar_cursos_p6($arreglocursos, $pseis_id)
     {
         foreach ($arreglocursos as $curso) {
+
+            $referencia = $this->Obtener_datos_solicitud($curso['solicitud_grupo_id']);
+
             $nuevalineacursos = PSeisCursosAprobados::create([
                 'p_seis_id' => $pseis_id,
-                'curso_id' => $curso['curso_id']
+                'curso_aprobado_id' => $referencia['id'] ?? null,
             ]);
 
         }
@@ -163,7 +168,7 @@ class PSeisController extends Controller
                     'p_seis_id' => $pseis_id,
                     'categoria' => $categoria->id,
                     'tipo' => $tfg['tipoTFG'],
-                    'estudiante' => $tfg['carnetEstudiante'].''.$tfg['nombreEstudiante'],
+                    'estudiante' => $tfg['carnetEstudiante'] . '' . $tfg['nombreEstudiante'],
                     'modalidad' => $tfg['modalidadTFG'],
                     'grado' => $tfg['gradoEstudiante'],
                     'postgrado' => $tfg['posgradoEstudiante'],
@@ -180,6 +185,37 @@ class PSeisController extends Controller
 
             return ['error' . $e->getMessage()];
         }
+    }
+
+    public function Obtener_datos_solicitud(Request $request)
+    {
+        $informacionSolicitud = SolicitudCurso::join('detalle_solicitudes', 'solicitud_cursos.id', '=', 'detalle_solicitudes.solicitud_curso_id')
+            ->join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
+            ->where('solicitud_grupos.id', $request->solicitudGrupoID)
+            ->select(
+                'solicitud_cursos.id as solicitud_id'
+            )
+            ->first();
+
+        $aprobacion = AprobacionSolicitudCurso::where('solicitud_curso_id', $informacionSolicitud->solicitud_id)->first();
+
+        $profesorid = 5;
+
+        $prueba = SolicitudCurso::join('detalle_solicitudes', 'solicitud_cursos.id', '=', 'detalle_solicitudes.solicitud_curso_id')
+            ->join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
+            ->where('solicitud_cursos.id', $request->solicitud_id)
+            ->where('solicitud_grupos.profesor_id', $profesorid)
+            ->select(
+                'detalle_solicitudes.curso_id as curso_id',
+                'solicitud_grupos.id as solicitud_grupos_id',
+                'solicitud_grupos.carga_id as solicitud_grupos_carga_id',
+                'solicitud_grupos.grupo as solicitud_grupos_grupo',
+                'solicitud_grupos.individual_colegiado as solicitud_grupos_individual_colegiado',
+                'solicitud_grupos.tutoria as solicitud_grupos_tutoria'
+            )
+            ->get();
+
+        return response($prueba);
     }
 
 }

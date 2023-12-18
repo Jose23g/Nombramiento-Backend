@@ -154,7 +154,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('crearp6', [PSeisController::class, 'crearP6']);
     });
 });
-
+Route::post('prueba', [PSeisController::class, 'Obtener_datos_solicitud']);
 Route::get('listadoDeBancos', [BancoController::class, 'obtengaLaLista']);
 Route::get('obtengaElBanco', [BancoController::class, 'obtengaPorId']);
 Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']);
