@@ -7,6 +7,7 @@ use App\Models\AprobacionSolicitudCurso;
 use App\Models\Carga;
 use App\Models\Categoria;
 use App\Models\Estado;
+use Illuminate\Support\Facades\DB;
 use App\Models\PSeis;
 use App\Models\PSeisCursosAprobados;
 use App\Models\SolicitudCurso;
@@ -34,7 +35,7 @@ class PSeisController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
+        DB::beginTransaction();
         try {
             $nuevap6 = PSeis::create([
                 'profesor_id' => $request->profesor_id,
@@ -43,23 +44,26 @@ class PSeisController extends Controller
                 'fecha_fin' => $request->fecha_fin,
                 'cargo_categoria' => $request->cargo_categoria
             ]);
+            
             //Recorremos cada arreglo que viene del request para agregar si alguno de los arrays no viene vacío 
             if ($nuevap6) {
-
-                if (!$request->cursos->isEmpty()) {
-
+                if (!empty($request->cursos)) {
+                    $agregarcursos = $this->Agregar_cursos_p6($request->cursos, $nuevap6->id);
+                    
                 }
-
-                if (!$request->DAC->isEmpty()) {
+                if (!empty($request->DAC)) {
                     $agregardac = $this->Agregar_cargo_DAC($request->DAC, $request->profesor_id, $nuevap6->id);
+                    
                 }
 
-                if (!$request->PIAC->isEmpty()) {
+                if (!empty($request->PIAC)) {
                     $agregarpiac = $this->Agregar_PIAC($request->PIAC, $request->profesor_id, $nuevap6->id);
+                   
                 }
 
-                if (!$request->TFG->isEmpty()) {
-
+                if (!empty($request->TFG)){
+                    
+                    $agregartfg = $this->Agregar_TFG($request->TFG, $request->profesor_id, $nuevap6->id);
                 }
 
             }
@@ -89,16 +93,29 @@ class PSeisController extends Controller
     }
     public function Agregar_cursos_p6($arreglocursos, $pseis_id)
     {
+        $acciones = [];
         foreach ($arreglocursos as $curso) {
+            try{
 
             $referencia = $this->Obtener_datos_solicitud($curso['solicitud_grupo_id']);
-
-            $nuevalineacursos = PSeisCursosAprobados::create([
-                'p_seis_id' => $pseis_id,
-                'curso_aprobado_id' => $referencia['id'] ?? null,
-            ]);
+            $existereferencia = PSeisCursosAprobados::where('p_seis_id', $pseis_id)->where('curso_aprobado_id', $referencia->id)->first();
+            
+            if(!$existereferencia){
+                $nuevalineacursos = PSeisCursosAprobados::create([
+                    'p_seis_id' => $pseis_id,
+                    'curso_aprobado_id' => $referencia->id,
+                ]);
+                $acciones [] = "Se añadio la referencia a la p6";
+            }else{
+                $acciones [] = "Se proceso la referencia a la p6";
+            }
+            
+            }catch(Exception $e){
+                return($e->getMessage());
+            }
 
         }
+         return $acciones;
     }
     public function Agregar_cargo_DAC($arregloDAC, $profesor_id, $pseis_id)
     {
@@ -119,6 +136,7 @@ class PSeisController extends Controller
                     'estado_id' => $this->obtenerestado('activo'),
                 ]);
             }
+            
             return ['se han agregado cargos DAC'];
 
         } catch (Exception $e) {
@@ -130,6 +148,7 @@ class PSeisController extends Controller
     public function Agregar_PIAC($arregloPIAC, $profesor_id, $pseis_id)
     {
         $categoria = Categoria::where('nombre', 'proyectos')->first();
+       
         try {
 
             foreach ($arregloPIAC as $piac) {
@@ -144,7 +163,6 @@ class PSeisController extends Controller
                     'fecha_inicio' => $piac['vigenciaDesdePIAC'],
                     'fecha_fin' => $piac['vigenciaHastaPIAC'],
                     'carga_id' => $carga->id,
-                    'usuario_id' => $profesor_id,
                     'estado_id' => $this->obtenerestado('activo'),
                 ]);
             }
@@ -166,18 +184,18 @@ class PSeisController extends Controller
 
                 $nuevaactividad = Actividad::create([
                     'p_seis_id' => $pseis_id,
-                    'categoria' => $categoria->id,
+                    'categoria_id' => $categoria->id,
                     'tipo' => $tfg['tipoTFG'],
-                    'estudiante' => $tfg['carnetEstudiante'] . '' . $tfg['nombreEstudiante'],
+                    'estudiante' => $tfg['carnetEstudiante'] . ' ' . $tfg['nombreEstudiante'],
                     'modalidad' => $tfg['modalidadTFG'],
                     'grado' => $tfg['gradoEstudiante'],
                     'postgrado' => $tfg['posgradoEstudiante'],
                     'fecha_inicio' => $tfg['vigenciaDesdeTFG'],
                     'fecha_fin' => $tfg['vigenciaHastaTFG'],
                     'carga_id' => $carga->id,
-                    'usuario_id' => $profesor_id,
                     'estado_id' => $this->obtenerestado('activo'),
                 ]);
+                return (dd($nuevaactividad));
             }
             return ['se han agregado TFG'];
 
@@ -187,11 +205,11 @@ class PSeisController extends Controller
         }
     }
 
-    public function Obtener_datos_solicitud(Request $request)
+    public function Obtener_datos_solicitud($solicitudGrupoID)
     {
         $informacionSolicitud = SolicitudCurso::join('detalle_solicitudes', 'solicitud_cursos.id', '=', 'detalle_solicitudes.solicitud_curso_id')
             ->join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
-            ->where('solicitud_grupos.id', $request->solicitudGrupoID)
+            ->where('solicitud_grupos.id', $solicitudGrupoID)
             ->select(
                 'solicitud_cursos.id as solicitud_id'
             )
@@ -199,23 +217,23 @@ class PSeisController extends Controller
 
         $aprobacion = AprobacionSolicitudCurso::where('solicitud_curso_id', $informacionSolicitud->solicitud_id)->first();
 
-        $profesorid = 5;
+        // $profesorid = 5;
 
-        $prueba = SolicitudCurso::join('detalle_solicitudes', 'solicitud_cursos.id', '=', 'detalle_solicitudes.solicitud_curso_id')
-            ->join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
-            ->where('solicitud_cursos.id', $request->solicitud_id)
-            ->where('solicitud_grupos.profesor_id', $profesorid)
-            ->select(
-                'detalle_solicitudes.curso_id as curso_id',
-                'solicitud_grupos.id as solicitud_grupos_id',
-                'solicitud_grupos.carga_id as solicitud_grupos_carga_id',
-                'solicitud_grupos.grupo as solicitud_grupos_grupo',
-                'solicitud_grupos.individual_colegiado as solicitud_grupos_individual_colegiado',
-                'solicitud_grupos.tutoria as solicitud_grupos_tutoria'
-            )
-            ->get();
+        // $prueba = SolicitudCurso::join('detalle_solicitudes', 'solicitud_cursos.id', '=', 'detalle_solicitudes.solicitud_curso_id')
+        //     ->join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
+        //     ->where('solicitud_cursos.id', $request->solicitud_id)
+        //     ->where('solicitud_grupos.profesor_id', $profesorid)
+        //     ->select(
+        //         'detalle_solicitudes.curso_id as curso_id',
+        //         'solicitud_grupos.id as solicitud_grupos_id',
+        //         'solicitud_grupos.carga_id as solicitud_grupos_carga_id',
+        //         'solicitud_grupos.grupo as solicitud_grupos_grupo',
+        //         'solicitud_grupos.individual_colegiado as solicitud_grupos_individual_colegiado',
+        //         'solicitud_grupos.tutoria as solicitud_grupos_tutoria'
+        //     )
+        //     ->get();
 
-        return response($prueba);
+        return $aprobacion;
     }
 
 }
