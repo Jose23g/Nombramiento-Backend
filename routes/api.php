@@ -94,21 +94,6 @@ Route::middleware('auth:api')->group(function () {
             Route::post('agregueElHorarioDelTrabajo', 'agregue');
             Route::delete('elimineElHorarioDeTrabajo', 'elimineElHorario');
         });
-        Route::controller(ActividadController::class)->group(function () {
-
-            Route::post('agregartrabajofinal', 'Agregar_trabajofinal_graduacion');
-            Route::get('listartrabajofinal', 'Listar_trabajosfinal_graduacion');
-            Route::post('buscartrabajofinal', 'Buscar_trabajofinal_graduacion');
-            Route::post('agregarproyectoaccion', 'Agregar_proyecto_accion');
-            Route::get('listarproyectoaccion', 'Listar_proyectos_accion');
-            Route::post('buscarproyectoaccion', 'Buscar_proyectos_accion');
-            Route::post('agregarcargoDAC', 'Agregar_cargo_DAC');
-            Route::get('listarcargoDAC', 'Listar_cargos_DAC');
-            Route::get('buscarcargoDAC', 'Buscar_cargo_DAC');
-            Route::post('agregarotralabor', 'Agregar_otra_labor');
-            Route::get('listarotraslabores', 'Listar_otras_labores');
-            Route::get('buscarotralabor', 'Buscar_otra_labor');
-        });
         Route::controller(DeclaracionJuradaController::class)->group(function () {
             Route::post('agregueLaDeclaracion', 'agregue');
             Route::get('muestreLaDeclaracion', 'obtengaLaUltimaDeclaracion');
@@ -154,6 +139,7 @@ Route::middleware('auth:api')->group(function () {
         });
 
         Route::post('crearp6', [PSeisController::class, 'crearP6']);
+        Route::get('listadotrabajos', [TrabajoController::class, 'obtengaElListadoPorPersona']);
     });
 });
 Route::post('prueba', [PSeisController::class, 'Obtener_datos_solicitud']);

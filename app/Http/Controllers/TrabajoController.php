@@ -240,7 +240,6 @@ class TrabajoController extends Controller
 
             foreach ($listadotrabajos as $trabajo) {
                 $diaslaborales = HorariosTrabajo::where('trabajo_id', $trabajo->id)->get();
-                $jornada = Jornada::find($trabajo['jornada_id']);
                 $horario = [];
                 foreach ($diaslaborales as $dia) {
                     $nombredia = Dias::find($dia['dia_id']);
@@ -256,9 +255,8 @@ class TrabajoController extends Controller
                 $lineatrabajo = (object) [
                     'id' => $trabajo['id'],
                     'Lugar' => $trabajo['lugar_trabajo'],
-                    'Cargo' => $trabajo['cargo'],
-                    'jornada' => $jornada->sigla_jornada,
-                    'horas_jornada' => $jornada->horas_jornada,
+                    'Cargo' => $trabajo['cargo_categoria'],
+                    'jornada' => $trabajo['jornada'],
                     'horario_trabajo' => $horario,
                 ];
 
@@ -396,4 +394,5 @@ class TrabajoController extends Controller
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
+
 }
