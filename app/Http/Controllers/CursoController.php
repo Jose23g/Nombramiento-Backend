@@ -69,34 +69,42 @@ class CursoController extends Controller
 
     public function cursosCarrera(Request $request)
     {
-
         $carrera = $request->user()->carreras->first();
         $planes = PlanEstudios::where('carrera_id', $carrera->id)->get();
         $listadecursos = [];
-
+    
         foreach ($planes as $plan) {
             $planbuscado = PlanEstudios::find($plan->id);
-
             $cursos = $planbuscado->cursos;
-
-            foreach($cursos as $curso){
-
     
-                $listadecursos[] = (object)[
-                    'id'=>  $curso->id,
-                    'plan_estudios' => $planbuscado->anio . ' - ' . $planbuscado->grado->nombre,
-                    'sigla' => $curso->sigla,
-                    'nombre' => $curso->nombre,
-                    'creditos' => $curso->creditos,
-                    'ciclos' => $curso->ciclo,
-                    'grado_anual' => $curso->grado_anual,
-                    'horas_teoricas' => $curso->horas_teoricas,
-                    'horas_practicas' => $curso->horas_practicas,
-                    'horas_laboratorio' => $curso->horas_laboratorio
-                ];
+            foreach ($cursos as $curso) {
+                $planescurso = [];
+             
+                foreach($curso->planEstudios as $plan){
+                    $planescurso[] = (object)[
+                        'id' => $plan->id,
+                        'nombre' => $plan->anio.' - '.$plan->grado->nombre
+                    ];
+                }
+
+                $cursoExistente = collect($listadecursos)->firstWhere('id', $curso->id);
+                if (!$cursoExistente) {
+                    $listadecursos[] = (object)[
+                        'id' => $curso->id,
+                        'sigla' => $curso->sigla,
+                        'nombre' => $curso->nombre,
+                        'creditos' => $curso->creditos,
+                        'ciclos' => $curso->ciclo,
+                        'grado_anual' => $curso->grado_anual,
+                        'horas_teoricas' => $curso->horas_teoricas,
+                        'horas_practicas' => $curso->horas_practicas,
+                        'horas_laboratorio' => $curso->horas_laboratorio,
+                        'planes' => $planescurso
+                    ];
+                }
             }
-            
         }
+    
         return response()->json($listadecursos);
     }
 }
