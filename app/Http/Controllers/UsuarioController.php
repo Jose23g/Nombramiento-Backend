@@ -24,7 +24,10 @@ class UsuarioController extends Controller
             ]);
 
             $usuario = Usuario::with(['rol', 'persona', 'carreras'])->where('correo', $request->input('correo'))->first();
+<<<<<<< HEAD
 
+=======
+>>>>>>> 09f815f (Se envia la imagen al hacer login)
 
             if (!$usuario) {
                 return response()->json(['Error' => 'Credenciales incorrectas'], 401);
@@ -39,7 +42,7 @@ class UsuarioController extends Controller
                     $carrera = $carrera->nombre;
                 }
 
-                return response()->json(['nombre' => $persona, 'carrera' => $carrera, 'token' => $token, 'scope' => $rolScope], 200);
+                return response()->json(['nombre' => $persona, 'imagen' => $usuario->imagen, 'carrera' => $carrera, 'token' => $token, 'scope' => $rolScope], 200);
             } else {
                 return response()->json(['error' => 'Credenciales incorrectas'], 401);
             }
@@ -206,7 +209,6 @@ class UsuarioController extends Controller
 
         $user = Auth::user(); // Obtiene el usuario autenticado
         $scopes = $request->user()->token()->scopes; // Obtiene los scopes del token del usuario
-
         if ($user !== null) {
             return response()->json(['status' => 'true', 'scopes' => $scopes], 200);
         }
