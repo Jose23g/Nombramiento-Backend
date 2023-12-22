@@ -24,10 +24,6 @@ class UsuarioController extends Controller
             ]);
 
             $usuario = Usuario::with(['rol', 'persona', 'carreras'])->where('correo', $request->input('correo'))->first();
-<<<<<<< HEAD
-
-=======
->>>>>>> 09f815f (Se envia la imagen al hacer login)
 
             if (!$usuario) {
                 return response()->json(['Error' => 'Credenciales incorrectas'], 401);
