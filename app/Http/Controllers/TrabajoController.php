@@ -240,6 +240,7 @@ class TrabajoController extends Controller
 
             foreach ($listadotrabajos as $trabajo) {
                 $diaslaborales = HorariosTrabajo::where('trabajo_id', $trabajo->id)->get();
+                $fecha = Fecha::where('id',$trabajo['fecha_id'])->first();
                 $horario = [];
                 foreach ($diaslaborales as $dia) {
                     $nombredia = Dias::find($dia['dia_id']);
@@ -257,6 +258,8 @@ class TrabajoController extends Controller
                     'Lugar' => $trabajo['lugar_trabajo'],
                     'Cargo' => $trabajo['cargo_categoria'],
                     'jornada' => $trabajo['jornada'],
+                    'fecha_inicio' => $fecha->fecha_inicio,
+                    'fecha_fin' => $fecha->fecha_inicio,
                     'horario_trabajo' => $horario,
                 ];
 
