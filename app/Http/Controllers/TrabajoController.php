@@ -148,7 +148,7 @@ class TrabajoController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        
+
         DB::beginTransaction();
         try {
             // recuperamos el usuario al que se le agregara el trabajo
@@ -156,7 +156,7 @@ class TrabajoController extends Controller
             // creamos el trabajo
             try {
 
-                $nuevafecha =  Fecha::create([
+                $nuevafecha = Fecha::create([
                     'tipo_id' => 5,
                     'fecha_inicio' => $request->fecha_inicio,
                     'fecha_fin' => $request->fecha_fin,
@@ -177,11 +177,11 @@ class TrabajoController extends Controller
 
                 return response()->json(['message' => $e->getMessage()], 422);
             }
-           
+
             foreach ($request['horario'] as $dia) { // recorremos los dias que vienen del horario
                 try {
                     $id_dia = Dias::where('nombre', $dia['dia_id'])->first();
-                
+
                     $diatrabajo = HorariosTrabajo::create([
                         'dia_id' => $id_dia->id,
                         'hora_inicio' => $dia['desde'],
@@ -205,7 +205,7 @@ class TrabajoController extends Controller
                 'lugar' => $nuevotrabajo->lugar_trabajo,
                 'cargo' => $nuevotrabajo->cargo
             ], 200);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -239,7 +239,7 @@ class TrabajoController extends Controller
 
             foreach ($listadotrabajos as $trabajo) {
                 $diaslaborales = HorariosTrabajo::where('trabajo_id', $trabajo->id)->get();
-                $fecha = Fecha::where('id',$trabajo['fecha_id'])->first();
+                $fecha = Fecha::where('id', $trabajo['fecha_id'])->first();
                 $horario = [];
                 foreach ($diaslaborales as $dia) {
                     $nombredia = Dias::find($dia['dia_id']);
@@ -258,7 +258,7 @@ class TrabajoController extends Controller
                     'Cargo' => $trabajo['cargo_categoria'],
                     'jornada' => $trabajo['jornada'],
                     'fecha_inicio' => $fecha->fecha_inicio,
-                    'fecha_fin' => $fecha->fecha_inicio,
+                    'fecha_fin' => $fecha->fecha_fin,
                     'horario_trabajo' => $horario,
                 ];
 
@@ -396,6 +396,66 @@ class TrabajoController extends Controller
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
-    
+    public function editarTrabajo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:trabajos,id',
+            'jornada' => 'required',
+            'cargo_categoria' => 'required',
+            'fecha_inicio' => 'required',
+            'fecha_fin' => 'required',
+            'horario' => 'required|array|min:1',
+            'horario.*.dia' => 'required',
+            'horario.*.hora_inicio' => 'required',
+            'horario.*.hora_fin' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            // buscamos el trabajo
+            $trabajoactualizar = Trabajo::find($request->id);
+            $trabajoactualizar->cargo_categoria = $request->cargo_categoria;
+            $trabajoactualizar->jornada = $request->jornada;
+            $trabajoactualizar->lugar_trabajo = $request->lugar_trabajo;
+            $trabajoactualizar->save();
+
+            // ahora eliminamos las referencias de los dias de trabajo del mismo
+
+            HorariosTrabajo::where('trabajo_id', $trabajoactualizar->id)->delete();
+
+            foreach ($request['horario'] as $dias) {
+                $id_dia = Dias::where('nombre', $dias['dia'])->first();
+                // creamos la referencia del horario del trabajo  
+                $diatrabajo = HorariosTrabajo::create([
+                    'dia_id' => $id_dia->id,
+                    'hora_inicio' => $dias['hora_inicio'],
+                    'hora_fin' => $dias['hora_fin'],
+                    'trabajo_id' => $trabajoactualizar->id,
+                ]);
+            }
+
+            $fechavigencia = Fecha::find($trabajoactualizar->fecha_id);
+            $fechavigencia->fecha_inicio = $request->fecha_inicio;
+            $fechavigencia->fecha_fin = $request->fecha_fin;
+            $fechavigencia->save();
+            
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Se ha actualizado el trabajo con exito',
+                'id' => $trabajoactualizar->id,
+                'lugar' => $trabajoactualizar->lugar_trabajo,
+                'cargo' => $trabajoactualizar->cargo_categoria,
+                'vigencia' => $fechavigencia->fecha_inicio ." / " .$fechavigencia->fecha_fin
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
 
 }

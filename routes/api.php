@@ -140,6 +140,7 @@ Route::middleware('auth:api')->group(function () {
 
         Route::post('crearp6', [PSeisController::class, 'crearP6']);
         Route::get('listadotrabajos', [TrabajoController::class, 'obtengaElListadoPorPersona']);
+        Route::post('editartrabajo', [TrabajoController::class, 'editarTrabajo']);
     });
 });
 Route::post('prueba', [PSeisController::class, 'Obtener_datos_solicitud']);
