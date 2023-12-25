@@ -153,7 +153,6 @@ class TrabajoController extends Controller
         try {
             // recuperamos el usuario al que se le agregara el trabajo
             $usuario = $request->user();
-            $jornada = Carga::find($request->jornada);
             // creamos el trabajo
             try {
 
@@ -164,7 +163,7 @@ class TrabajoController extends Controller
                 ]);
 
                 $nuevotrabajo = Trabajo::create([
-                    'jornada' => $jornada->nombre,
+                    'jornada' => $request->jornada,
                     'usuario_id' => $usuario->id,
                     'estado_id' => 5,
                     'tipo_id' => 5,
@@ -397,5 +396,6 @@ class TrabajoController extends Controller
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
+    
 
 }
