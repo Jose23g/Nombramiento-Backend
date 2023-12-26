@@ -42,8 +42,8 @@ class CursoController extends Controller
                 'ciclo' => $validatedData['ciclo'],
                 'horas_practicas' => $validatedData['horas_practicas'],
                 'horas_laboratorio' => $validatedData['horas_laboratorio'],
-                'individual_colegiado' => $validatedData['individual_colegiado'],
-                'tutoria' => $validatedData['tutoria'],
+                'tutoria' => $validatedData['tutoria'] ?? null,
+                'individual_colegiado' => $validatedData['individual_colegiado'] ?? null,
                 'horas_teoricas' => $validatedData['horas_teoricas']
             ]);
 
