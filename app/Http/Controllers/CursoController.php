@@ -20,8 +20,6 @@ class CursoController extends Controller
             'grado_anual' => 'required',
             'ciclo' => 'required',
             'horas_teoricas' => 'required',
-            'individual_colegiado' => 'required',
-            'tutoria' => 'required',
             'horas_practicas' => 'required',
             'horas_laboratorio' => 'required',
             'planes' => 'required',
