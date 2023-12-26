@@ -23,7 +23,8 @@ class CursoController extends Controller
             'horas_practicas' => 'required',
             'horas_laboratorio' => 'required',
             'planes' => 'required',
-
+            'individual_colegiado' => 'nullable',
+            'tutoria' => 'nullable',
         ], [
             'required' => 'El campo :attribute es requerido.',
             'unique' => 'Ya existe un valor en la columna :attribute similar al ingresado.',
