@@ -136,6 +136,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
+            Route::post('editarcurso', 'editarCurso');
+            
         });
 
         Route::post('crearp6', [PSeisController::class, 'crearP6']);
