@@ -99,6 +99,8 @@ class CursoController extends Controller
                         'horas_teoricas' => $curso->horas_teoricas,
                         'horas_practicas' => $curso->horas_practicas,
                         'horas_laboratorio' => $curso->horas_laboratorio,
+                        'individual_colegiado' => $curso->individual_colegiado,
+                        'tutoria' => $curso->tutoria,
                         'planes' => $planescurso
                     ];
                 }
