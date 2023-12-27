@@ -134,6 +134,7 @@ Route::middleware('auth:api')->group(function () {
             Route::post('asignar-carrera', 'incorporar_a_carrera');
         });
         Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
+        Route::get('grados', [PlanEstudiosController::class, 'listargrados_plan']);
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
             Route::post('editarcurso', 'editarCurso');

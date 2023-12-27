@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Grado;
 use App\Models\PlanEstudios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -10,10 +11,10 @@ class PlanEstudiosController extends Controller
 {
     public function agregue(Request $request)
     {
+        $carrera = $request->user()->carreras->first();
         $validator = Validator::make($request->all(), [
-            'id_carrera' => 'required',
-            'id_grado' => 'required',
-            'fecha' => 'required',
+            'grado_id' => 'required',
+            'anio' => 'required',
         ], [
             'required' => 'El campo :attribute es requerido.',
         ]);
@@ -21,9 +22,12 @@ class PlanEstudiosController extends Controller
             return response()->json(['message' => $validator->errors()], 422);
         }
         $validatedData = $validator->validated();
-        PlanEstudios::create(['id_carrera' => $validatedData['id_carrera'], 'id_grado' => $validatedData['id_grado']]);
 
-        return response()->json(['message' => 'Se ha registrado el plan de estudios con exito'], 200);
+        $nuevoplan = PlanEstudios::create(['carrera_id' => $carrera->id, 'grado_id' => $validatedData['grado_id'],
+            'anio' => $validatedData['anio']]);
+
+        return response()->json(['message' => 'Se ha ingresado el plan',
+            'plan' => $nuevoplan], 200);
     }
 
     public function obtengaLaListaDeCursosPorPlanEstudio(Request $request)
@@ -44,5 +48,10 @@ class PlanEstudiosController extends Controller
         }
 
         return response()->json(['message' => 'No se encontrado'], 500);
+    }
+
+    public function listargrados_plan(Request $request)
+    {
+        return Grado::all('id', 'nombre');
     }
 }
