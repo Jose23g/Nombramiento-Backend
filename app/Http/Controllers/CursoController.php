@@ -105,7 +105,7 @@ class CursoController extends Controller
                 }
             }
         }
-
+        $listadecursos = collect($listadecursos)->sortBy('id')->values()->all();
         return response()->json($listadecursos);
     }
 
@@ -146,8 +146,17 @@ class CursoController extends Controller
             $cursoeditar->tutoria = $request->tutoria;
             $cursoeditar->save();
 
+            $planeseliminar = CursoPlan::where('curso_id', $cursoeditar->id)->delete();
+            
+            foreach ($request->planes as $plancurso){
+                
+                $nuevalineacursoplan = CursoPlan::create([
+                    'curso_id' => $cursoeditar->id,
+                    'plan_estudios_id' => $plancurso['id']
+                ]);
+            }
             return response()->json(['message' => 'Curso editado con exito',
-                'curso' => $cursoeditar], 200);
+                'curso' => $cursoeditar ], 200);
         } catch (Exception $e) {
             return response()->json(['error' => $validator->errors()], 422);
         }
