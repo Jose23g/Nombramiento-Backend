@@ -25,7 +25,8 @@ class CarreraController extends Controller
         $carrera = $request->user()->carreras->first();
         if ($carrera) {
             $planEstudios = $carrera->planEstudios()->with('grado')->get()->map(function ($planEstudio) {
-                return ['id' => $planEstudio->id, 'nombre' => $planEstudio->anio.' - '.$planEstudio->grado->nombre];
+                return ['id' => $planEstudio->id, 'nombre' => $planEstudio->anio . ' - ' . $planEstudio->grado->nombre,
+                    'anio' => $planEstudio->anio, 'grado_id' => $planEstudio->grado_id];
             });
 
             return response()->json($planEstudios, 200);
