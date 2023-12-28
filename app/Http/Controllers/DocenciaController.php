@@ -352,7 +352,7 @@ class DocenciaController extends Controller
             $anio = Carbon::now()->year;
             $fecha= Tipos::join('fechas' , 'tipos.id', '=', 'fechas.tipo_id')
             ->whereIn('tipos.nombre',['Continuidad','Interino'])
-            ->where('fechas.anio', $anio)->select(['tipos.nombre','anio','ciclo', 'fecha_inicio', 'fecha_fin'])->get();
+            ->where('fechas.anio', $anio)->select(['fechas.id','tipos.nombre','anio','ciclo', 'fecha_inicio', 'fecha_fin'])->get();
 
             return response()->json($fecha);
         }catch (\Exception $e){

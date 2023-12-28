@@ -46,31 +46,45 @@ class PSeisController extends Controller
             ]);
             
             //Recorremos cada arreglo que viene del request para agregar si alguno de los arrays no viene vacío 
+            $acciones = [];
+            
             if ($nuevap6) {
                 if (!empty($request->cursos)) {
-                    $agregarcursos = $this->Agregar_cursos_p6($request->cursos, $nuevap6->id);
-                    
+                   $agregarcursos = $this->Agregar_cursos_p6($request->cursos, $nuevap6->id);
+                   $acciones[] = $agregarcursos;
                 }
                 if (!empty($request->DAC)) {
-                    $agregardac = $this->Agregar_cargo_DAC($request->DAC, $request->profesor_id, $nuevap6->id);
-                    
+                   $agregardac = $this->Agregar_cargo_DAC($request->DAC, $request->profesor_id, $nuevap6->id);
+                   $acciones[] = $agregardac;
                 }
 
                 if (!empty($request->PIAC)) {
-                    $agregarpiac = $this->Agregar_PIAC($request->PIAC, $request->profesor_id, $nuevap6->id);
-                   
+                  $agregarpiac = $this->Agregar_PIAC($request->PIAC, $request->profesor_id, $nuevap6->id);
+                  $acciones[] = $agregarpiac;
                 }
 
                 if (!empty($request->TFG)){
                     
-                    $agregartfg = $this->Agregar_TFG($request->TFG, $request->profesor_id, $nuevap6->id);
+                   $agregartfg = $this->Agregar_TFG($request->TFG, $request->profesor_id, $nuevap6->id);
+                   $acciones[] = $agregartfg;
                 }
 
+                if (!empty($request->OT)){
+                    
+                    $aceptarot = $this->Agregar_OT($request->OT, $request->profesor_id, $nuevap6->id);
+                    $acciones[] = $aceptarot;
+                }
+                DB::commit();
+                return response()->json(['message' => 'P6 creada exitosamente', 'acciones' => $acciones]);
+           
+            }else{
+                DB::rollback();
+                return response()->json(['error' => "No se ha podido crear la p6"], 500);
             }
+
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
-
     }
     public function obtenerestado($estado)
     {
@@ -128,7 +142,7 @@ class PSeisController extends Controller
                 $nuevaactividad = Actividad::create([
                     'p_seis_id' => $pseis_id,
                     'categoria_id' => $categoria->id,
-                    'numero_oficio' => $dac['nOficio'],
+                    'numero_oficio' => $dac['numeroOficio'],
                     'cargo_comision' => $dac['cargoComision'],
                     'fecha_inicio' => $dac['vigenciaDesdeDAC'],
                     'fecha_fin' => $dac['vigenciaHastaDAC'],
@@ -195,7 +209,6 @@ class PSeisController extends Controller
                     'carga_id' => $carga->id,
                     'estado_id' => $this->obtenerestado('activo'),
                 ]);
-                return (dd($nuevaactividad));
             }
             return ['se han agregado TFG'];
 
@@ -204,7 +217,32 @@ class PSeisController extends Controller
             return ['error' . $e->getMessage()];
         }
     }
+    public function Agregar_OT($arregloOT, $profesor_id, $pseis_id)
+    {
+        $categoria = Categoria::where('nombre', 'otro')->first();
+        try {
 
+            foreach ($arregloOT as $ot) {
+                $carga = Carga::where('nombre', $ot['cargaAsignadaOT'])->first();
+                
+                $nuevaactividad = Actividad::create([
+                    'p_seis_id' => $pseis_id,
+                    'categoria_id' => $categoria->id,
+                    'cargo_comision' => $ot['cargo'],
+                    'nombre' => $ot['nombre'],
+                    'fecha_inicio' => $ot['vigenciaDesdeOT'],
+                    'fecha_fin' => $ot['vigenciaHastaOT'],
+                    'carga_id' => $carga->id,
+                    'estado_id' => $this->obtenerestado('activo'),
+                ]);
+            }
+            return ['se han agregado OT'];
+
+        } catch (Exception $e) {
+
+            return ['error' . $e->getMessage()];
+        }
+    }
     public function Obtener_datos_solicitud($solicitudGrupoID)
     {
         $informacionSolicitud = SolicitudCurso::join('detalle_solicitudes', 'solicitud_cursos.id', '=', 'detalle_solicitudes.solicitud_curso_id')
@@ -214,25 +252,7 @@ class PSeisController extends Controller
                 'solicitud_cursos.id as solicitud_id'
             )
             ->first();
-
         $aprobacion = AprobacionSolicitudCurso::where('solicitud_curso_id', $informacionSolicitud->solicitud_id)->first();
-
-        // $profesorid = 5;
-
-        // $prueba = SolicitudCurso::join('detalle_solicitudes', 'solicitud_cursos.id', '=', 'detalle_solicitudes.solicitud_curso_id')
-        //     ->join('solicitud_grupos', 'detalle_solicitudes.id', '=', 'solicitud_grupos.detalle_solicitud_id')
-        //     ->where('solicitud_cursos.id', $request->solicitud_id)
-        //     ->where('solicitud_grupos.profesor_id', $profesorid)
-        //     ->select(
-        //         'detalle_solicitudes.curso_id as curso_id',
-        //         'solicitud_grupos.id as solicitud_grupos_id',
-        //         'solicitud_grupos.carga_id as solicitud_grupos_carga_id',
-        //         'solicitud_grupos.grupo as solicitud_grupos_grupo',
-        //         'solicitud_grupos.individual_colegiado as solicitud_grupos_individual_colegiado',
-        //         'solicitud_grupos.tutoria as solicitud_grupos_tutoria'
-        //     )
-        //     ->get();
-
         return $aprobacion;
     }
 

@@ -143,6 +143,7 @@ Route::middleware('auth:api')->group(function () {
 
         Route::post('crearp6', [PSeisController::class, 'crearP6']);
         Route::get('listadotrabajos', [TrabajoController::class, 'obtengaElListadoPorPersona']);
+        Route::get('vigenciap6', [DocenciaController::class, 'obtener_TNombramiento_vigenciaP6']);
         Route::post('editartrabajo', [TrabajoController::class, 'editarTrabajo']);
     });
 });
