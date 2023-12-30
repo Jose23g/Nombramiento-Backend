@@ -10,7 +10,6 @@ class Archivos extends Model
     use HasFactory;
     protected $table = 'archivos';
     protected $guarded = [];
-    public $timestamps = false;
 
     public function persona()
     {

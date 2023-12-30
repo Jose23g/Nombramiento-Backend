@@ -22,7 +22,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-       // Passport::routes();
+        //Passport::routes();
 
         Passport::tokensCan([
             'Coordinador' => 'Tiene acceso intermedio en la aplicacion',
@@ -30,10 +30,13 @@ class AuthServiceProvider extends ServiceProvider
             'Docencia' => 'Tiene acceso limitado a la aplicacion',
             'Director_de_Departamento' => 'Tiene acceso limitado a la aplicacion',
         ]);
+        Passport::tokensExpireIn(now()->addMinutes(3));
+        Passport::refreshTokensExpireIn(now()->addDay());
+        Passport::personalAccessTokensExpireIn(now()->addMinute());
 
         Passport::setDefaultScope(
             [
-                'Profesor'
+                'Profesor',
             ]
         );
     }

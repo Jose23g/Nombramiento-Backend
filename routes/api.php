@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\ArchivosController;
 use App\Http\Controllers\BancoController;
 use App\Http\Controllers\CantonController;
@@ -40,6 +39,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');
     Route::post('login', 'login');
+    Route::post('refresh', 'renueveElToken');
 });
 
 Route::group(['prefix' => 'direccion'], function () {
@@ -56,6 +56,8 @@ Route::middleware('auth:api')->prefix('usuario')->controller(UsuarioController::
 
 Route::middleware('auth:api')->group(function () {
     Route::get('obtengaElArchivo', [ArchivosController::class, 'obtenga']);
+    Route::post('guardeElDocumento', [ArchivosController::class, 'guarde']);
+    Route::delete('elimineElDocumento', [ArchivosController::class, 'elimine']);
     Route::get('listadoDeProfesores', [CarreraController::class, 'obtengaLaListaDeProfesoresPorCarrera']);
     Route::get('listadoDePlanEstudios', [CarreraController::class, 'obtengaLaListaDePlanEstudiosPorCarrera']);
     Route::get('listadoDeCursos', [PlanEstudiosController::class, 'obtengaLaListaDeCursosPorPlanEstudio']);
@@ -63,6 +65,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('coordinadorActual', [UsuarioController::class, 'obtengaElCoordinadorActual']);
     Route::get('profesorActual', [UsuarioController::class, 'obtengaElProfesorActual']);
     Route::get('miscarreras', [UsuarioController::class, 'misCarreras']);
+    Route::get('revoqueLosTokens', [UsuarioController::class, 'revoqueLosTokens']);
 
     Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
         Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');

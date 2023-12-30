@@ -4,57 +4,59 @@ namespace App\Http\Controllers;
 
 use App\Models\Archivos;
 use App\Models\Persona;
-use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ArchivosController extends Controller
 {
     public function obtenga(Request $request)
     {
-        return response()->json($request->user()->archivo);
+        return response()->json($request->user()->persona->archivo);
     }
-    public function guardarimagen($usuarioId, $imagenPerfil)
-    {
-        $usuario = Usuario::find($usuarioId);
 
-        if (!$usuario) {
-            return response()->json(['Error' => 'Usuario no encontrado'], 400);
+    public function guarde(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'archivos' => 'required',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $persona = null;
+        if ($request->persona) {
+            $persona = $request->persona;
+        } else {
+            $persona = $request->user()->persona;
         }
         try {
-            if ($imagenPerfil) {
-                $usuario->imagen = $imagenPerfil;
-                $usuario->save();
-            } else {
-                return response()->json(['Error' => 'Revise el contenido o el formato de la imagen'], 400);
-            }
+            $nombreArchivo = $persona->nombre . '_documentoAdicional'; // Nombre del archivo
+            Archivos::create([
+                'nombre' => $nombreArchivo,
+                'archivo' => $request->archivos,
+                'persona_id' => $persona->id,
+            ]);
+            return response()->json(['message' => 'Guardado exitosamente'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            throw new \Exception($e->getMessage());
         }
     }
-
-    public function guardardocumento($personaId, $documento)
+    public function elimine(Request $request)
     {
-        $persona = Persona::find($personaId);
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
 
-        if (!$persona) {
-            return response()->json(['Error' => 'Persona no encontrado'], 400);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
         }
         try {
-            if ($documento) {
-                try {
-                    $nombreArchivo = $persona->nombre . '_DocumentosAsociados'; // Nombre del archivo
-                    Archivos::create([
-                        'nombre' => $nombreArchivo,
-                        'file' => $documento,
-                        'persona_id' => $persona->id,
-                    ]);
-                    // dd($pdfBase64);
-                } catch (\Exception $e) {
-                    throw new \Exception($e->getMessage());
-                }
-            } else {
-                return response()->json(['Error' => 'Revise el contenido o el formato del pdf'], 400);
-            }
+            Archivos::delete($request->id);
+            return response()->json(['message' => 'Eliminado exitosamente'], 200);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }

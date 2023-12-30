@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Telefono;
 use App\Models\Usuario;
@@ -10,43 +11,73 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Passport\Passport;
 
 class UsuarioController extends Controller
 {
     public function login(Request $request)
     {
-        //  dd($request);
-        try {
-            $request->validate([
-                'correo' => 'required',
-                'contrasena' => 'required',
-            ]);
-
-            $usuario = Usuario::with(['rol', 'persona', 'carreras'])->where('correo', $request->input('correo'))->first();
-
-            if (!$usuario) {
-                return response()->json(['Error' => 'Credenciales incorrectas'], 401);
-            }
-            if (Hash::check($request->input('contrasena'), $usuario->contrasena)) {
-                Passport::actingAs($usuario);
-                $rolScope = $usuario->rol->nombre;
-                $token = $usuario->createToken('MyAppToken', [$rolScope])->accessToken;
-                $persona = $usuario->persona->nombre;
-                $carrera = $usuario->carreras->first();
-                if ($carrera) {
-                    $carrera = $carrera->nombre;
-                }
-
-                return response()->json(['nombre' => $persona, 'imagen' => $usuario->imagen, 'carrera' => $carrera, 'token' => $token, 'scope' => $rolScope], 200);
-            } else {
-                return response()->json(['error' => 'Credenciales incorrectas'], 401);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        $validator = Validator::make($request->all(), [
+            'correo' => 'required|exists:usuarios,correo',
+            'contrasena' => 'required',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $usuario = Usuario::where('correo', $request->correo)->first();
+        if (Hash::check($request->contrasena, $usuario->contrasena)) {
+            $resultado = app()->handle(Request::create('oauth/token', 'POST', [
+                'grant_type' => 'password',
+                'client_id' => env("CLIENT_ID"),
+                'client_secret' => env("CLIENT_SECRET"),
+                'username' => $request->correo,
+                'password' => $request->contrasena,
+                'scope' => $usuario->rol->nombre,
+            ]));
+            $respuesta = json_decode($resultado->getContent(), true);
+            $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
+            return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
         }
     }
+    public function renueveElToken(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'refresh_token' => 'required',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $resultado = app()->handle(Request::create('oauth/token', 'POST', [
+            'grant_type' => 'refresh_token',
+            'client_id' => env("CLIENT_ID"),
+            'client_secret' => env("CLIENT_SECRET"),
+            'refresh_token' => $request->refresh_token,
+            'scope' => '',
+        ]));
+        $respuesta = json_decode($resultado->getContent(), true);
+        return response()->json($respuesta, 200);
+    }
+    public function revoqueLosTokens(Request $request)
+    {
+        $request->user()->tokens->each(function ($token, $key) {
+            if (!$token->revoked) {
+                $this->revokeAccessAndRefreshTokens($token->id);
+            }
 
+        });
+        return response()->json(['message' => 'All refresh tokens revoked successfully.'], 200);
+    }
+    protected function revokeAccessAndRefreshTokens($tokenId)
+    {
+        $tokenRepository = app('Laravel\Passport\TokenRepository');
+        $refreshTokenRepository = app('Laravel\Passport\RefreshTokenRepository');
+
+        $tokenRepository->revokeAccessToken($tokenId);
+        $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($tokenId);
+    }
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -86,45 +117,29 @@ class UsuarioController extends Controller
             $numeroTelefono = $request->numero;
 
             if ($numeroTelefono && strlen($numeroTelefono) === 8 && ctype_digit($numeroTelefono)) {
-                $nuevotelefono = Telefono::create([
+                Telefono::create([
                     'persona_id' => $nuevaPersona->id,
                     'personal' => $request->numero,
                 ]);
             }
 
-            $imagenPerfil = $request->imagen_perfil; // Imagen de perfil
-            $documento = $request->archivos; // pdf de la persona
-
             // Crear el usuario a partir de los datos de persona
             $nuevoUsuario = Usuario::create([
                 'rol_id' => 1,
+                'imagen' => $request->imagen_perfil,
                 'persona_id' => $nuevaPersona->id,
                 'estado_id' => 5,
                 'correo' => $request->correo,
                 'otro_correo' => $request->otro_correo,
                 'contrasena' => Hash::make($request->contrasena),
             ]);
-            DB::commit();
 
-            if ($imagenPerfil) {
-                $imagen = app()->make(ArchivosController::class);
-                try {
-                    $resultado = $imagen->guardarimagen($nuevoUsuario->id, $imagenPerfil);
-                } catch (\Exception $e) {
-                    return response(['mensaje' => $e->getMessage()]);
-                }
-            }
-
+            $documento = $request->archivos; // pdf de la persona
+            $request->merge(['persona' => $nuevaPersona]);
             if ($documento) {
-                try {
-                    $pdf = app()->make(ArchivosController::class);
-                    // dd($nuevaPersona->id);
-                    $resultado = $pdf->guardardocumento($nuevaPersona->id, $documento);
-                } catch (\Exception $e) {
-                    return response(['mensaje' => $e->getMessage()]);
-                }
+                app()->make(ArchivosController::class)->guardeElDocumento($request);
             }
-
+            DB::commit();
             return response()->json(['Message' => 'Se ha registrado con éxito', 'persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
         } catch (\Exception $e) {
             DB::rollback();
