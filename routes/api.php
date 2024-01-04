@@ -142,10 +142,12 @@ Route::middleware('auth:api')->group(function () {
         });
 
         Route::post('crearp6', [PSeisController::class, 'crearP6']);
+        
+    });
         Route::get('listadotrabajos', [TrabajoController::class, 'obtengaElListadoPorPersona']);
         Route::get('vigenciap6', [DocenciaController::class, 'obtener_TNombramiento_vigenciaP6']);
         Route::post('editartrabajo', [TrabajoController::class, 'editarTrabajo']);
-    });
+        Route::get('listarp6usuario', [PSeisController::class, 'listarP6_Usuario']);
 });
 Route::post('prueba', [PSeisController::class, 'Obtener_datos_solicitud']);
 Route::get('listadoDeBancos', [BancoController::class, 'obtengaLaLista']);
