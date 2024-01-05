@@ -39,7 +39,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');
     Route::post('login', 'login');
-    Route::post('refresh', 'renueveElToken');
+    Route::get('refresh', 'renueveElToken');
 });
 
 Route::group(['prefix' => 'direccion'], function () {
@@ -141,7 +141,7 @@ Route::middleware('auth:api')->group(function () {
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
             Route::post('editarcurso', 'editarCurso');
-            
+
         });
 
         Route::post('crearp6', [PSeisController::class, 'crearP6']);

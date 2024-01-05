@@ -66,7 +66,6 @@ class UsuarioController extends Controller
             if (!$token->revoked) {
                 $this->revokeAccessAndRefreshTokens($token->id);
             }
-
         });
         return response()->json(['message' => 'All refresh tokens revoked successfully.'], 200);
     }

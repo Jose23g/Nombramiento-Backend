@@ -30,7 +30,7 @@ class AuthServiceProvider extends ServiceProvider
             'Docencia' => 'Tiene acceso limitado a la aplicacion',
             'Director_de_Departamento' => 'Tiene acceso limitado a la aplicacion',
         ]);
-        Passport::tokensExpireIn(now()->addMinutes(3));
+        Passport::tokensExpireIn(now()->addMinute());
         Passport::refreshTokensExpireIn(now()->addDay());
         Passport::personalAccessTokensExpireIn(now()->addMinute());
 
