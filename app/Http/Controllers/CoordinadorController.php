@@ -619,6 +619,7 @@ class CoordinadorController extends Controller
         }
     }
 
+    //obtiene la lista de profesores de la ultima solicitud aprobada
     public function obtenerProfesoresdeUltimaSolicitud(Request $request)
     {
         try {
@@ -634,9 +635,21 @@ class CoordinadorController extends Controller
                     $profesores[] = $this->obtenerprofesores($solicitudID->solicitud_curso_id);
                 }
             }
-            //$profesores = array_unique($profesores);
+
             $profesores = collect($profesores);
             $profesores = $profesores->collapse();
+
+            foreach ($profesores as $profesor) {
+                $resultado = PSeis::where('profesor_id', $profesor->profesor_id)
+                    ->where('solicitud_curso_id', $profesor->solicitud_curso_id)->first();
+
+                if ($resultado) {
+                    $profesor->estado = 'true';
+                } else {
+                    $profesor->estado = 'false';
+                }
+            }
+
             return response()->json($profesores, 200);
 
         } catch (\Exception $e) {
@@ -670,38 +683,6 @@ class CoordinadorController extends Controller
             ->get();
 
         return $resultados;
-    }
-
-    public function generarP6(Request $request)
-    {
-        $validaciones = Validator::make(
-            [
-                'cargo_categoria' => 'required',
-                'profesor_id' => 'required',
-                'vig_desde' => 'required',
-                'vig_hasta' => 'required',
-                'jornada' => 'required',
-            ],
-            [
-                'cargo_categoria.required' => "Es necesario ingresar el cargo o categoria al que está asignado",
-                'vig_desde.required' => "No se puede generar el borrador sin haber establecido el inicio de la vigencia",
-                'vig_hasta.required' => "No se puede generar el borrador sin haber establecido el final de la vigencia",
-                'jornada.required' => "Es necesario ingresar la jornada",
-            ]
-        );
-        if ($validaciones->fails()) {
-            return response()->json(['errormessage' => $validaciones->errors()], 422);
-        }
-
-        $p6 = PSeis::create([
-            'profesor_id' => $request->input('profesor_id'),
-            'jornada_id' => $request->input('jornada_id'),
-            'fecha_inicio' => $request->input('vig_desde'),
-            'fecha_fin' => $request->input('vig_hasta'),
-            'cargo_categoria' => $request->input('cargo_categoria'),
-        ]);
-
-        return response()->json('P6 generada', 200);
     }
 
     public function previsualizarP6(Request $request)
@@ -784,14 +765,16 @@ class CoordinadorController extends Controller
     public function incorporar_a_carrera(Request $request)
     {
         try {
-            $validaciones = Validator::make([
-                'usuario_id' => 'required',
-                'carrera_id' => 'required',
-            ],
+            $validaciones = Validator::make(
+                [
+                    'usuario_id' => 'required',
+                    'carrera_id' => 'required',
+                ],
                 [
                     'usuario_id.required' => 'No se puede incorporar sin el usuario_id',
                     'carrera_id.required' => 'No se puede asignar el usuario sin el carrera_id',
-                ]);
+                ]
+            );
 
             if ($validaciones->fails()) {
                 return response()->json(['errorMessage' => $validaciones->errors()], 400);

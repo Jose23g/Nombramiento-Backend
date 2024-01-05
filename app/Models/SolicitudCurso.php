@@ -40,4 +40,8 @@ class SolicitudCurso extends Model
     {
         return $this->belongsTo(Usuario::class, 'coordinador_id', 'id');
     }
+
+    public function pseis(){
+        return $this->hasMany(PSeis::class, 'solicitud_id', 'id');
+    }
 }

@@ -26,6 +26,7 @@ class PSeisController extends Controller
 
         $validator = Validator::make($request->all(), [
             'profesor_id' => 'required',
+            'solicitud_curso_id' => 'required',
             'cargo_categoria' => 'required',
             'jornada_id' => 'required',
             'fecha_inicio' => 'required',
@@ -43,6 +44,7 @@ class PSeisController extends Controller
         try {
             $nuevap6 = PSeis::create([
                 'profesor_id' => $request->profesor_id,
+                'solicitud_curso_id' => $request->solicitud_curso_id,
                 'jornada_id' => $request->jornada_id,
                 'fecha_inicio' => $request->fecha_inicio,
                 'fecha_fin' => $request->fecha_fin,

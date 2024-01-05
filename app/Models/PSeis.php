@@ -30,4 +30,9 @@ class PSeis extends Model
     {
         return $this->belongsToMany(AprobacionSolicitudCurso::class, 'p_seis_cursos_aprobados', 'p_seis_id', 'curso_aprobado_id');
     }
+
+    public function solicitud_curso(){
+        return $this->belongsTo(SolicitudCurso::class, 'solicitud_curso_id', 'id');
+    }
+
 }
