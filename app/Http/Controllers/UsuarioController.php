@@ -258,4 +258,14 @@ class UsuarioController extends Controller
 
         return response()->json($carreras, 200);
     }
+
+    public function listar_todos_los_usuarios(Request $request)
+    {
+        $usuarios = Usuario::join('roles as r', 'usuarios.rol_id', '=', 'r.id')
+            ->join('personas as p', 'usuarios.persona_id', '=', 'p.id')
+            ->select('p.nombre as nombre', 'usuarios.correo as correo', 'r.nombre as rol', 'usuarios.id as id')
+            ->get();
+
+        return response()->json($usuarios, 200);
+    }
 }

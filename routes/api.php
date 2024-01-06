@@ -55,6 +55,7 @@ Route::middleware('auth:api')->prefix('usuario')->controller(UsuarioController::
 });
 
 Route::middleware('auth:api')->group(function () {
+    
     Route::get('obtengaElArchivo', [ArchivosController::class, 'obtenga']);
     Route::post('guardeElDocumento', [ArchivosController::class, 'guarde']);
     Route::delete('elimineElDocumento', [ArchivosController::class, 'elimine']);
@@ -67,19 +68,29 @@ Route::middleware('auth:api')->group(function () {
     Route::get('miscarreras', [UsuarioController::class, 'misCarreras']);
     Route::get('revoqueLosTokens', [UsuarioController::class, 'revoqueLosTokens']);
 
-    Route::middleware('scope:Docencia')->controller(DocenciaController::class)->group(function () {
-        Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
-        Route::post('/establecer-plazo', 'fechaRecepcion');
-        Route::post('/comprobar', 'comprobarFechaRecepcion');
-        Route::get('verpendientes', 'Listar_todas_solicitudes');
-        Route::get('fechas', 'Listar_fechas_solicitudes');
-        Route::post('cambiar-estado', 'cambiarEstadoSolicitud');
-        Route::get('ultimafecha', 'Obtener_ultima_fecha');
-        Route::post('crear-vigencia-p6', 'establecer_TNombramiento_vigenciaP6');
-        Route::get('vigencia-p6', 'obtener_TNombramiento_vigenciaP6');
+    Route::middleware('scope:Docencia')->group(function () {
+
+        Route::controller(DocenciaController::class)->group(function () {
+            Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
+            Route::post('/establecer-plazo', 'fechaRecepcion');
+            Route::post('/comprobar', 'comprobarFechaRecepcion');
+            Route::get('verpendientes', 'Listar_todas_solicitudes');
+            Route::get('fechas', 'Listar_fechas_solicitudes');
+            Route::post('cambiar-estado', 'cambiarEstadoSolicitud');
+            Route::get('ultimafecha', 'Obtener_ultima_fecha');
+            Route::post('crear-vigencia-p6', 'establecer_TNombramiento_vigenciaP6');
+            Route::get('vigencia-p6', 'obtener_TNombramiento_vigenciaP6');
+
+        });
+
+        Route::controller(UsuarioController::class)->group(function () {
+            Route::get('lista-de-usuarios', 'listar_todos_los_usuarios');
+        });
+
     });
 
     Route::middleware('scope:Profesor')->group(function () {
+       
         Route::controller(TrabajoController::class)->group(function () {
             Route::get('listadoDeTrabajosExternos', 'obtengaElListadoDeTrabajosExternos');
             Route::get('listadoDeTrabajosInternos', 'obtengaElListadoDeTrabajosInternos');
@@ -92,19 +103,23 @@ Route::middleware('auth:api')->group(function () {
             Route::post('eliminartrabajo', 'elimine');
             Route::post('buscartrabajo', 'obtengaPorId');
         });
+       
         Route::controller(HorariosTrabajoController::class)->group(function () {
             Route::get('listadoHorarioTrabajos', 'obtengaLaLista');
             Route::post('agregueElHorarioDelTrabajo', 'agregue');
             Route::delete('elimineElHorarioDeTrabajo', 'elimineElHorario');
         });
+       
         Route::controller(DeclaracionJuradaController::class)->group(function () {
             Route::post('agregueLaDeclaracion', 'agregue');
             Route::get('muestreLaDeclaracion', 'obtengaLaUltimaDeclaracion');
         });
+        
         Route::get('p6', [ProfesorContoller::class, 'previsualizarP6']);
     });
 
     Route::middleware('scope:Coordinador')->group(function () {
+      
         Route::controller(SolicitudCursoController::class)->group(function () {
             Route::get('listadoSolicitudCursos', 'obtengaLaLista');
             Route::get('cursoscarrera', [CursoController::class, 'cursosCarrera']);
@@ -113,21 +128,25 @@ Route::middleware('auth:api')->group(function () {
             Route::delete('elimineLaSolicitudDeCursos', 'elimineLaSolicitud');
             Route::post('addtrabajo', [TrabajoController::class, 'agregue']);
         });
+       
         Route::controller(DetalleSolicitudController::class)->group(function () {
             Route::get('listadoDetalleSolicitud', 'obtengaLaLista');
             Route::post('agregueElDetalleDeSolicitud', 'agregue');
             Route::delete('elimineElDetalleDeSolicitud', 'elimineElDetalle');
         });
+       
         Route::controller(SolicitudGrupoController::class)->group(function () {
             Route::get('listadoSolicitudGrupos', 'obtengaLaLista');
             Route::post('agregueLaSolicitudDeGrupos', 'agregue');
             Route::delete('elimineLaSolicitudDeGrupos', 'elimineLaSolicitud');
         });
+       
         Route::controller(HorariosGrupoController::class)->group(function () {
             Route::get('listadoHorarioGrupos', 'obtengaLaLista');
             Route::post('agregueElHorarioDelGrupo', 'agregue');
             Route::delete('elimineElHorarioDeGrupo', 'elimineElHorario');
         });
+       
         Route::controller(CoordinadorController::class)->group(function () {
             Route::post('solicitud', 'Solicitud_de_curso');
             Route::get('ultimasolicitud', 'ultimaSolicitud');
@@ -136,22 +155,25 @@ Route::middleware('auth:api')->group(function () {
             Route::get('ver-p6', 'previsualizarP6');
             Route::post('asignar-carrera', 'incorporar_a_carrera');
         });
-        Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
-        Route::get('grados', [PlanEstudiosController::class, 'listargrados_plan']);
+       
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
             Route::post('editarcurso', 'editarCurso');
-
         });
-
-        Route::post('crearp6', [PSeisController::class, 'crearP6']);
         
+        Route::post('addplan', [PlanEstudiosController::class, 'agregue']);
+        Route::get('grados', [PlanEstudiosController::class, 'listargrados_plan']);
+        Route::post('crearp6', [PSeisController::class, 'crearP6']);
+
     });
-        Route::get('listadotrabajos', [TrabajoController::class, 'obtengaElListadoPorPersona']);
-        Route::get('vigenciap6', [DocenciaController::class, 'obtener_TNombramiento_vigenciaP6']);
-        Route::post('editartrabajo', [TrabajoController::class, 'editarTrabajo']);
-        Route::get('listarp6usuario', [PSeisController::class, 'listarP6_Usuario']);
+
+    Route::get('listadotrabajos', [TrabajoController::class, 'obtengaElListadoPorPersona']);
+    Route::get('vigenciap6', [DocenciaController::class, 'obtener_TNombramiento_vigenciaP6']);
+    Route::post('editartrabajo', [TrabajoController::class, 'editarTrabajo']);
+    Route::get('listarp6usuario', [PSeisController::class, 'listarP6_Usuario']);
+
 });
+
 Route::post('prueba', [PSeisController::class, 'Obtener_datos_solicitud']);
 Route::get('listadoDeBancos', [BancoController::class, 'obtengaLaLista']);
 Route::get('obtengaElBanco', [BancoController::class, 'obtengaPorId']);
