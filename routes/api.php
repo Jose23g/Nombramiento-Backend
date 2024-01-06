@@ -60,7 +60,7 @@ Route::middleware('auth:api')->group(function () {
 
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {
-        Route::get('perfil', 'obtenerPerfil');
+        Route::get('perfil', 'obtenerUsuario');
         Route::post('editar', 'editarUsuario');
         Route::get('validar', 'validarToken');
     });
@@ -113,7 +113,7 @@ Route::middleware('auth:api')->group(function () {
 
     //Rutas accesibles solamente para los roles de Docencia
     Route::middleware('scope:Docencia')->group(function () {
-    
+
         //Rutas relacionadas a la gestion de Docencia
         Route::controller(DocenciaController::class)->group(function () {
             Route::post('solicitudfecha', 'Ver_Solicitud_curso_fecha');
@@ -128,7 +128,6 @@ Route::middleware('auth:api')->group(function () {
 
         });
 
-
         Route::controller(UsuarioController::class)->group(function () {
             Route::get('lista-de-usuarios', 'listar_todos_los_usuarios');
         });
@@ -137,7 +136,6 @@ Route::middleware('auth:api')->group(function () {
 
     //Rutas rutas para los roles de profesores
     Route::middleware('scope:Profesor')->group(function () {
-
 
         Route::controller(TrabajoController::class)->group(function () {
             Route::get('listadoDeTrabajosExternos', 'obtengaElListadoDeTrabajosExternos');
@@ -151,7 +149,6 @@ Route::middleware('auth:api')->group(function () {
             Route::post('eliminartrabajo', 'elimine');
             Route::post('buscartrabajo', 'obtengaPorId');
         });
-
 
         Route::controller(HorariosTrabajoController::class)->group(function () {
             Route::get('listadoHorarioTrabajos', 'obtengaLaLista');
@@ -170,7 +167,6 @@ Route::middleware('auth:api')->group(function () {
     //Rutas para los roles de Coordinador
     Route::middleware('scope:Coordinador')->group(function () {
 
-
         Route::controller(SolicitudCursoController::class)->group(function () {
             Route::get('listadoSolicitudCursos', 'obtengaLaLista');
             Route::get('cursoscarrera', [CursoController::class, 'cursosCarrera']);
@@ -180,13 +176,11 @@ Route::middleware('auth:api')->group(function () {
             Route::post('addtrabajo', [TrabajoController::class, 'agregue']);
         });
 
-
         Route::controller(DetalleSolicitudController::class)->group(function () {
             Route::get('listadoDetalleSolicitud', 'obtengaLaLista');
             Route::post('agregueElDetalleDeSolicitud', 'agregue');
             Route::delete('elimineElDetalleDeSolicitud', 'elimineElDetalle');
         });
-
 
         Route::controller(SolicitudGrupoController::class)->group(function () {
             Route::get('listadoSolicitudGrupos', 'obtengaLaLista');
@@ -194,13 +188,11 @@ Route::middleware('auth:api')->group(function () {
             Route::delete('elimineLaSolicitudDeGrupos', 'elimineLaSolicitud');
         });
 
-
         Route::controller(HorariosGrupoController::class)->group(function () {
             Route::get('listadoHorarioGrupos', 'obtengaLaLista');
             Route::post('agregueElHorarioDelGrupo', 'agregue');
             Route::delete('elimineElHorarioDeGrupo', 'elimineElHorario');
         });
-
 
         Route::controller(CoordinadorController::class)->group(function () {
             Route::post('solicitud', 'Solicitud_de_curso');
@@ -210,7 +202,6 @@ Route::middleware('auth:api')->group(function () {
             Route::get('ver-p6', 'previsualizarP6');
             Route::post('asignar-carrera', 'incorporar_a_carrera');
         });
-
 
         Route::controller(CursoController::class)->group(function () {
             Route::post('addcurse', 'agregueUnCurso');
