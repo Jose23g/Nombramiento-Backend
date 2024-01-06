@@ -9,6 +9,8 @@ use App\Models\Categoria;
 use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\SolicitudGrupo;
+use App\Models\Telefono;
+use App\Models\Usuario;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\PSeis;
@@ -196,12 +198,13 @@ class PSeisController extends Controller
     public function Agregar_TFG($arregloTFG, $profesor_id, $pseis_id)
     {
         $categoria = Categoria::where('nombre', 'trabajos_finales')->first();
+        
         try {
 
             foreach ($arregloTFG as $tfg) {
 
                 $carga = Carga::where('nombre', $tfg['cargaAcademicaEstudiante'])->first();
-
+                
                 $nuevaactividad = Actividad::create([
                     'p_seis_id' => $pseis_id,
                     'categoria_id' => $categoria->id,
@@ -284,7 +287,7 @@ class PSeisController extends Controller
 
         return($listacompletada);
     }
-    public function Obtener_datos_p6Usuario(Request $request)
+    public function Obtener_datos_P6_id(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'p6_id' => 'required',
@@ -294,20 +297,30 @@ class PSeisController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $usuario = $request->user();
         $pseis = PSeis::where('id', $request->p6_id)->first();
 
-        
-
-        foreach ($pseis as $p6) {
-            $cursosasoacidos = $this->Cargarcursos_p6id($p6['id'], $p6['profesor_id']);
-            $actividadesasociadas = $this->Cargar_Actividades($p6['id']);
+            $cursosasoacidos = $this->Cargarcursos_p6id($pseis->id, $pseis->profesor_id);
+            $actividadesasociadas = $this->Cargar_Actividades($pseis->id);
+            $profesor_user = Usuario::find($pseis->profesor_id);
+            $provincia = $profesor_user->persona->provincia->nombre;
+            $profesor = $profesor_user->persona;
+            $canton = $profesor_user->persona->canton->nombre;
+            $telefonos = Telefono::where('persona_id', $profesor_user->id)->first();
+          
             return response()->json([
-                'P6 info' => $p6,
-                'actividades' => $actividadesasociadas,
-                'cursos' => $cursosasoacidos
+                'profesor_id' => $profesor_user->id,
+                'nombre' => $profesor->nombre,
+                'cedula' => $profesor->cedula,
+                'correo' => $profesor_user->correo,
+                'otroCorreo' => $profesor->otro_correo,
+                'provincia' => $provincia,
+                'canton' => $canton,
+                'telefonos' => [
+                    'personal' => $telefonos->personal,
+                    'trabajo' => $telefonos->trabajo,
+                ],
+                'cursos'=>$this->Cargarcursos_p6id($pseis->id,$pseis->profesor_id),
             ]);
-        }
     }
 
     public function Cargarcursos_p6id($pseis_id, $profesor_id)
@@ -332,22 +345,21 @@ class PSeisController extends Controller
             ->get();
         if ($gruposJoin) {
             $grupos_profesor = [];
+            
             foreach ($gruposJoin as $lineacurso) {
                 $carga = Carga::find($lineacurso->carga_id);
                 $curso = Curso::find($lineacurso->curso_id);
                 $infocurso = (object) [
                     'curso_id' => $curso->id,
-                    'sigla' => $curso->sigla,
-                    'nombre' => $curso->nombre,
-                    'grado_anual' => $curso->grado_anual,
-                    'grupo' => $lineacurso->grupo,
-                    'cupo' => $lineacurso->cupo,
-                    'recinto' => $lineacurso->recinto,
+                    'codigo' => $curso->sigla,
+                    'nombre_del_curso' => $curso->nombre,
+                    'ic' => $curso->individual_colegiado,
+                    't' => $curso->tutoria,
                     'horas' => $lineacurso->horas,
                     'carga' => $carga->nombre,
-                    'id_solicitud_grupo' => $lineacurso->grupo_id,
-                    'detalle_id' => $lineacurso->detalle_id,
-                    'solicitud_curso' => $lineacurso->solicitud_curso_id
+                    // 'id_solicitud_grupo' => $lineacurso->grupo_id,
+                    // 'detalle_id' => $lineacurso->detalle_id,
+                    // 'solicitud_curso' => $lineacurso->solicitud_curso_id
                 ];
                 $grupos_profesor[] = $infocurso;
             }
@@ -358,6 +370,13 @@ class PSeisController extends Controller
     public function Cargar_Actividades($pseis_id)
     {
         $actividades = Actividad::where('p_seis_id', $pseis_id)->get();
+
+        if($actividades){
+
+            foreach($actividades as $actividad){
+
+            }
+        }
         return $actividades;
     }
 
