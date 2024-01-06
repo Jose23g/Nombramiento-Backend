@@ -60,7 +60,7 @@ Route::middleware('auth:api')->group(function () {
 
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {
-        Route::get('perfil', 'obtenerPerfil');
+        Route::get('perfil', 'obtenerUsuario');
         Route::post('editar', 'editarUsuario');
         Route::get('validar', 'validarToken');
     });
@@ -127,7 +127,6 @@ Route::middleware('auth:api')->group(function () {
             Route::get('vigencia-p6', 'obtener_TNombramiento_vigenciaP6');
 
         });
-
 
         Route::controller(UsuarioController::class)->group(function () {
             Route::get('lista-de-usuarios', 'listar_todos_los_usuarios');
