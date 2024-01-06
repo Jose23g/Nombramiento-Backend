@@ -55,7 +55,8 @@ class ArchivosController extends Controller
             return response()->json(['message' => $validator->errors()], 422);
         }
         try {
-            Archivos::delete($request->id);
+            $archivo = Archivos::find($request->id);
+            $archivo->delete();
             return response()->json(['message' => 'Eliminado exitosamente'], 200);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
