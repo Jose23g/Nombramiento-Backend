@@ -198,13 +198,13 @@ class PSeisController extends Controller
     public function Agregar_TFG($arregloTFG, $profesor_id, $pseis_id)
     {
         $categoria = Categoria::where('nombre', 'trabajos_finales')->first();
-        
+
         try {
 
             foreach ($arregloTFG as $tfg) {
 
                 $carga = Carga::where('nombre', $tfg['cargaAcademicaEstudiante'])->first();
-                
+
                 $nuevaactividad = Actividad::create([
                     'p_seis_id' => $pseis_id,
                     'categoria_id' => $categoria->id,
@@ -281,11 +281,11 @@ class PSeisController extends Controller
                 'fecha_inicio' => $p6->fecha_inicio,
                 'fecha_fin' => $p6->fecha_fin,
             ];
-           
-            $listacompletada [] = $lineap6;
+
+            $listacompletada[] = $lineap6;
         }
 
-        return($listacompletada);
+        return ($listacompletada);
     }
     public function Obtener_datos_P6_id(Request $request)
     {
@@ -299,85 +299,151 @@ class PSeisController extends Controller
 
         $pseis = PSeis::where('id', $request->p6_id)->first();
 
-            $cursosasoacidos = $this->Cargarcursos_p6id($pseis->id, $pseis->profesor_id);
-            $actividadesasociadas = $this->Cargar_Actividades($pseis->id);
-            $profesor_user = Usuario::find($pseis->profesor_id);
-            $provincia = $profesor_user->persona->provincia->nombre;
-            $profesor = $profesor_user->persona;
-            $canton = $profesor_user->persona->canton->nombre;
-            $telefonos = Telefono::where('persona_id', $profesor_user->id)->first();
-          
-            return response()->json([
-                'profesor_id' => $profesor_user->id,
-                'nombre' => $profesor->nombre,
-                'cedula' => $profesor->cedula,
-                'correo' => $profesor_user->correo,
-                'otroCorreo' => $profesor->otro_correo,
-                'provincia' => $provincia,
-                'canton' => $canton,
-                'telefonos' => [
-                    'personal' => $telefonos->personal,
-                    'trabajo' => $telefonos->trabajo,
-                ],
-                'cursos'=>$this->Cargarcursos_p6id($pseis->id,$pseis->profesor_id),
-            ]);
+        $cursosasoacidos = $this->Cargarcursos_p6id($pseis->id, $pseis->profesor_id);
+        $actividadesasociadas = $this->Cargar_Actividades($pseis->id);
+        $profesor_user = Usuario::find($pseis->profesor_id);
+        $provincia = $profesor_user->persona->provincia->nombre;
+        $profesor = $profesor_user->persona;
+        $canton = $profesor_user->persona->canton->nombre;
+        $telefonos = Telefono::where('persona_id', $profesor_user->id)->first();
+
+        $actividades = $this->Cargar_Actividades($pseis->id);
+
+        return response()->json([
+            'profesor_id' => $profesor_user->id,
+            'nombre' => $profesor->nombre,
+            'cedula' => $profesor->cedula,
+            'correo' => $profesor_user->correo,
+            'otroCorreo' => $profesor->otro_correo,
+            'provincia' => $provincia,
+            'canton' => $canton,
+            'telefonos' => [
+                'personal' => $telefonos->personal,
+                'trabajo' => $telefonos->trabajo,
+            ],
+            'cursos' => $this->Cargarcursos_p6id($pseis->id, $pseis->profesor_id),
+            'tfg' => $actividades->tfg,
+            'piac' => $actividades->piac,
+            'dac' => $actividades->dac,
+            'ot' => $actividades->otro
+        ]);
     }
 
     public function Cargarcursos_p6id($pseis_id, $profesor_id)
     {
         $cursos_aprobados = PSeisCursosAprobados::where('p_seis_id', $pseis_id)->first();
-        $aprobacion = AprobacionSolicitudCurso::find($cursos_aprobados->curso_aprobado_id);
-        $gruposJoin = DB::table('solicitud_grupos')->where('profesor_id', $profesor_id)
-            ->leftJoin('detalle_solicitudes', 'solicitud_grupos.detalle_solicitud_id', '=', 'detalle_solicitudes.id')
-            ->leftJoin('solicitud_cursos', 'detalle_solicitudes.solicitud_curso_id', '=', 'solicitud_cursos.id')
-            ->where('solicitud_cursos.id', $aprobacion->solicitud_curso_id)
-            ->select(
-                'detalle_solicitudes.curso_id as curso_id',
-                'solicitud_grupos.id as grupo_id',
-                'solicitud_grupos.carga_id as carga_id',
-                'solicitud_grupos.grupo as grupo',
-                'solicitud_grupos.horas as horas',
-                'solicitud_grupos.recinto as recinto',
-                'solicitud_grupos.cupo as cupo',
-                'detalle_solicitudes.id as detalle_id',
-                'solicitud_cursos.id as solicitud_curso_id'
-            )
-            ->get();
-        if ($gruposJoin) {
-            $grupos_profesor = [];
-            
-            foreach ($gruposJoin as $lineacurso) {
-                $carga = Carga::find($lineacurso->carga_id);
-                $curso = Curso::find($lineacurso->curso_id);
-                $infocurso = (object) [
-                    'curso_id' => $curso->id,
-                    'codigo' => $curso->sigla,
-                    'nombre_del_curso' => $curso->nombre,
-                    'ic' => $curso->individual_colegiado,
-                    't' => $curso->tutoria,
-                    'horas' => $lineacurso->horas,
-                    'carga' => $carga->nombre,
-                    // 'id_solicitud_grupo' => $lineacurso->grupo_id,
-                    // 'detalle_id' => $lineacurso->detalle_id,
-                    // 'solicitud_curso' => $lineacurso->solicitud_curso_id
-                ];
-                $grupos_profesor[] = $infocurso;
+        if ($cursos_aprobados) {
+            $aprobacion = AprobacionSolicitudCurso::find($cursos_aprobados->curso_aprobado_id);
+            $gruposJoin = DB::table('solicitud_grupos')->where('profesor_id', $profesor_id)
+                ->leftJoin('detalle_solicitudes', 'solicitud_grupos.detalle_solicitud_id', '=', 'detalle_solicitudes.id')
+                ->leftJoin('solicitud_cursos', 'detalle_solicitudes.solicitud_curso_id', '=', 'solicitud_cursos.id')
+                ->where('solicitud_cursos.id', $aprobacion->solicitud_curso_id)
+                ->select(
+                    'detalle_solicitudes.curso_id as curso_id',
+                    'solicitud_grupos.id as grupo_id',
+                    'solicitud_grupos.carga_id as carga_id',
+                    'solicitud_grupos.grupo as grupo',
+                    'solicitud_grupos.horas as horas',
+                    'solicitud_grupos.recinto as recinto',
+                    'solicitud_grupos.cupo as cupo',
+                    'detalle_solicitudes.id as detalle_id',
+                    'solicitud_cursos.id as solicitud_curso_id'
+                )
+                ->get();
+            if ($gruposJoin) {
+                $grupos_profesor = [];
+
+                foreach ($gruposJoin as $lineacurso) {
+                    $carga = Carga::find($lineacurso->carga_id);
+                    $curso = Curso::find($lineacurso->curso_id);
+                    $infocurso = (object) [
+                        'curso_id' => $curso->id,
+                        'codigo' => $curso->sigla,
+                        'nombre_del_curso' => $curso->nombre,
+                        'ic' => $curso->individual_colegiado,
+                        't' => $curso->tutoria,
+                        'horas' => $lineacurso->horas,
+                        'carga' => $carga->nombre,
+                        // 'id_solicitud_grupo' => $lineacurso->grupo_id,
+                        // 'detalle_id' => $lineacurso->detalle_id,
+                        // 'solicitud_curso' => $lineacurso->solicitud_curso_id
+                    ];
+                    $grupos_profesor[] = $infocurso;
+                }
+                return $grupos_profesor;
             }
-            return $grupos_profesor;
+        } else {
+            return ([]);
         }
     }
 
     public function Cargar_Actividades($pseis_id)
     {
         $actividades = Actividad::where('p_seis_id', $pseis_id)->get();
+        $tfg = [];
+        $dac = [];
+        $piac = [];
+        $ot = [];
 
-        if($actividades){
+        if ($actividades) {
 
-            foreach($actividades as $actividad){
+            foreach ($actividades as $actividad) {
+                $categoria = Categoria::find($actividad->categoria_id);
+                $jornada = Carga::find($actividad->carga_id);
+                switch ($categoria->nombre) {
 
+                    case "trabajos_finales":
+                        $tfg[] = (object) [
+                            'tipoTFG' => $actividad->tipo,
+                            'estudiante' => $actividad->estudiante,
+                            'modalidadTFG' => $actividad->modalidad,
+                            'gradoEstudiante' => $actividad->grado,
+                            'postgradoEstudiante' => $actividad->postgrado,
+                            'vigenciaDesdeTFG' => $actividad->fecha_inicio,
+                            'vigenciaHastaTFG' => $actividad->fecha_fin,
+                            'cargaAcademicaEstudiante' => $jornada->nombre
+                        ];
+                        break;
+
+                    case "proyectos":
+                        $piac[] = (object) [
+                            'numeroProyecto' => $actividad->numero_oficio,
+                            'nombreProyecto' => $actividad->nombre,
+                            'vigenciaDesdePIAC' => $actividad->fecha_inicio,
+                            'vigenciaHastaPIAC' => $actividad->fecha_fin,
+                            'cargaAsignadaProyecto' => $jornada->nombre,
+                        ];
+                        break;
+
+                    case "cargo_docente":
+                        $dac[] = (object) [
+                            'cargoComision' => $actividad->cargo_comision,
+                            'numeroOficio' => $actividad->numero_oficio,
+                            'vigenciaDesdeDAC' => $actividad->fecha_inicio,
+                            'vigenciaHastaDAC' => $actividad->fecha_fin,
+                            'cargaAsignadaCC' => $jornada->nombre,
+                        ];
+                        break;
+
+                    case "otro":
+                        $ot[] = (object) [
+                            'cargoComision' => $actividad->cargo_comision,
+                            'nombre' => $actividad->nombre,
+                            'desde' => $actividad->fecha_inicio,
+                            'hasta' => $actividad->fecha_fin,
+                            'carga' => $jornada->nombre,
+                        ];
+                        break;
+                }
             }
         }
-        return $actividades;
+
+        return ($listadoactividades = (object) [
+            'tfg' => $tfg,
+            'dac' => $dac,
+            'otro' => $ot,
+            'piac' => $piac
+        ]);
     }
 
 }
