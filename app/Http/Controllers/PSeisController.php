@@ -269,7 +269,7 @@ class PSeisController extends Controller
         $listacompletada = [];
         foreach ($listado_p6 as $p6) {
             $jornada = Carga::find($p6->jornada_id);
-            $formatocreatedat = Carbon::parse($p6->created_at)->format('Y-m-d');
+            $formatocreatedat = Carbon::parse($p6->created_at)->format('Y-d-m');
             $lineap6 = (object) [
                 'id' => $p6->id,
                 'Cargo_categoria' => $p6->cargo_categoria,
@@ -286,8 +286,18 @@ class PSeisController extends Controller
     }
     public function Obtener_datos_p6Usuario(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'p6_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
         $usuario = $request->user();
-        $pseis = PSeis::where('profesor_id', $usuario->id)->get();
+        $pseis = PSeis::where('id', $request->p6_id)->first();
+
+        
 
         foreach ($pseis as $p6) {
             $cursosasoacidos = $this->Cargarcursos_p6id($p6['id'], $p6['profesor_id']);

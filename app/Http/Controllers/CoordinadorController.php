@@ -645,6 +645,7 @@ class CoordinadorController extends Controller
 
                 if ($resultado) {
                     $profesor->estado = 'true';
+                    $profesor->p6_id = $resultado->id;
                 } else {
                     $profesor->estado = 'false';
                 }
@@ -755,11 +756,21 @@ class CoordinadorController extends Controller
 
     public function listaProf(Request $request)
     {
+        $coordinador = $request->user();
         $usuarios = Usuario::join('personas', 'usuarios.persona_id', '=', 'personas.id')
             ->where('rol_id', '1')
             ->select('personas.nombre', 'usuarios.id', 'usuarios.persona_id')->get();
-
-        return response()->json($usuarios);
+        $arreglousuarios = [];
+        
+        foreach ($usuarios as $profe) {
+            $existeencarrera = UsuarioCarrera::where('usuario_id', $profe['id'])
+                ->where('carrera_id', $coordinador->carreras->first()->id)
+                ->first();
+            if ($existeencarrera===null) {
+               $arreglousuarios[] = $profe;
+            }
+        }
+        return response()->json($arreglousuarios);
     }
 
     public function incorporar_a_carrera(Request $request)
