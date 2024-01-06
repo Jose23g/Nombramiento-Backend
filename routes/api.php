@@ -60,8 +60,8 @@ Route::middleware('auth:api')->group(function () {
 
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {
-        Route::get('perfil', 'obtenerUsuario');
-        Route::post('editar', 'editarUsuario');
+        Route::get('perfil', 'obtengaUsuario');
+        Route::post('editar', 'editeUsuario');
         Route::get('validar', 'validarToken');
     });
 

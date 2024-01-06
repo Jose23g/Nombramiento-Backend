@@ -64,12 +64,12 @@ class UsuarioController extends Controller
     {
         $request->user()->tokens->each(function ($token, $key) {
             if (!$token->revoked) {
-                $this->revokeAccessAndRefreshTokens($token->id);
+                $this->revoqueAccessYRefreshTokens($token->id);
             }
         });
         return response()->json(['message' => 'All refresh tokens revoked successfully.'], 200);
     }
-    protected function revokeAccessAndRefreshTokens($tokenId)
+    protected function revoqueAccessYRefreshTokens($tokenId)
     {
         $tokenRepository = app('Laravel\Passport\TokenRepository');
         $refreshTokenRepository = app('Laravel\Passport\RefreshTokenRepository');
@@ -147,7 +147,7 @@ class UsuarioController extends Controller
         }
     }
 
-    public function obtenerUsuario(Request $request)
+    public function obtengaUsuario(Request $request)
     {
         $usuario = $request->user();
 
