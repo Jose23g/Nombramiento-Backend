@@ -645,6 +645,7 @@ class CoordinadorController extends Controller
 
                 if ($resultado) {
                     $profesor->estado = 'true';
+                    $profesor->p6_id = $resultado->id;
                 } else {
                     $profesor->estado = 'false';
                 }
