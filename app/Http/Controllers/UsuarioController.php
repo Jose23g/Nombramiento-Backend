@@ -6,6 +6,7 @@ use App\Models\Archivos;
 use App\Models\Persona;
 use App\Models\Telefono;
 use App\Models\Usuario;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -267,5 +268,35 @@ class UsuarioController extends Controller
             ->get();
 
         return response()->json($usuarios, 200);
+    }
+
+    public function EditarRolUsuario(Request $request)
+    {
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'usuario_id' => 'required|exists:usuarios,id',
+                'rol_id' => 'required|exists:roles,id'
+            ],
+            [
+                'exists' => 'no existe la referencia'
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $usuario = Usuario::find($request->usuario_id);
+            $usuario->rol_id = $request->rol_id;
+            $usuario->save();
+
+            return response()->json(['message' =>"Rol de " . $usuario->persona->nombre ." modificado con exito"],200);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

@@ -131,6 +131,7 @@ Route::middleware('auth:api')->group(function () {
 
         Route::controller(UsuarioController::class)->group(function () {
             Route::get('lista-de-usuarios', 'listar_todos_los_usuarios');
+            Route::post('cambiar-rol', 'EditarRolUsuario');
         });
         
 
