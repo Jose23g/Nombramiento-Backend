@@ -125,6 +125,7 @@ Route::middleware('auth:api')->group(function () {
             Route::get('ultimafecha', 'Obtener_ultima_fecha');
             Route::post('crear-vigencia-p6', 'establecer_TNombramiento_vigenciaP6');
             Route::get('vigencia-p6', 'obtener_TNombramiento_vigenciaP6');
+            Route::get('listarroles', 'listado_roles');
 
         });
 
@@ -132,6 +133,7 @@ Route::middleware('auth:api')->group(function () {
             Route::get('lista-de-usuarios', 'listar_todos_los_usuarios');
         });
         
+
         Route::controller(CarreraController::class)->group(function () {
             Route::get('listarCarreras', 'listar_Carreras');
             Route::post('editarCarrera', 'editar_Carrera');

@@ -10,6 +10,7 @@ use App\Models\Estado;
 use App\Models\Fecha;
 use App\Models\GrupoAprobado;
 use App\Models\Persona;
+use App\Models\Rol;
 use App\Models\SolicitudCurso;
 use App\Models\SolicitudGrupo;
 use App\Models\Tipos;
@@ -358,5 +359,9 @@ class DocenciaController extends Controller
         }catch (\Exception $e){
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+
+    public function listado_roles(Request $request){
+        return response()->json(Rol::select('id','nombre')->get());
     }
 }
