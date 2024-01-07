@@ -131,6 +131,14 @@ Route::middleware('auth:api')->group(function () {
         Route::controller(UsuarioController::class)->group(function () {
             Route::get('lista-de-usuarios', 'listar_todos_los_usuarios');
         });
+        
+        Route::controller(CarreraController::class)->group(function () {
+            Route::get('listarCarreras', 'listar_Carreras');
+            Route::post('editarCarrera', 'editar_Carrera');
+            Route::post('agregarCarrera', 'Agregar_Carrera');
+        });
+        
+
 
     });
 
