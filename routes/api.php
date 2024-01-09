@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\ArchivosController;
 use App\Http\Controllers\BancoController;
 use App\Http\Controllers\CantonController;
 use App\Http\Controllers\CargaController;
@@ -20,6 +19,7 @@ use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\PSeisController;
 use App\Http\Controllers\SolicitudCursoController;
 use App\Http\Controllers\SolicitudGrupoController;
+use App\Http\Controllers\TituloController;
 use App\Http\Controllers\TrabajoController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
@@ -66,7 +66,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     //Rutas relacionada a archivos
-    Route::controller(ArchivosController::class)->group(function () {
+    Route::controller(TituloController::class)->group(function () {
         Route::get('obtengaElArchivo', 'obtenga');
         Route::post('guardeElDocumento', 'guarde');
         Route::delete('elimineElDocumento', 'elimine');
@@ -90,11 +90,6 @@ Route::middleware('auth:api')->group(function () {
     Route::controller(TrabajoController::class)->group(function () {
         Route::get('listadotrabajos', 'obtengaElListadoPorPersona');
         Route::post('editartrabajo', 'editarTrabajo');
-    });
-    Route::controller(ArchivosController::class)->group(function () {
-        Route::get('obtengaElArchivo', 'obtenga');
-        Route::post('guardeElArchivo', 'guarde');
-        Route::delete('elimineElArchivo', 'elimine');
     });
     Route::controller(CarreraController::class)->group(function () {
         Route::get('listadoDeProfesores', 'obtengaLaListaDeProfesoresPorCarrera');
@@ -133,15 +128,12 @@ Route::middleware('auth:api')->group(function () {
             Route::get('lista-de-usuarios', 'listar_todos_los_usuarios');
             Route::post('cambiar-rol', 'EditarRolUsuario');
         });
-        
 
         Route::controller(CarreraController::class)->group(function () {
             Route::get('listarCarreras', 'listar_Carreras');
             Route::post('editarCarrera', 'editar_Carrera');
             Route::post('agregarCarrera', 'Agregar_Carrera');
         });
-        
-
 
     });
 

@@ -137,7 +137,7 @@ class UsuarioController extends Controller
             $documento = $request->archivos; // pdf de la persona
             $request->merge(['persona' => $nuevaPersona]);
             if ($documento) {
-                app()->make(ArchivosController::class)->guardeElDocumento($request);
+                app()->make(TituloController::class)->guarde($request);
             }
             DB::commit();
             return response()->json(['Message' => 'Se ha registrado con éxito', 'persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
@@ -277,10 +277,10 @@ class UsuarioController extends Controller
             $request->all(),
             [
                 'usuario_id' => 'required|exists:usuarios,id',
-                'rol_id' => 'required|exists:roles,id'
+                'rol_id' => 'required|exists:roles,id',
             ],
             [
-                'exists' => 'no existe la referencia'
+                'exists' => 'no existe la referencia',
             ]
         );
 
@@ -294,7 +294,7 @@ class UsuarioController extends Controller
             $usuario->rol_id = $request->rol_id;
             $usuario->save();
 
-            return response()->json(['message' =>"Rol de " . $usuario->persona->nombre ." modificado con exito"],200);
+            return response()->json(['message' => "Rol de " . $usuario->persona->nombre . " modificado con exito"], 200);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

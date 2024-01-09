@@ -15,9 +15,12 @@ class Persona extends Model
 
     public function archivo()
     {
-        return $this->hasOne(Archivos::class, 'persona_id', 'id');
+        return $this->hasMany(Archivos::class, 'persona_id', 'id');
     }
-
+    public function titulo()
+    {
+        return $this->hasOne(Titulo::class, 'persona_id', 'id');
+    }
     public function telefono()
     {
         return $this->hasOne(Telefono::class, 'persona_id', 'id');
