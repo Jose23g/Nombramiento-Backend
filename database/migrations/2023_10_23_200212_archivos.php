@@ -13,10 +13,20 @@ return new class() extends Migration
     {
         Schema::create('archivos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('persona_id')->unique();
-            $table->string('nombre');
+            $table->unsignedBigInteger('usuario_propietario_id');
+            $table->unsignedBigInteger('usuario_coordinador_id')->nullable();
+            $table->unsignedBigInteger('usuario_direccion_id')->nullable();
+            $table->unsignedBigInteger('usuario_docencia_id')->nullable();
+            $table->unsignedBigInteger('estado_id')->nullable();
+            $table->unsignedBigInteger('estado_general_id')->nullable();
             $table->binary('archivo');
-            $table->foreign('persona_id')->references('id')->on('personas')->onDelete('cascade');
+            $table->string('observacion')->nullable();
+            $table->foreign('usuario_propietario_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('usuario_coordinador_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('usuario_direccion_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('usuario_docencia_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('estado_id')->references('id')->on('estados')->onDelete('cascade');
+            $table->foreign('estado_general_id')->references('id')->on('estados')->onDelete('cascade');
             $table->timestamps();
         });
         DB::statement('ALTER TABLE archivos MODIFY archivo MEDIUMBLOB');

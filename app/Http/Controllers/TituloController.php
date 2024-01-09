@@ -32,7 +32,7 @@ class TituloController extends Controller
             $persona = $request->user()->persona;
         }
         try {
-            $nombreArchivo = $persona->nombre . '_documentoAdicional'; // Nombre del archivo
+            $nombreArchivo = str_replace(' ', '_', $persona->nombre) . '_documentoAdicional'; // Nombre del archivo
             Titulo::create([
                 'nombre' => $nombreArchivo,
                 'archivo' => $request->archivos,
