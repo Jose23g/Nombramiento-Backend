@@ -779,24 +779,36 @@ class CoordinadorController extends Controller
             $validaciones = Validator::make(
                 [
                     'usuario_id' => 'required',
-                    'carrera_id' => 'required',
                 ],
                 [
                     'usuario_id.required' => 'No se puede incorporar sin el usuario_id',
-                    'carrera_id.required' => 'No se puede asignar el usuario sin el carrera_id',
                 ]
             );
 
             if ($validaciones->fails()) {
                 return response()->json(['errorMessage' => $validaciones->errors()], 400);
             }
+            if($request->input('carrera_id')){
 
-            UsuarioCarrera::create([
-                'usuario_id' => $request->input('usuario_id'),
-                'carrera_id' => $request->input('carrera_id'),
-            ]);
+                UsuarioCarrera::create([
+                    'usuario_id' => $request->input('usuario_id'),
+                    'carrera_id' => $request->input('carrera_id'),
+                ]);
 
-            return response()->json('Usuario asignado a la carrera', 200);
+                return response()->json('Usuario asignado a la carrera', 200);
+
+            }else{
+
+                $carrera_coordinador = $request->user()->carreras->first();
+                UsuarioCarrera::create([
+                    'usuario_id' => $request->input('usuario_id'),
+                    'carrera_id' => $carrera_coordinador->id,
+                ]);
+                return response()->json('Usuario asignado a la carrera '.$carrera_coordinador->nombre, 200);
+            }
+            
+            
+       
         } catch (\Exception $e) {
             return response()->json($e->getMessage(), 400);
         }
