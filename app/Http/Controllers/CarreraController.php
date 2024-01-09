@@ -15,9 +15,8 @@ class CarreraController extends Controller
         $carrera = $request->user()->carreras->first();
         if ($carrera) {
             $profesores = $carrera->usuarios()->with('persona')->where('rol_id', 1)->get()->map(function ($profesor) {
-                return ['id' => $profesor->id, 'nombre' => $profesor->persona->nombre];
+                return ['id' => $profesor->id, 'nombre' => $profesor->persona->nombre, 'correo' => $profesor->correo,'cedula' => $profesor->persona->cedula];
             });
-
             return response()->json($profesores, 200);
         }
 
