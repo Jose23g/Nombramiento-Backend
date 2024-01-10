@@ -7,6 +7,7 @@ use App\Models\Persona;
 use App\Models\Telefono;
 use App\Models\Usuario;
 use Exception;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -83,7 +84,7 @@ class UsuarioController extends Controller
         $validator = Validator::make($request->all(), [
             'cedula' => 'required|unique:personas',
             'nombre' => 'required',
-            'correo' => 'required',
+            'correo' => 'required|email|unique:usuarios',
             'contrasena' => 'required',
             'cuenta' => 'required',
             'banco_id' => 'required',
@@ -140,6 +141,7 @@ class UsuarioController extends Controller
                 app()->make(TituloController::class)->guarde($request);
             }
             DB::commit();
+            event(new Registered($nuevoUsuario));
             return response()->json(['Message' => 'Se ha registrado con éxito', 'persona' => $nuevaPersona, 'usuario' => $nuevoUsuario], 200);
         } catch (\Exception $e) {
             DB::rollback();

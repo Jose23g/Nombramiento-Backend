@@ -22,6 +22,7 @@ use App\Http\Controllers\SolicitudGrupoController;
 use App\Http\Controllers\TituloController;
 use App\Http\Controllers\TrabajoController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,7 +35,15 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
  */
+// Verify email
+Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
 
+// Resend link to verify email
+Route::post('/email/verify/resend', [VerifyEmailController::class, 'resend'])
+    ->middleware(['auth:api', 'throttle:6,1'])
+    ->name('verification.send');
 // Rutas de autenticación
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');

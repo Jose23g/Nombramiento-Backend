@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
 
-class Usuario extends Authenticatable
+class Usuario extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
     use HasFactory;
@@ -19,12 +21,11 @@ class Usuario extends Authenticatable
      * @var array<int, string>
      */
 
-    protected $table = 'usuarios';
-    protected $email = 'correo';
-    protected $password = 'contrasena';
-
     protected $guarded = [];
+    protected $table = 'usuarios';
 
+    protected $password;
+    protected $email;
     protected $hidden = [
         'contrasena',
         'remember_token',
@@ -39,6 +40,17 @@ class Usuario extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected static function booted()
+    {
+        static::retrieved(function ($user) {
+            $user->email = $user->correo;
+            $user->password = $user->contrasena;
+        });
+    }
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification);
+    }
     public function findForPassport(string $correo): Usuario
     {
         return $this->where('correo', $correo)->first();
