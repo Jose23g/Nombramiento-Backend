@@ -278,7 +278,8 @@ class UsuarioController extends Controller
                 'id' => $usuario->id,
                 'nombre' => $usuario->nombre,
                 'correo' => $usuario->correo,
-                'carreras' => $carreras
+                'carreras' => $carreras,
+                'rol'=> $usuario->rol
             ];
         }
 
