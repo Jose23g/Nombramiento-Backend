@@ -267,7 +267,22 @@ class UsuarioController extends Controller
             ->select('p.nombre as nombre', 'usuarios.correo as correo', 'r.nombre as rol', 'usuarios.id as id')
             ->get();
 
-        return response()->json($usuarios, 200);
+        $listadofinal = [];
+
+        foreach ($usuarios as $usuario) {
+            $user = Usuario::find($usuario->id);
+            $carreras = $user->carreras()
+                ->select('carreras.id', 'carreras.nombre')
+                ->get();
+            $listadofinal[] = (object) [
+                'id' => $usuario->id,
+                'nombre' => $usuario->nombre,
+                'correo' => $usuario->correo,
+                'carreras' => $carreras
+            ];
+        }
+
+        return response()->json($listadofinal, 200);
     }
 
     public function EditarRolUsuario(Request $request)
