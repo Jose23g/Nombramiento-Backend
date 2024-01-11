@@ -29,18 +29,23 @@ class UsuarioController extends Controller
         }
         $usuario = Usuario::where('correo', $request->correo)->first();
         if (Hash::check($request->contrasena, $usuario->contrasena)) {
-            $resultado = app()->handle(Request::create('oauth/token', 'POST', [
-                'grant_type' => 'password',
-                'client_id' => env("CLIENT_ID"),
-                'client_secret' => env("CLIENT_SECRET"),
-                'username' => $request->correo,
-                'password' => $request->contrasena,
-                'scope' => $usuario->rol->nombre,
-            ]));
-            $respuesta = json_decode($resultado->getContent(), true);
-            $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
-            return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
+            if ($usuario->hasVerifiedEmail()) {
+                $resultado = app()->handle(Request::create('oauth/token', 'POST', [
+                    'grant_type' => 'password',
+                    'client_id' => env("CLIENT_ID"),
+                    'client_secret' => env("CLIENT_SECRET"),
+                    'username' => $request->correo,
+                    'password' => $request->contrasena,
+                    'scope' => $usuario->rol->nombre,
+                ]));
+                $respuesta = json_decode($resultado->getContent(), true);
+                $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
+                return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
+            }
+            $usuario->sendEmailVerificationNotification();
+            return response()->json(['message' => 'El usuario debe confirmar el correo'], 432);
         }
+        return response()->json(['message' => 'Credenciales Inválidas'], 402);
     }
     public function renueveElToken(Request $request)
     {
@@ -281,7 +286,7 @@ class UsuarioController extends Controller
                 'nombre' => $usuario->nombre,
                 'correo' => $usuario->correo,
                 'carreras' => $carreras,
-                'rol'=> $usuario->rol
+                'rol' => $usuario->rol,
             ];
         }
 

@@ -13,18 +13,19 @@ class VerifyEmailController extends Controller
 
     public function verify(Request $request): RedirectResponse
     {
-        $user = Usuario::find($request->route('id'));
+        $usuario = Usuario::find($request->route('id'));
 
-        if ($user->hasVerifiedEmail()) {
+        if ($usuario->hasVerifiedEmail()) {
             return redirect(env('FRONT_URL') . '/email/verify/already-success');
         }
 
-        if ($user->markEmailAsVerified()) {
-            event(new Verified($user));
+        if ($usuario->markEmailAsVerified()) {
+            event(new Verified($usuario));
         }
 
         return redirect(env('FRONT_URL') . '/email/verify/success');
     }
+
     public function resend(Request $request)
     {
         $request->user()->sendEmailVerificationNotification();
