@@ -75,6 +75,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::get('perfil', 'obtengaUsuario');
         Route::post('editar', 'editeUsuario');
         Route::get('validar', 'validarToken');
+        Route::get('revoqueLosTokens', 'revoqueLosTokens');
     });
 
     //Rutas relacionada a archivos
@@ -111,7 +112,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::get('coordinadorActual', 'obtengaElCoordinadorActual');
         Route::get('profesorActual', 'obtengaElProfesorActual');
         Route::get('miscarreras', 'misCarreras');
-        Route::get('revoqueLosTokens', 'revoqueLosTokens');
     });
     Route::controller(DeclaracionJuradaController::class)->group(function () {
         Route::post('agregueLaDeclaracion', 'agregue');
