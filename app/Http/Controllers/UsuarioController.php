@@ -24,27 +24,26 @@ class UsuarioController extends Controller
         ], [
             'required' => 'El campo :attribute es requerido.',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        $usuario = Usuario::where('correo', $request->correo)->first();
-        if (Hash::check($request->contrasena, $usuario->contrasena)) {
-            if ($usuario->hasVerifiedEmail()) {
-                $resultado = app()->handle(Request::create('oauth/token', 'POST', [
-                    'grant_type' => 'password',
-                    'client_id' => env("CLIENT_ID"),
-                    'client_secret' => env("CLIENT_SECRET"),
-                    'username' => $request->correo,
-                    'password' => $request->contrasena,
-                    'scope' => $usuario->rol->nombre,
-                ]));
-                $respuesta = json_decode($resultado->getContent(), true);
-                $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
-                return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
-            }
-            $usuario->sendEmailVerificationNotification();
-            return response()->json(['message' => 'El usuario debe confirmar el correo'], 432);
+
+        if (Auth::attempt(['correo' => $request->correo, 'password' => $request->contrasena])) {
+            $usuario = Auth::user();
+            $resultado = app()->handle(Request::create('oauth/token', 'POST', [
+                'grant_type' => 'password',
+                'client_id' => env("CLIENT_ID"),
+                'client_secret' => env("CLIENT_SECRET"),
+                'username' => $request->correo,
+                'password' => $request->contrasena,
+                'scope' => $usuario->rol->nombre,
+            ]));
+            $respuesta = json_decode($resultado->getContent(), true);
+            $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
+            return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
         }
+
         return response()->json(['message' => 'Credenciales Inválidas'], 402);
     }
     public function renueveElToken(Request $request)

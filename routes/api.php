@@ -44,6 +44,9 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify']
 Route::post('/email/verify/resend', [VerifyEmailController::class, 'resend'])
     ->middleware(['auth:api', 'throttle:6,1'])
     ->name('verification.send');
+
+Route::any('/email/notice', [VerifyEmailController::class, 'notice'])
+    ->name('verification.notice');
 // Rutas de autenticación
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');
@@ -65,7 +68,7 @@ Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
 
 //Todas las rutas protegidas
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'verified'])->group(function () {
 
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {

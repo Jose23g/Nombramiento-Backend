@@ -60,12 +60,17 @@ class DeclaracionJuradaController extends Controller
     {
         $declaracion = $request->user()->declaraciones()->orderBy('id', 'DESC')->first();
         $declaracionJurada = $request->user()->declaraciones()->with(['trabajos.fecha', 'trabajos.horarioTrabajos.dia'])->orderBy('id', 'DESC')->first();
-        $trabajosInternos = $declaracionJurada->trabajos->filter(function ($trabajo) {
-            return $trabajo->tipo_id == 2;
-        })->values()->toArray();
-        $trabajosExternos = $declaracionJurada->trabajos->filter(function ($trabajo) {
-            return $trabajo->tipo_id == 3;
-        })->values()->toArray();
+        $trabajosInternos = null;
+        $trabajosExternos = null;
+        if ($declaracionJurada) {
+            $trabajosInternos = $declaracionJurada->trabajos->filter(function ($trabajo) {
+                return $trabajo->tipo_id == 2;
+            })->values()->toArray();
+            $trabajosExternos = $declaracionJurada->trabajos->filter(function ($trabajo) {
+                return $trabajo->tipo_id == 3;
+            })->values()->toArray();
+        }
+
         $profesor = app(UsuarioController::class)->obtengaElProfesorActual($request);
         return response()->json(['profesor' => $profesor, 'declaracion' => $declaracion, 'trabajos_internos' => $trabajosInternos, 'trabajos_externos' => $trabajosExternos]);
     }
