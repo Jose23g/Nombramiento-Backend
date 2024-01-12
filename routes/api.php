@@ -35,22 +35,30 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
  */
-// Verify email
-Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
+// // Verify email
+// Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify']);
 
-// Resend link to verify email
-Route::post('/email/verify/resend', [VerifyEmailController::class, 'resend'])
-    ->middleware(['auth:api', 'throttle:6,1'])
-    ->name('verification.send');
+// // Resend link to verify email
+// Route::post('/email/verify/resend', [VerifyEmailController::class, 'resend']);
 
-Route::any('/email/notice', [VerifyEmailController::class, 'notice'])
-    ->name('verification.notice');
+Route::prefix('email')->controller(VerifyEmailController::class)->group(function () {
+    Route::prefix('verify')->group(function () {
+        Route::get('{id}/{hash}', 'verify')
+            ->middleware(['signed', 'throttle:6,1'])
+            ->name('verification.verify');
+
+        Route::post('resend', 'resend')
+            ->middleware(['auth:api', 'throttle:6,1'])
+            ->name('verification.send');
+    });
+
+    Route::any('notice', 'notice')->name('verification.notice');
+});
 // Rutas de autenticación
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');
     Route::post('login', 'login');
+    Route::post('recupereLaContrasena', 'recupereLaContrasena');
     Route::get('refresh', 'renueveElToken');
 });
 

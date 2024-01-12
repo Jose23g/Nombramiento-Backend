@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
 class UsuarioController extends Controller
@@ -82,6 +83,23 @@ class UsuarioController extends Controller
 
         $tokenRepository->revokeAccessToken($tokenId);
         $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($tokenId);
+    }
+    public function recupereLaContrasena(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'correo' => 'required|email|exists:usuarios,correo',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+            'exists' => 'El :attribute ingresado no existe en la tabla de usuarios.',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $response = Password::sendResetLink($request->only('correo'));
+
+        $message = $response == Password::RESET_LINK_SENT ? 'Mail send successfully' : GLOBAL_SOMETHING_WANTS_TO_WRONG;
+
+        return response()->json($message);
     }
     public function register(Request $request)
     {
