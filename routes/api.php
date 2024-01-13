@@ -228,6 +228,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
             Route::get('listaProfesores', 'listaProf');
             Route::get('ver-p6', 'previsualizarP6');
             Route::post('asignar-carrera', 'incorporar_a_carrera');
+            Route::post('excluir-carrera', 'excluir_de_carrera');
         });
 
         Route::controller(CursoController::class)->group(function () {

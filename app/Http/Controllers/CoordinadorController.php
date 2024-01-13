@@ -17,6 +17,7 @@ use App\Models\Telefono;
 use App\Models\Usuario;
 use App\Models\UsuarioCarrera;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -761,13 +762,13 @@ class CoordinadorController extends Controller
             ->where('rol_id', '1')
             ->select('personas.nombre', 'usuarios.id', 'usuarios.persona_id')->get();
         $arreglousuarios = [];
-        
+
         foreach ($usuarios as $profe) {
             $existeencarrera = UsuarioCarrera::where('usuario_id', $profe['id'])
                 ->where('carrera_id', $coordinador->carreras->first()->id)
                 ->first();
-            if ($existeencarrera===null) {
-               $arreglousuarios[] = $profe;
+            if ($existeencarrera === null) {
+                $arreglousuarios[] = $profe;
             }
         }
         return response()->json($arreglousuarios);
@@ -788,7 +789,7 @@ class CoordinadorController extends Controller
             if ($validaciones->fails()) {
                 return response()->json(['errorMessage' => $validaciones->errors()], 400);
             }
-            if($request->input('carrera_id')){
+            if ($request->input('carrera_id')) {
 
                 UsuarioCarrera::create([
                     'usuario_id' => $request->input('usuario_id'),
@@ -797,20 +798,49 @@ class CoordinadorController extends Controller
 
                 return response()->json('Usuario asignado a la carrera', 200);
 
-            }else{
+            } else {
 
                 $carrera_coordinador = $request->user()->carreras->first();
                 UsuarioCarrera::create([
                     'usuario_id' => $request->input('usuario_id'),
                     'carrera_id' => $carrera_coordinador->id,
                 ]);
-                return response()->json('Usuario asignado a la carrera '.$carrera_coordinador->nombre, 200);
+                return response()->json('Usuario asignado a la carrera ' . $carrera_coordinador->nombre, 200);
             }
-            
-            
-       
+
+
+
         } catch (\Exception $e) {
             return response()->json($e->getMessage(), 400);
+        }
+    }
+
+    public function excluir_de_carrera(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'usuario_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+
+            $carrera_coordinador = $request->user()->carreras->first();
+
+            $referencia_carrera = UsuarioCarrera::where('usuario_id',$request->usuario_id)
+            ->where('carrera_id',$carrera_coordinador->id)
+            ->first();
+
+            if($referencia_carrera){
+                $referencia_carrera->delete();
+                return response()->json(['message' => 'El profesor ya no es parte de la carrera'], 200);
+            }
+        
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         }
     }
 }
