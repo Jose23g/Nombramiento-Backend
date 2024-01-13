@@ -115,6 +115,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('muestreLaDeclaracion', 'obtengaLaUltimaDeclaracion');
     });
 
+    Route::controller(SolicitudCursoController::class)->group(function (){
+        Route::get('solicitud-info', 'obtener_informacion_solicitud');
+    });
+
     //Rutas accesibles solamente para los roles de Docencia
     Route::middleware('scope:Docencia')->group(function () {
 
