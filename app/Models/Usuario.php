@@ -42,15 +42,26 @@ class Usuario extends Authenticatable implements MustVerifyEmail
 
     protected static function booted()
     {
+        static::creating(function ($user) {
+            self::processUser($user);
+        });
+
         static::retrieved(function ($user) {
-            $user->email = $user->correo;
-            $user->password = $user->contrasena;
+            self::processUser($user);
         });
     }
+
+    private static function processUser($user)
+    {
+        $user->email = $user->correo;
+        $user->password = $user->contrasena;
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmailNotification);
     }
+
     public function findForPassport(string $correo): Usuario
     {
         return $this->where('correo', $correo)->first();

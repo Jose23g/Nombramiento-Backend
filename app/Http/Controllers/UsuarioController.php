@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
 class UsuarioController extends Controller
@@ -24,27 +25,26 @@ class UsuarioController extends Controller
         ], [
             'required' => 'El campo :attribute es requerido.',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 422);
         }
-        $usuario = Usuario::where('correo', $request->correo)->first();
-        if (Hash::check($request->contrasena, $usuario->contrasena)) {
-            if ($usuario->hasVerifiedEmail()) {
-                $resultado = app()->handle(Request::create('oauth/token', 'POST', [
-                    'grant_type' => 'password',
-                    'client_id' => env("CLIENT_ID"),
-                    'client_secret' => env("CLIENT_SECRET"),
-                    'username' => $request->correo,
-                    'password' => $request->contrasena,
-                    'scope' => $usuario->rol->nombre,
-                ]));
-                $respuesta = json_decode($resultado->getContent(), true);
-                $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
-                return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
-            }
-            $usuario->sendEmailVerificationNotification();
-            return response()->json(['message' => 'El usuario debe confirmar el correo'], 432);
+
+        if (Auth::attempt(['correo' => $request->correo, 'password' => $request->contrasena])) {
+            $usuario = Auth::user();
+            $resultado = app()->handle(Request::create('oauth/token', 'POST', [
+                'grant_type' => 'password',
+                'client_id' => env("CLIENT_ID"),
+                'client_secret' => env("CLIENT_SECRET"),
+                'username' => $request->correo,
+                'password' => $request->contrasena,
+                'scope' => $usuario->rol->nombre,
+            ]));
+            $respuesta = json_decode($resultado->getContent(), true);
+            $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
+            return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
         }
+
         return response()->json(['message' => 'Credenciales Inválidas'], 402);
     }
     public function renueveElToken(Request $request)
@@ -83,6 +83,23 @@ class UsuarioController extends Controller
 
         $tokenRepository->revokeAccessToken($tokenId);
         $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($tokenId);
+    }
+    public function recupereLaContrasena(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'correo' => 'required|email|exists:usuarios,correo',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+            'exists' => 'El :attribute ingresado no existe en la tabla de usuarios.',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $response = Password::sendResetLink($request->only('correo'));
+
+        $message = $response == Password::RESET_LINK_SENT ? 'Mail send successfully' : GLOBAL_SOMETHING_WANTS_TO_WRONG;
+
+        return response()->json($message);
     }
     public function register(Request $request)
     {

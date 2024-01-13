@@ -35,19 +35,30 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
  */
-// Verify email
-Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
+// // Verify email
+// Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify']);
 
-// Resend link to verify email
-Route::post('/email/verify/resend', [VerifyEmailController::class, 'resend'])
-    ->middleware(['auth:api', 'throttle:6,1'])
-    ->name('verification.send');
+// // Resend link to verify email
+// Route::post('/email/verify/resend', [VerifyEmailController::class, 'resend']);
+
+Route::prefix('email')->controller(VerifyEmailController::class)->group(function () {
+    Route::prefix('verify')->group(function () {
+        Route::get('{id}/{hash}', 'verify')
+            ->middleware(['signed', 'throttle:6,1'])
+            ->name('verification.verify');
+
+        Route::post('resend', 'resend')
+            ->middleware(['auth:api', 'throttle:6,1'])
+            ->name('verification.send');
+    });
+
+    Route::any('notice', 'notice')->name('verification.notice');
+});
 // Rutas de autenticación
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');
     Route::post('login', 'login');
+    Route::post('recupereLaContrasena', 'recupereLaContrasena');
     Route::get('refresh', 'renueveElToken');
 });
 
@@ -65,13 +76,14 @@ Route::get('listadoDeFechas', [FechaController::class, 'obtengaLaListaDeFechas']
 Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_curso']);
 
 //Todas las rutas protegidas
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'verified'])->group(function () {
 
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {
         Route::get('perfil', 'obtengaUsuario');
         Route::post('editar', 'editeUsuario');
         Route::get('validar', 'validarToken');
+        Route::get('revoqueLosTokens', 'revoqueLosTokens');
     });
 
     //Rutas relacionada a archivos
@@ -108,7 +120,6 @@ Route::middleware('auth:api')->group(function () {
         Route::get('coordinadorActual', 'obtengaElCoordinadorActual');
         Route::get('profesorActual', 'obtengaElProfesorActual');
         Route::get('miscarreras', 'misCarreras');
-        Route::get('revoqueLosTokens', 'revoqueLosTokens');
     });
     Route::controller(DeclaracionJuradaController::class)->group(function () {
         Route::post('agregueLaDeclaracion', 'agregue');

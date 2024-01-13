@@ -31,4 +31,9 @@ class VerifyEmailController extends Controller
         $request->user()->sendEmailVerificationNotification();
         return response()->json(['message' => 'Se ha reenviado el correo']);
     }
+
+    public function notice()
+    {
+        return response()->json(['message' => 'El usuario debe validar el correo'], 452);
+    }
 }
