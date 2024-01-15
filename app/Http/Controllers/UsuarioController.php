@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
 class UsuarioController extends Controller
@@ -42,7 +41,7 @@ class UsuarioController extends Controller
             ]));
             $respuesta = json_decode($resultado->getContent(), true);
             $carrera = $usuario->carreras->first() ? $usuario->carreras->first()->nombre : null;
-            return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
+            return response()->json(['nombre' => $usuario->persona->nombre, 'scope' => $usuario->rol->nombre, 'emailVerified' => $usuario->hasVerifiedEmail(), 'carrera' => $carrera, ...$respuesta, 'imagen' => $usuario->imagen], 200);
         }
 
         return response()->json(['message' => 'Credenciales Inválidas'], 402);
