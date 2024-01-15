@@ -75,4 +75,26 @@ class ResetPasswordController extends Controller
                 return response()->json(['message' => 'Algo ha salido mal'], 400);
         }
     }
+    public function change(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'contrasena_actual' => 'required',
+            'contrasena' => 'required|confirmed',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $usuario = $request->user();
+        if (Hash::check($request->contrasena_actual, $usuario->contrasena)) {
+            $usuario->forceFill([
+                'contrasena' => Hash::make($request->contrasena),
+            ])->save();
+            event(new PasswordReset($usuario));
+            return response()->json(['message' => 'La contraseña se ha cambiado con exito']);
+        }
+        return response()->json(['message' => 'Credenciales incorrectas'], 400);
+    }
 }

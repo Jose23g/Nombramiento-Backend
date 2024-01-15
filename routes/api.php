@@ -59,6 +59,7 @@ Route::prefix('password')->controller(ResetPasswordController::class)->group(fun
     Route::get('recover/{id}/{hash}', 'recover')->name('password.recover');
     Route::post('reset', 'reset')->name('password.reset');
     Route::post('notice', 'notice')->name('password.notice');
+    Route::post('change', 'change')->middleware(['auth:api', 'verified'])->name('password.change');
 });
 // Rutas de autenticación
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
@@ -131,7 +132,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::get('muestreLaDeclaracion', 'obtengaLaUltimaDeclaracion');
     });
 
-    Route::controller(SolicitudCursoController::class)->group(function (){
+    Route::controller(SolicitudCursoController::class)->group(function () {
         Route::get('solicitud-info', 'obtener_informacion_solicitud');
     });
 
