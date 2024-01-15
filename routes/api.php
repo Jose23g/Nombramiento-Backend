@@ -17,6 +17,7 @@ use App\Http\Controllers\PlanEstudiosController;
 use App\Http\Controllers\ProfesorContoller;
 use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\PSeisController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SolicitudCursoController;
 use App\Http\Controllers\SolicitudGrupoController;
 use App\Http\Controllers\TituloController;
@@ -54,11 +55,15 @@ Route::prefix('email')->controller(VerifyEmailController::class)->group(function
 
     Route::any('notice', 'notice')->name('verification.notice');
 });
+Route::prefix('password')->controller(ResetPasswordController::class)->group(function () {
+    Route::get('recover/{id}/{hash}', 'recover')->name('password.recover');
+    Route::post('reset', 'reset')->name('password.reset');
+    Route::post('notice', 'notice')->name('password.notice');
+});
 // Rutas de autenticación
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');
     Route::post('login', 'login');
-    Route::post('recupereLaContrasena', 'recupereLaContrasena');
     Route::get('refresh', 'renueveElToken');
 });
 

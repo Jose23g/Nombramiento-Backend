@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\PasswordResetNotification;
+use App\Notifications\PasswordResetSuccessfullyNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -57,9 +59,19 @@ class Usuario extends Authenticatable implements MustVerifyEmail
         $user->password = $user->contrasena;
     }
 
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new PasswordResetNotification($token));
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmailNotification);
+    }
+
+    public function sendPasswordResetSuccessfullyNotification()
+    {
+        $this->notify(new PasswordResetSuccessfullyNotification);
     }
 
     public function findForPassport(string $correo): Usuario
