@@ -137,4 +137,24 @@ class Usuario extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(DeclaracionJurada::class, 'usuario_id', 'id');
     }
+
+    public function archivosPropietario()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_propietario_id', 'id');
+    }
+
+    public function archivosCoordinador()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_coordinador_id', 'id');
+    }
+
+    public function archivosDirector()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_direccion_id', 'id');
+    }
+
+    public function archivosDocencia()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_docencia_id', 'id');
+    }
 }

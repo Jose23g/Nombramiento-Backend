@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArchivosController;
 use App\Http\Controllers\BancoController;
 use App\Http\Controllers\CantonController;
 use App\Http\Controllers\CargaController;
@@ -84,6 +85,12 @@ Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_
 //Todas las rutas protegidas
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
+    Route::controller(ArchivosController::class)->prefix('archivo')->group(function () {
+        Route::post('apruebe', 'apruebe');
+        Route::post('rechace', 'rechace');
+        Route::post('guarde', 'guarde');
+        Route::post('listado', 'obtengaElListado');
+    });
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {
         Route::get('perfil', 'obtengaUsuario');
