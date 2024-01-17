@@ -8,6 +8,7 @@ use App\Http\Controllers\CoordinadorController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\DeclaracionJuradaController;
 use App\Http\Controllers\DetalleSolicitudController;
+use App\Http\Controllers\DirectorContoller;
 use App\Http\Controllers\DistritoController;
 use App\Http\Controllers\DocenciaController;
 use App\Http\Controllers\FechaController;
@@ -126,7 +127,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::get('muestreLaDeclaracion', 'obtengaLaUltimaDeclaracion');
     });
 
-    Route::controller(SolicitudCursoController::class)->group(function (){
+    Route::controller(SolicitudCursoController::class)->group(function () {
         Route::get('solicitud-info', 'obtener_informacion_solicitud');
     });
 
@@ -239,6 +240,13 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::get('grados', [PlanEstudiosController::class, 'listargrados_plan']);
         Route::post('crearp6', [PSeisController::class, 'crearP6']);
 
+    });
+
+    //Rutas para los roles de Director de departamento
+    Route::middleware('scope:Director_de_Departamento')->group(function () {
+        Route::controller(DirectorContoller::class)->group(function () {
+            Route::get('solicitudes-pendientes', 'obtener_solicitudes_pendientes');
+        });
     });
 
 });

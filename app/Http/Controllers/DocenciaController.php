@@ -128,7 +128,6 @@ class DocenciaController extends Controller
     // Obtiene todas las solicitudes realizadas
     public function Listar_todas_solicitudes(Request $request)
     {
-        $solicitudcompleta = [];
 
         try {
             $consutaestados = app()->make(EstadosController::class);
