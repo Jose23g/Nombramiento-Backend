@@ -44,7 +44,7 @@ class DirectorContoller extends Controller
 
                 $detalles[] = $solicitudarreglo;
             }
-            return response()->json(['Solicitudes_de_curso' => $detalles], 200);
+            return response()->json($detalles, 200);
        
         } catch (\Exception $e) {
             
