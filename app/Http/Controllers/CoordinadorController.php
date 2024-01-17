@@ -758,14 +758,19 @@ class CoordinadorController extends Controller
     public function listaProf(Request $request)
     {
         $coordinador = $request->user();
+
         $usuarios = Usuario::join('personas', 'usuarios.persona_id', '=', 'personas.id')
             ->where('rol_id', '1')
             ->select('personas.nombre', 'usuarios.id', 'usuarios.persona_id')->get();
+
+        $carreracoordinacion = UsuarioCarrera::where('usuario_id', $coordinador->id)
+            ->where('rol_id', 2)->first();
+
         $arreglousuarios = [];
 
         foreach ($usuarios as $profe) {
             $existeencarrera = UsuarioCarrera::where('usuario_id', $profe['id'])
-                ->where('carrera_id', $coordinador->carreras->first()->id)
+                ->where('carrera_id', $carreracoordinacion->carrera_id)
                 ->first();
             if ($existeencarrera === null) {
                 $arreglousuarios[] = $profe;
@@ -830,17 +835,42 @@ class CoordinadorController extends Controller
 
             $carrera_coordinador = $request->user()->carreras->first();
 
-            $referencia_carrera = UsuarioCarrera::where('usuario_id',$request->usuario_id)
-            ->where('carrera_id',$carrera_coordinador->id)
-            ->first();
+            $referencia_carrera = UsuarioCarrera::where('usuario_id', $request->usuario_id)
+                ->where('carrera_id', $carrera_coordinador->id)
+                ->first();
 
-            if($referencia_carrera){
+            if ($referencia_carrera) {
                 $referencia_carrera->delete();
                 return response()->json(['message' => 'El profesor ya no es parte de la carrera'], 200);
             }
-        
+
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+
+    public function profesores_en_carrera(Request $request)
+    {
+
+        $coordinador = $request->user();
+
+        $carreracoordinacion = UsuarioCarrera::where('usuario_id', $coordinador->id)
+            ->where('rol_id', 2)->first();
+
+        $profes = DB::table('usuarios')
+            ->Join('usuario_carreras', 'usuarios.id', '=', 'usuario_carreras.usuario_id')
+            ->where('usuario_carreras.rol_id', '=', 1)
+            ->where('usuario_carreras.carrera_id', '=', $carreracoordinacion->carrera_id)
+            ->Join('personas', 'usuarios.persona_id', 'personas.id')
+            ->select(
+                'usuarios.id as usuario_id',
+                'personas.id as persona_id',
+                'personas.nombre as nombre',
+                'personas.cedula as cedula',
+                'usuarios.correo as correo'
+            )
+            ->get();
+
+            return response()->json($profes, 200);
     }
 }
