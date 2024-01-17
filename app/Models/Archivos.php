@@ -11,8 +11,31 @@ class Archivos extends Model
     protected $table = 'archivos';
     protected $guarded = [];
 
-    public function persona()
+    public function propietario()
     {
-        return $this->belongsTo(Persona::class, 'persona_id', 'id');
+        return $this->belongsTo(Usuario::class, 'usuario_propietario_id', 'id');
+    }
+
+    public function coordinador()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_coordinador_id', 'id');
+    }
+
+    public function direccion()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_direccion_id', 'id');
+    }
+
+    public function docencia()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_docencia_id', 'id');
+    }
+    public function estado()
+    {
+        return $this->belongsTo(Estado::class, 'estado_id', 'id');
+    }
+    public function estadoGeneral()
+    {
+        return $this->belongsTo(Estado::class, 'estado_general_id', 'id');
     }
 }

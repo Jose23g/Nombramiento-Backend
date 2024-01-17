@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\PasswordResetNotification;
+use App\Notifications\PasswordResetSuccessfullyNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -57,9 +59,19 @@ class Usuario extends Authenticatable implements MustVerifyEmail
         $user->password = $user->contrasena;
     }
 
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new PasswordResetNotification($token));
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmailNotification);
+    }
+
+    public function sendPasswordResetSuccessfullyNotification()
+    {
+        $this->notify(new PasswordResetSuccessfullyNotification);
     }
 
     public function findForPassport(string $correo): Usuario
@@ -124,5 +136,25 @@ class Usuario extends Authenticatable implements MustVerifyEmail
     public function declaraciones()
     {
         return $this->hasMany(DeclaracionJurada::class, 'usuario_id', 'id');
+    }
+
+    public function archivosPropietario()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_propietario_id', 'id');
+    }
+
+    public function archivosCoordinador()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_coordinador_id', 'id');
+    }
+
+    public function archivosDirector()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_direccion_id', 'id');
+    }
+
+    public function archivosDocencia()
+    {
+        return $this->hasMany(Archivos::class, 'usuario_docencia_id', 'id');
     }
 }

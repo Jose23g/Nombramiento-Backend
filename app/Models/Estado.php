@@ -30,4 +30,14 @@ class Estado extends Model
     {
         return $this->hasMany(SolicitudCurso::class, 'estado_id', 'id');
     }
+
+    public function archivosEstado()
+    {
+        return $this->hasMany(Archivos::class, 'estado_id', 'id');
+    }
+
+    public function archivosEstadoGeneral()
+    {
+        return $this->hasMany(Archivos::class, 'estado_general_id', 'id');
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArchivosController;
 use App\Http\Controllers\BancoController;
 use App\Http\Controllers\CantonController;
 use App\Http\Controllers\CargaController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\PlanEstudiosController;
 use App\Http\Controllers\ProfesorContoller;
 use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\PSeisController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SolicitudCursoController;
 use App\Http\Controllers\SolicitudGrupoController;
 use App\Http\Controllers\TituloController;
@@ -55,11 +57,16 @@ Route::prefix('email')->controller(VerifyEmailController::class)->group(function
 
     Route::any('notice', 'notice')->name('verification.notice');
 });
+Route::prefix('password')->controller(ResetPasswordController::class)->group(function () {
+    Route::get('recover/{id}/{hash}', 'recover')->name('password.recover');
+    Route::post('reset', 'reset')->name('password.reset');
+    Route::post('notice', 'notice')->name('password.notice');
+    Route::post('change', 'change')->middleware(['auth:api', 'verified'])->name('password.change');
+});
 // Rutas de autenticación
 Route::prefix('auth')->controller(UsuarioController::class)->group(function () {
     Route::post('registrar', 'register');
     Route::post('login', 'login');
-    Route::post('recupereLaContrasena', 'recupereLaContrasena');
     Route::get('refresh', 'renueveElToken');
 });
 
@@ -79,6 +86,12 @@ Route::post('editarsolicitud', [CoordinadorController::class, 'Editar_solicitud_
 //Todas las rutas protegidas
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
+    Route::controller(ArchivosController::class)->prefix('archivo')->group(function () {
+        Route::post('apruebe', 'apruebe');
+        Route::post('rechace', 'rechace');
+        Route::post('guarde', 'guarde');
+        Route::post('listado', 'obtengaElListado');
+    });
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {
         Route::get('perfil', 'obtengaUsuario');
@@ -229,6 +242,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
             Route::get('listaProfesores', 'listaProf');
             Route::get('ver-p6', 'previsualizarP6');
             Route::post('asignar-carrera', 'incorporar_a_carrera');
+            Route::post('excluir-carrera', 'excluir_de_carrera');
         });
 
         Route::controller(CursoController::class)->group(function () {
