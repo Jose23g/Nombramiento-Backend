@@ -363,4 +363,12 @@ class DocenciaController extends Controller
     public function listado_roles(Request $request){
         return response()->json(Rol::select('id','nombre')->get());
     }
+
+    public function listado_roles_comunes(Request $request){
+        $rolesnocomunes = ['docencia', 'administrador', 'nuevo'];
+
+        return response()->json(Rol::select('id', 'nombre')
+            ->whereNotIn('nombre', $rolesnocomunes)
+            ->get());
+    }
 }

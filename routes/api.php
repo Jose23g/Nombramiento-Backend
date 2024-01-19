@@ -159,6 +159,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
             Route::post('crear-vigencia-p6', 'establecer_TNombramiento_vigenciaP6');
             Route::get('vigencia-p6', 'obtener_TNombramiento_vigenciaP6');
             Route::get('listarroles', 'listado_roles');
+            Route::get('listarroles-comunes', 'listado_roles_comunes');
 
         });
 
