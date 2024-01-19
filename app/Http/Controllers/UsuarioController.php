@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Archivos;
+use App\Models\Carrera;
 use App\Models\Persona;
 use App\Models\Telefono;
 use App\Models\Usuario;
@@ -278,15 +279,24 @@ class UsuarioController extends Controller
 
         foreach ($usuarios as $usuario) {
             $user = Usuario::find($usuario->id);
-            $carreras = $user->carreras()
-                ->select('carreras.id', 'carreras.nombre')
+
+            $carrerarol = DB::table('carreras')
+                ->Join('usuario_carreras', 'carreras.id', 'usuario_carreras.carrera_id')
+                ->where('usuario_carreras.usuario_id',$usuario->id)
+                ->Join('roles', 'usuario_carreras.rol_id', 'roles.id')
+                ->select(
+                    'carreras.nombre as nombre',
+                    'roles.nombre as rol'
+                )
                 ->get();
+
             $listadofinal[] = (object) [
                 'id' => $usuario->id,
                 'nombre' => $usuario->nombre,
                 'correo' => $usuario->correo,
-                'carreras' => $carreras,
                 'rol' => $usuario->rol,
+                'carreras' => $carrerarol
+                
             ];
         }
 
