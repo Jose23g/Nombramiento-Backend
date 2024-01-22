@@ -154,7 +154,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
             Route::post('/comprobar', 'comprobarFechaRecepcion');
             Route::get('verpendientes', 'Listar_todas_solicitudes');
             Route::get('fechas', 'Listar_fechas_solicitudes');
-            Route::post('cambiar-estado', 'cambiarEstadoSolicitud');
             Route::get('ultimafecha', 'Obtener_ultima_fecha');
             Route::post('crear-vigencia-p6', 'establecer_TNombramiento_vigenciaP6');
             Route::get('vigencia-p6', 'obtener_TNombramiento_vigenciaP6');
@@ -263,6 +262,9 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::controller(DirectorContoller::class)->group(function () {
             Route::get('solicitudes-pendientes', 'obtener_solicitudes_pendientes');
         });
+        
+        Route::post('cambiar-estado', [DocenciaController::class, 'cambiarEstadoSolicitud']);
+        
     });
 
 });
