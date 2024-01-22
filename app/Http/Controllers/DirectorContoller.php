@@ -16,12 +16,13 @@ class DirectorContoller extends Controller
     public function obtener_solicitudes_pendientes()
     {
         try {
-
             $consultaestados = app()->make(EstadosController::class);
             $categoria = $consultaestados->Estado_por_nombre('pendiente');
             $solicitudes = SolicitudCurso::where('estado_id', $categoria)->get();
 
-            if ($solicitudes == null) {
+            $detalles = []; // Initialize $detalles array
+
+            if ($solicitudes->isEmpty()) {
                 return response()->json(['Message' => 'No hay solicitudes de cursos'], 200);
             }
 
@@ -44,12 +45,11 @@ class DirectorContoller extends Controller
 
                 $detalles[] = $solicitudarreglo;
             }
-            return response()->json($detalles, 200);
-       
-        } catch (\Exception $e) {
-            
-            return response()->json(['error' => $e->getMessage()], 500);
 
+            return response()->json($detalles, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 }
