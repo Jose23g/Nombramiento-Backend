@@ -199,7 +199,8 @@ class DocenciaController extends Controller
             if ($estadoNombre == 'Aceptado') {
                 $solicitudCurso->estado_id = $estado->id;
                 $solicitudCurso->save();
-                $this->aprobarUnaSolicitud($solicitudCurso, $request->user()->id, $result);
+                
+                $this->aprobarUnaSolicitud($solicitudCurso, $request->user()->id, $result, $solicitudCurso->carrera_id);
 
                 return response()->json(['success' => true, 'message' => 'Se ha aceptado la solicitud', 'result' => $result], 200);
             } else {
@@ -215,11 +216,12 @@ class DocenciaController extends Controller
     }
 
     //Cuando se acepta una solicitud se asocia a un encargado, a un registro de aceptacion y una carrrera.
-    public function aprobarUnaSolicitud($solicitud, $idEncargado, &$result)
+    public function aprobarUnaSolicitud($solicitud, $idEncargado, &$result, $carrera_id)
     {
         $solicitudAprobada = AprobacionSolicitudCurso::create([
             'solicitud_curso_id' => $solicitud->id,
             'encargado_id' => $idEncargado,
+            'carrera_id' => $carrera_id
         ]);
         $cursosaceptados = $this->aprobarUnCursoDeUnaSolicitud($solicitudAprobada, $solicitud);
         $result[] = [
