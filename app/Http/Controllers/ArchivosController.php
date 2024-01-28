@@ -133,11 +133,12 @@ class ArchivosController extends Controller
                 return response()->json(['message' => 'Usuario no autorizado', 400]);
                 break;
         }
-        $archivos = Archivos::where('estado_id', $estado_id)->get();
-        $carreraDeUsuario = $usuario->usuarioCarreras->filter(function ($carrera) use (&$rol_id) {
-            return $carrera->rol_id == $rol_id;
-        })->first();
+        $archivos = Archivos::with(['propietario.persona', 'estado', 'estadoGeneral'])->where('estado_id', $estado_id)->get();
+
         if ($estado_id != 10) {
+            $carreraDeUsuario = $usuario->usuarioCarreras->filter(function ($carrera) use (&$rol_id) {
+                return $carrera->rol_id == $rol_id;
+            })->first();
             $listadoDeArchivos = $archivos->filter(function ($archivo) use (&$carreraDeUsuario) {
                 $carrera_id = $carreraDeUsuario->carrera_id;
                 $carreras = $archivo->propietario->usuarioCarreras;

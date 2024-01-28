@@ -90,7 +90,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::post('apruebe', 'apruebe');
         Route::post('rechace', 'rechace');
         Route::post('guarde', 'guarde');
-        Route::post('listado', 'obtengaElListado');
+        Route::get('listado', 'obtengaElListado');
     });
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {
@@ -262,9 +262,9 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::controller(DirectorContoller::class)->group(function () {
             Route::get('solicitudes-pendientes', 'obtener_solicitudes_pendientes');
         });
-        
+
         Route::post('cambiar-estado', [DocenciaController::class, 'cambiarEstadoSolicitud']);
-        
+
     });
 
 });
