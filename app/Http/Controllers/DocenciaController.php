@@ -187,8 +187,11 @@ class DocenciaController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'observacion' => Rule::requiredIf($estadoNombre == 'Rechazado'),
+
             ], [
+
                 'observacion.required' => 'Si usted rechazó la solicitud, es obligatorio poner una observación del por qué',
+                
             ]);
 
             if ($validator->fails()) {
