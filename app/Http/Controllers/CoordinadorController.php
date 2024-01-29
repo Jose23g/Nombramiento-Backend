@@ -864,6 +864,8 @@ class CoordinadorController extends Controller
             ->Join('personas', 'usuarios.persona_id', 'personas.id')
             ->select(
                 'usuarios.id as usuario_id',
+                'usuarios.correo as correo',
+                'personas.cedula as cedula',
                 'personas.id as persona_id',
                 'personas.nombre as nombre',
                 'personas.cedula as cedula',
