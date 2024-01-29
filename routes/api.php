@@ -90,6 +90,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::post('apruebe', 'apruebe');
         Route::post('rechace', 'rechace');
         Route::post('guarde', 'guarde');
+        Route::get('obtenga', 'obtenga');
         Route::get('listado', 'obtengaElListado');
     });
     //Rutas relacionadas a la gestion del usuario

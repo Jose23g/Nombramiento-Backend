@@ -8,6 +8,21 @@ use Illuminate\Support\Facades\Validator;
 
 class ArchivosController extends Controller
 {
+    public function obtenga(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 422);
+        }
+        $archivo = Archivos::with(['propietario.persona', 'estado', 'estadoGeneral'])->find($request->id);
+        return response()->json($archivo);
+    }
+
     public function apruebe(Request $request)
     {
         $validator = Validator::make($request->all(), [
