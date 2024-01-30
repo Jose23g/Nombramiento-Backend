@@ -92,6 +92,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         Route::post('guarde', 'guarde');
         Route::get('obtenga', 'obtenga');
         Route::get('listado', 'obtengaElListado');
+        Route::get('listadoProfesor', 'obtengaElListadoParaElProfesor');
     });
     //Rutas relacionadas a la gestion del usuario
     Route::controller(UsuarioController::class)->prefix('usuario')->group(function () {

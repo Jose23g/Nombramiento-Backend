@@ -128,7 +128,10 @@ class ArchivosController extends Controller
         ]);
         return response()->json(['message' => 'Guardado exitosamente'], 200);
     }
-
+    public function obtengaElListadoParaElProfesor(Request $request)
+    {
+        return response()->json(Archivos::with(['estadoGeneral'])->where('usuario_propietario_id', $request->user()->id)->get());
+    }
     public function obtengaElListado(Request $request)
     {
         $usuario = $request->user();
